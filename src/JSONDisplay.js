@@ -49,7 +49,7 @@ const JSONDisplay = ({ data, groups, selectedItems, handleItemSelected, weightMa
                 <div>
                     <Typography variant={"h5"} >Best Teams</Typography>
                     <div style={{ display: 'flex' }}>
-                        <div>Force Rank 1</div>
+                        <div>{`Ignore Pets Rank`}</div>
                         <input type="checkbox" onChange={(e) => {
                             setDefaultRank(e.target.checked ? 1 : 0)
                         }} />

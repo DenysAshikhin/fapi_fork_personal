@@ -338,7 +338,7 @@ export const BonusMap = {
     1013: {id: 1013, label: "DUNGEON DMG"},
     1014: {id: 1014, label: "CARD EXP"},
     1015: {id: 1015, label: "REINC PTS GAIN"},
-    1016: {id: 1015, label: "EXPE TOKEN GAIN"},
+    1016: {id: 1016, label: "EXPE TOKEN GAIN"},
     5001: {id: 5001, label: "Spawn More Potatoes"},
     5002: {id: 5002, label: "Fewer Potatoes"},
     5003: {id: 5003, label: "Potatoes Spawn Speed"},
