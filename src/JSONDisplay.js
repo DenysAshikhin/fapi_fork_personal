@@ -10,7 +10,7 @@ import Typography from "@mui/material/Typography";
 import { calculateGroupScore, calculatePetBaseDamage, EXP_DMG_MOD, EXP_TIME_MOD } from "./App";
 
 
-function ScoreSection({ data, group, totalScore,defaultRank }) {
+function ScoreSection({ data, group, totalScore, defaultRank }) {
     const { baseGroupScore, dmgCount, timeCount, synergyBonus } = calculateGroupScore(group, defaultRank);
     return (
         <React.Fragment>
@@ -38,7 +38,7 @@ function ScoreSection({ data, group, totalScore,defaultRank }) {
     );
 }
 
-const JSONDisplay = ({ data, groups, selectedItems, handleItemSelected, weightMap, setDefaultRank, defaultRank }) => {
+const JSONDisplay = ({ data, groups, selectedItems, handleItemSelected, weightMap, setDefaultRank, defaultRank, groupRankCritera, setGroupRankCriteria }) => {
     if (!!data === false || !!data.PetsCollection === false) {
         return <div>Loading...</div>; // You can replace this with null or another element if you prefer
     }
@@ -48,20 +48,62 @@ const JSONDisplay = ({ data, groups, selectedItems, handleItemSelected, weightMa
             <div className="grid-left">
                 <div>
                     <Typography variant={"h5"} >Best Teams</Typography>
-                    <div style={{ display: 'flex' }}>
-                        <div>{`Ignore Pets Rank`}</div>
-                        <input type="checkbox" onChange={(e) => {
-                            setDefaultRank(e.target.checked ? 1 : 0)
-                        }} />
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+
+                        <select
+                            style={{ maxWidth: '144px' }}
+                            onChange={(e) => {
+                                switch (e.target.value) {
+                                    case 'damage':
+                                        setGroupRankCriteria(1);
+                                        break;
+                                    case 'token':
+                                        setGroupRankCriteria(2);
+                                        break;
+                                    default:
+                                        throw new Error('invalid dropdown selector');
+                                }
+                            }}
+                        >
+                            <option value="damage">Damage Focus</option>
+                            <option value="token">Token Focus</option>
+                        </select>
+                        <div style={{ display: 'flex' }}>
+
+                            <div>{`Ignore Pets Rank`}</div>
+                            <input type="checkbox" onChange={(e) => {
+                                setDefaultRank(e.target.checked ? 1 : 0)
+                            }} />
+                        </div>
                     </div>
                 </div>
 
                 {groups.reduce((accum, group, index) => {
-                    const score = calculateGroupScore(group, defaultRank).groupScore;
+                    let groupLabel = ``;
+
+                    const groupTotal = calculateGroupScore(group, defaultRank);
+                    let tokenScore = groupTotal.tokenMult;
+                    tokenScore = tokenScore.toExponential(2);
+                    const score = groupTotal.groupScore;
                     const displayedDamage = group
                         .map((pet) => calculatePetBaseDamage(pet, defaultRank) * 5 * data?.PetDamageBonuses)
                         .reduce((accum, dmg) => (accum += dmg), Number(0))
                         .toExponential(2);
+
+
+
+                    switch (groupRankCritera) {
+                        case 1://damage
+                            groupLabel = `Group ${index + 1} Damage: ${displayedDamage}`
+                            break;
+                        case 2://token
+                            groupLabel = `Group ${index + 1} Token: ${tokenScore}  Damage: ${displayedDamage}`
+                            break;
+                        default:
+                            break;
+
+                    }
+
                     const totalScore = Number(Number(data?.PetDamageBonuses) * score * 5).toExponential(2);
                     const groupTooltip = (
                         <div className="groups-tooltip">
@@ -74,7 +116,7 @@ const JSONDisplay = ({ data, groups, selectedItems, handleItemSelected, weightMa
                     accum.push(
                         <div className="grid-row" key={(1 + index) * 9001}>
                             <MouseOverPopover tooltip={groupTooltip}>
-                                Group {index + 1} Damage: {displayedDamage}
+                                {groupLabel}
                             </MouseOverPopover>
                         </div>
                     )

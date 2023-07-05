@@ -38,6 +38,7 @@ const defaultPetSelection = petNameArray.map(petData => petData.petId);
 export const EXP_DMG_MOD = .1;
 export const EXP_TIME_MOD = .05;
 export const SYNERGY_MOD_STEP = .25;
+export const EXP_TOKEN_MOD = 0.05;
 
 export function calculatePetBaseDamage(pet, defaultRank) {
     const rankCount = defaultRank ? defaultRank : pet?.Rank;
@@ -56,6 +57,8 @@ export const calculateGroupScore = (group, defaultRank) => {
     let rpRewardCount = 0;
     let cardXpCount = 0;
     let tokenRewardCount = 0;
+    let tokenMult = 0;
+    let tokenModif = 0;
     const typeCounts = {};
 
     group.forEach((pet) => {
@@ -99,7 +102,22 @@ export const calculateGroupScore = (group, defaultRank) => {
     groupScore *= (1 + timeCount * EXP_TIME_MOD);
     groupScore *= synergyBonus;
 
-    return { groupScore, baseGroupScore, dmgCount, timeCount, synergyBonus, cardPowerCount, expRewardCount, cardXpCount, rpRewardCount, tokenRewardCount };
+    tokenModif = tokenRewardCount * EXP_TOKEN_MOD;
+    tokenMult = synergyBonus + synergyBonus * tokenModif;
+    return {
+        groupScore,
+        baseGroupScore,
+        dmgCount,
+        timeCount,
+        synergyBonus,
+        cardPowerCount,
+        expRewardCount,
+        cardXpCount,
+        rpRewardCount,
+        tokenRewardCount,
+        tokenModif,
+        tokenMult
+    };
 };
 
 function getCombinations(array, k) {
@@ -120,7 +138,7 @@ function getCombinations(array, k) {
     return Array.from(combinations).map((combination) => combination.split(',').map((id) => array.find((pet) => pet.ID === parseInt(id))));
 }
 
-export const findBestGroups = (petsCollection, defaultRank) => {
+const calcBestDamageGroup = (petsCollection, defaultRank) => {
     const k = 4; // Size of each group
     const numGroups = 6; // Number of groups to find
     const memo = {};
@@ -151,6 +169,61 @@ export const findBestGroups = (petsCollection, defaultRank) => {
     }
 
     return bestGroups;
+}
+
+const calcBestTokenGroup = (petsCollection, defaultRank) => {
+    const k = 4; // Size of each group
+    const numGroups = 6; // Number of groups to find
+    const memo = {};
+
+    const memoizedGroupScore = (group) => {
+        const key = group.map((pet) => pet.ID).join(',');
+        if (!memo[key] || memo[key]) {
+            let res = calculateGroupScore(group, defaultRank);
+            let sum = res.tokenMult;
+            memo[key] = { token: sum, damage: res.groupScore, other: res };
+        }
+        return memo[key];
+    };
+
+    let bestGroups = [];
+    for (let g = 0; g < numGroups; g++) {
+        const combinations = getCombinations(petsCollection, Math.min(k, petsCollection.length));
+        if (combinations.length === 0) {
+            break;
+        }
+        const bestGroup = combinations.reduce((best, group) => {
+            const currentGroup = memoizedGroupScore(group);
+            const bestGroup = memoizedGroupScore(best);
+            if (currentGroup.token === bestGroup.token) {
+                return currentGroup.damage > bestGroup.damage ? group : best;
+            }
+
+            return currentGroup.token > bestGroup.token ? group : best;
+        }, combinations[0]);
+
+        if (bestGroup) {
+            let temp = memoizedGroupScore(bestGroup);
+            bestGroups.push(bestGroup);
+            petsCollection = petsCollection.filter((pet) => !bestGroup.includes(pet));
+        }
+        else {
+            throw new Error(`No best group calculated??`);
+        }
+    }
+
+    return bestGroups;
+}
+
+
+export const findBestGroups = (petsCollection, defaultRank, groupRankCritera) => {
+
+    switch (groupRankCritera) {
+        case 1: //damage focus
+            return calcBestDamageGroup(petsCollection, defaultRank);
+        case 2: // token focus
+            return calcBestTokenGroup(petsCollection, defaultRank);
+    }
 };
 
 let groupCache = {};
@@ -167,6 +240,7 @@ function App() {
     const [tabSwitch, setTabSwitch] = useState(0);
     const [weightMap, setWeightMap] = useState(DefaultWeightMap);
     const [refreshGroups, setRefreshGroups] = useState(false);
+    const [groupRankCritera, setGroupRankCriteria] = useState(1);//1 = overall damage + modifiers, 2 = token/hr + (damage and modifiers)
 
     //Fires only when we need to refresh the best pet groups (like the rank being reset)
     useEffect(() => {
@@ -211,6 +285,11 @@ function App() {
                         }
                     }
                     defaultRank={defaultRank}
+                    groupRankCritera={groupRankCritera}
+                    setGroupRankCriteria={(val) => {
+                        setGroupRankCriteria(val);
+                        setRefreshGroups(true);
+                    }}
                 />;
             case 0:
                 return <FileUpload onData={handleData} />;
@@ -250,7 +329,7 @@ function App() {
         if (groups && !recalculate) {
             setGroups(groups);
         } else {
-            groups = findBestGroups(localPets, defaultRank);
+            groups = findBestGroups(localPets, defaultRank, groupRankCritera);
             setGroupCache({ ...groupCache, [keyString]: groups })
             setGroups(groups);
         }
