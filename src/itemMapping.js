@@ -283,7 +283,7 @@ const PetNames = {
 export default PetNames;
 
 export function getImageUrl(itemName) {
-    return `/fapi/pets/${itemName}.png`;
+    return `/fapi_fork_personal/pets/${itemName}.png`;
 }
 
 export const petNameArray = Object.entries(PetNames).map(([key, value]) => {

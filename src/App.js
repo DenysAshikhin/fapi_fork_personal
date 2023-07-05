@@ -194,7 +194,7 @@ function App() {
             case 3:
                 return <PetComboList data={data} weightMap={weightMap} />;
             // case 3:
-            //     return <ExpeditionCardComponent data={data} weightMap={weightMap} />;
+            //     return <ExpeditionCardComponent data={data} weightMap={weightMap} defaultRank={defaultRank} />;
             case 2:
                 return <CardComponent data={data} weightMap={weightMap} />;
             case 1:

@@ -162,7 +162,7 @@ const CardCard = ({data, card, weightMap, i, classes, applyWeights}) => {
         <Grid2 xs={1} key={i}>
             <Box sx={{ minWidth: 20 }}>
                 <Card variant="outlined" className={classes.card}>
-                    <img src={`/fapi/cards/card${ID}.png`} />
+                    <img src={`/fapi_fork_personal/cards/card${ID}.png`} />
                     {/*<Typography variant="body1" gutterBottom>{total.toExponential(4)}</Typography>*/}
                     {/*<Typography variant="body1" gutterBottom>->{afterCharge.toExponential(4)}</Typography>*/}
                     <Typography sx={{color: isPositiveChargeRatio ? 'green' : 'red'}} variant="body1" gutterBottom>
@@ -174,7 +174,7 @@ const CardCard = ({data, card, weightMap, i, classes, applyWeights}) => {
     );
 }
 
-export function ExpeditionCardComponent({ data, weightMap, applyWeights }) {
+export function ExpeditionCardComponent({ data, weightMap, applyWeights, defaultRank }) {
     // data.ExpeditionsCollection: {ID: 0, Room: 1, BaseHP: 0, CardFound:[...], ...}
     // data.PetsSpecial (?combos)
     // data.ExpeditionTeam
@@ -186,7 +186,7 @@ export function ExpeditionCardComponent({ data, weightMap, applyWeights }) {
             const teamPetIds = [...team.ExpeditionTeamID]
                 .filter(id => id)
                 .map(id => data.PetsCollection[id]);
-            const score = calculateGroupScore(teamPetIds);
+            const score = calculateGroupScore(teamPetIds, defaultRank);
             return {
                 ...team, ...score
             }
@@ -259,16 +259,16 @@ export function ExpeditionCardComponent({ data, weightMap, applyWeights }) {
                                 </div>
                             </Grid2>
                             <Grid2 xs={12}>
-                                <img src={`/fapi/cards/cardPower.png`} className={"statIcon"} />:&nbsp;{tmpPower.toExponential(2)}
+                                <img src={`/fapi_fork_personal/cards/cardPower.png`} className={"statIcon"} />:&nbsp;{tmpPower.toExponential(2)}
                             </Grid2>
                             <Grid2 xs={12}>
-                                <img src={`/fapi/cards/CardExp.png`} className={"statIcon"} />:&nbsp;{totalXpGain.toExponential(2)}
+                                <img src={`/fapi_fork_personal/cards/CardExp.png`} className={"statIcon"} />:&nbsp;{totalXpGain.toExponential(2)}
                             </Grid2>
                             <Grid2 xs={12}>
-                                <img src={`/fapi/cards/rp.png`} className={"statIcon"} />&nbsp;{rpGain.toExponential(2)}
+                                <img src={`/fapi_fork_personal/cards/rp.png`} className={"statIcon"} />&nbsp;{rpGain.toExponential(2)}
                             </Grid2>
                             <Grid2 xs={12}>
-                                <img src={`/fapi/cards/exp_token.png`} className={"statIcon"} />&nbsp;{tokenGain.toFixed(0)}
+                                <img src={`/fapi_fork_personal/cards/exp_token.png`} className={"statIcon"} />&nbsp;{tokenGain.toFixed(0)}
                             </Grid2>
                         </Grid2>
                     </Grid2>
@@ -299,7 +299,7 @@ export default function CardComponent({ data, weightMap, applyWeights }) {
     return (
         <Grid2 container spacing={.5}>
             <Grid2 xs={2}>
-                <Typography variant={"h4"}>{data?.CurrentCardCharge}&nbsp;<img src={`/fapi/cards/charge.png`} /></Typography>
+                <Typography variant={"h4"}>{data?.CurrentCardCharge}&nbsp;<img src={`/fapi_fork_personal/cards/charge.png`} /></Typography>
             </Grid2>
             <Grid2 xs={10}>
                 <Typography variant={"body"}>(uses Weights)</Typography>

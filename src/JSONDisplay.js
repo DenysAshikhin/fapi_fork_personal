@@ -57,7 +57,7 @@ const JSONDisplay = ({ data, groups, selectedItems, handleItemSelected, weightMa
                 </div>
 
                 {groups.reduce((accum, group, index) => {
-                    const score = calculateGroupScore(group).groupScore;
+                    const score = calculateGroupScore(group, defaultRank).groupScore;
                     const displayedDamage = group
                         .map((pet) => calculatePetBaseDamage(pet) * 5 * data?.PetDamageBonuses)
                         .reduce((accum, dmg) => (accum += dmg), Number(0))
