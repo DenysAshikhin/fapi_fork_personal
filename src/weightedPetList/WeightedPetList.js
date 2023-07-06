@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { petNameArray, StandardBonusesWeightMap } from '../itemMapping';
 import PetItem from '../PetItem';
-import {Checkbox} from "@mui/material";
+import { Checkbox } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 
 const label = { inputProps: { 'aria-label': 'Include XP Weight' } };
@@ -25,7 +25,7 @@ export function weightedActivePetScore(data, pet, weightMap, includeXpFactor) {
         return accum;
     }, 0);
 }
-const WeightedPetList = ({ data, weightMap }) => {
+const WeightedPetList = ({ data, weightMap, defaultRank }) => {
     const [includeXpFactor, setIncludeXpFactor] = useState(true);
     const renderPet = (petData) => {
         const { petId } = petData;
@@ -39,6 +39,7 @@ const WeightedPetList = ({ data, weightMap }) => {
                 onClick={() => false}
                 weightMap={weightMap}
                 petScoreFn={(pet) => weightedActivePetScore(data, pet, weightMap, includeXpFactor)}
+                defaultRank={defaultRank}
             />
         );
     };
@@ -51,8 +52,8 @@ const WeightedPetList = ({ data, weightMap }) => {
             };
         })
         .sort((a, b) => {
-        return a?.weightedActivePetScore < b?.weightedActivePetScore;
-    });
+            return a?.weightedActivePetScore < b?.weightedActivePetScore;
+        });
 
     return (
         <Grid2 container spacing={1}>

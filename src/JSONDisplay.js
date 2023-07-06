@@ -85,19 +85,21 @@ const JSONDisplay = ({ data, groups, selectedItems, handleItemSelected, weightMa
                     let tokenScore = groupTotal.tokenMult;
                     tokenScore = tokenScore.toExponential(2);
                     const score = groupTotal.groupScore;
-                    const displayedDamage = group
-                        .map((pet) => calculatePetBaseDamage(pet, defaultRank) * 5 * data?.PetDamageBonuses)
-                        .reduce((accum, dmg) => (accum += dmg), Number(0))
-                        .toExponential(2);
+                    const displayedDamage = (score * 5 * data.PetDamageBonuses).toExponential(2);
+                
+                    // const displayedDamage = group
+                    //     .map((pet) => calculatePetBaseDamage(pet, defaultRank) * 5 * data?.PetDamageBonuses)
+                    //     .reduce((accum, dmg) => (accum += dmg), Number(0))
+                    //     .toExponential(2);
 
 
 
                     switch (groupRankCritera) {
                         case 1://damage
-                            groupLabel = `Group ${index + 1} Damage: ${displayedDamage}`
+                            groupLabel = `Group ${index + 1} Damage: ${displayedDamage} || Token: ${tokenScore}`
                             break;
                         case 2://token
-                            groupLabel = `Group ${index + 1} Token: ${tokenScore}  Damage: ${displayedDamage}`
+                            groupLabel = `Group ${index + 1} Token: ${tokenScore} || Damage: ${displayedDamage}`
                             break;
                         default:
                             break;
@@ -135,6 +137,7 @@ const JSONDisplay = ({ data, groups, selectedItems, handleItemSelected, weightMa
                                             isSelected={true}
                                             onClick={() => { }}
                                             weightMap={weightMap}
+                                            defaultRank={defaultRank}
                                         />
                                     </Grid2>
                                 );
@@ -146,7 +149,13 @@ const JSONDisplay = ({ data, groups, selectedItems, handleItemSelected, weightMa
             </div>
             <div className="grid-right">
                 <Typography variant={"h5"}>Highlighted: {'>'}0 rank pets (clickable)</Typography>
-                <ItemSelection weightMap={weightMap} data={data} selectedItems={selectedItems} onItemSelected={handleItemSelected} />
+                <ItemSelection 
+                weightMap={weightMap}
+                 data={data} 
+                 selectedItems={selectedItems}
+                  onItemSelected={handleItemSelected} 
+                  defaultRank={defaultRank}
+                  />
             </div>
         </div>
     );

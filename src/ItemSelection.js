@@ -3,7 +3,7 @@ import './ItemSelection.css';
 import { petNameArray } from './itemMapping';
 import PetItem from './PetItem';
 
-const ItemSelection = ({ selectedItems, onItemSelected, data, weightMap }) => {
+const ItemSelection = ({ selectedItems, onItemSelected, data, weightMap, defaultRank }) => {
     const isSelected = (petId) => {
         return selectedItems.includes(petId);
     };
@@ -28,6 +28,7 @@ const ItemSelection = ({ selectedItems, onItemSelected, data, weightMap }) => {
                 isSelected={isItemSelected}
                 onClick={() => handleItemClick(petId)}
                 weightMap={weightMap}
+                defaultRank={defaultRank}
             />
         );
     };

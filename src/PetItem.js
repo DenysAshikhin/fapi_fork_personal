@@ -1,14 +1,14 @@
 import React from 'react';
 import './PetItem.css';
 
-import {BonusMap} from "./itemMapping";
+import { BonusMap } from "./itemMapping";
 
 const filterBonuses = (bonuses, filterFn) => {
     return bonuses
         .filter(filterFn);
 };
 
-const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn }) => {
+const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, defaultRank }) => {
     if (!!data === false) return <div></div>;
     const { petId, img, name } = petData;
 
@@ -17,7 +17,7 @@ const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn }) 
 
     if (!pet) return null; // In case the pet is not found in the collection
 
-    const rank = pet.Rank;
+    const rank = defaultRank ? defaultRank : pet.Rank;
     const level = pet.Level;
     const totalScore = Number(
         Number(data?.PetDamageBonuses) * pet.BaseDungeonDamage * (1.0 + rank * 0.05) * 5

@@ -146,7 +146,7 @@ const calcBestDamageGroup = (petsCollection, defaultRank) => {
     const memoizedGroupScore = (group) => {
         const key = group.map((pet) => pet.ID).join(',');
         if (!memo[key] || memo[key]) {
-            memo[key] = calculateGroupScore(group, defaultRank)?.groupScore;
+            memo[key] = calculateGroupScore(group, defaultRank).groupScore;
         }
         return memo[key];
     };
@@ -178,6 +178,7 @@ const calcBestTokenGroup = (petsCollection, defaultRank) => {
 
     const memoizedGroupScore = (group) => {
         const key = group.map((pet) => pet.ID).join(',');
+        
         if (!memo[key] || memo[key]) {
             let res = calculateGroupScore(group, defaultRank);
             let sum = res.tokenMult;
