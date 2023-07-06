@@ -48,7 +48,7 @@ const JSONDisplay = ({ data, refreshGroups, groups, selectedItems, handleItemSel
             <div className="grid-left">
                 <div>
                     <Typography variant={"h5"} >Best Teams</Typography>
-               
+
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
 
                         <select
@@ -128,7 +128,10 @@ const JSONDisplay = ({ data, refreshGroups, groups, selectedItems, handleItemSel
                                             style={{ maxWidth: '312px' }}
                                         >
                                             {tokenInfo.map((value, index) => {
-                                                return <option value={index}> {`${value.hours} hours creating ${value.floored} (${value.totalTokens}) tokens at ${helper.roundTwoDecimal(value.effeciency * 100)}%`}</option>
+                                                return <option value={index}>
+                                                    {/* {`${value.hours} hours creating ${value.floored} (${value.totalTokens}) tokens at ${helper.roundTwoDecimal(value.effeciency * 100)}%`} */}
+                                                    {`${value.hours} hours creating ${value.floored} (${helper.roundTwoDecimal(value.totalTokens)}) tokens wasting ${helper.roundTwoDecimal(value.wasted)} tokens`}
+                                                </option>
                                             })}
                                         </select>
                                     </div>

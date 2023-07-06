@@ -55,16 +55,23 @@ export function calculateBestHours(group, hours) {
         let totalTokens = tokenHR * h;
         let floored = Math.floor(totalTokens);
         let effeciency = floored / totalTokens;
-        if (effeciency > best.effeciency) {
-            bestArr = [];
-            best = { hours: h, totalTokens: totalTokens, floored: floored, effeciency: effeciency };
-            bestArr.push(best);
-        }
-        else if (effeciency === best.effeciency) {
-            best = { hours: h, totalTokens: totalTokens, floored: floored, effeciency: effeciency };
-            bestArr.push(best);
-        }
+        let wasted = totalTokens - floored;
+        let temp = { wasted: wasted, hours: h, totalTokens: totalTokens, floored: floored, effeciency: effeciency };
+        bestArr.push(temp);
+
+        // if (effeciency > best.effeciency) {
+        //     bestArr = [];
+        //     best = { hours: h, totalTokens: totalTokens, floored: floored, effeciency: effeciency };
+        //     bestArr.push(best);
+        // }
+        // else if (effeciency === best.effeciency) {
+        //     best = { hours: h, totalTokens: totalTokens, floored: floored, effeciency: effeciency };
+        //     bestArr.push(best);
+        // }
     }
+
+    bestArr.sort((a, b) => { return a.wasted - b.wasted })
+
     return bestArr;
 }
 
