@@ -48,16 +48,16 @@ const JSONDisplay = ({ data, refreshGroups, comboSelector, setComboSelector, gro
 
     let totalTokensHR = 0;
 
-    if (groups && groupRankCritera === 2)
-        if (groups.length > 0)
-            groups.map((group, index) => {
-                // const groupTotal = calculateGroupScore(group, defaultRank);
-                // totalTokensHR += groupTotal.tokenMult * (Math.pow(1 + SOUL_CLOVER_STEP, data.SoulGoldenClover));
+    // if (groups && groupRankCritera === 2)
+    if (groups.length > 0)
+        groups.map((group, index) => {
+            // const groupTotal = calculateGroupScore(group, defaultRank);
+            // totalTokensHR += groupTotal.tokenMult * (Math.pow(1 + SOUL_CLOVER_STEP, data.SoulGoldenClover));
 
-                const groupBests = calculateBestHours(group, null, data.SoulGoldenClover, comboSelector)[tokenSelections[index]];
+            const groupBests = calculateBestHours(group, null, data.SoulGoldenClover, comboSelector)[tokenSelections[index]];
 
-                totalTokensHR += groupBests.floored / groupBests.hours;
-            })
+            totalTokensHR += groupBests.floored / groupBests.hours;
+        })
 
     return (
         <div className="grid-container" style={{
@@ -67,7 +67,7 @@ const JSONDisplay = ({ data, refreshGroups, comboSelector, setComboSelector, gro
             <div className="grid-left">
                 <div>
                     <Typography variant={"h4"} >{`If you have a large number of pets, please be patient`}</Typography>
-                    <Typography variant={"h5"} >Best Teams {groupRankCritera === 2 ? ` || Total tokens/hr: ${helper.roundThreeDecimal(totalTokensHR)}` : ''}</Typography>
+                    <Typography variant={"h5"} >Best Teams {` || Total tokens/hr: ${helper.roundThreeDecimal(totalTokensHR)}`}</Typography>
 
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <select
@@ -97,31 +97,31 @@ const JSONDisplay = ({ data, refreshGroups, comboSelector, setComboSelector, gro
                             }} />
                         </div>
 
-                        {groupRankCritera === 2 && (
-                            <div style={{ display: 'flex', }}>
-                                <div style={{ marginRight: '12px' }}>
-                                    Expedition Reward Combo
-                                </div>
-                                <select
-                                    style={{ maxWidth: '144px' }}
-                                    disabled={refreshGroups}
-                                    onChange={(e) => {
-                                        setComboSelector(Number(e.target.value))
-                                    }
-                                    }
-                                >
-                                    <option selected={comboSelector === 1} value="1">1.0</option>
-                                    <option selected={comboSelector === 1.1} value="1.1">1.1</option>
-                                    <option selected={comboSelector === 1.2} value="1.2">1.2</option>
-                                </select>
+                        {/* {groupRankCritera === 2 && ( */}
+                        <div style={{ display: 'flex', }}>
+                            <div style={{ marginRight: '12px' }}>
+                                Expedition Reward Combo
+                            </div>
+                            <select
+                                style={{ maxWidth: '144px' }}
+                                disabled={refreshGroups}
+                                onChange={(e) => {
+                                    setComboSelector(Number(e.target.value))
+                                }
+                                }
+                            >
+                                <option selected={comboSelector === 1} value="1">1.0</option>
+                                <option selected={comboSelector === 1.1} value="1.1">1.1</option>
+                                <option selected={comboSelector === 1.2} value="1.2">1.2</option>
+                            </select>
 
-                            </div>
-                        )}
-                        {groupRankCritera === 2 && (
-                            <div>
-                                {`Golden Clover Level: ${data.SoulGoldenClover}`}
-                            </div>
-                        )}
+                        </div>
+                        {/* )} */}
+                        {/* {groupRankCritera === 2 && ( */}
+                        <div>
+                            {`Golden Clover Level: ${data.SoulGoldenClover}`}
+                        </div>
+                        {/* )} */}
 
                     </div>
                 </div>
@@ -141,10 +141,11 @@ const JSONDisplay = ({ data, refreshGroups, comboSelector, setComboSelector, gro
 
                     switch (groupRankCritera) {
                         case 1://damage
-                            groupLabel = `Group ${index + 1} Damage: ${displayedDamage} || Token: ${tokenScore}`
+                            groupLabel = `Group ${index + 1} Damage: ${displayedDamage} || Token: ${tokenScore}`;
+                            tokenInfo = calculateBestHours(group, null, data.SoulGoldenClover, comboSelector);
                             break;
                         case 2://token
-                            groupLabel = `Group ${index + 1} Token: ${tokenScore} || Damage: ${displayedDamage}`
+                            groupLabel = `Group ${index + 1} Token: ${tokenScore} || Damage: ${displayedDamage}`;
                             tokenInfo = calculateBestHours(group, null, data.SoulGoldenClover, comboSelector);
                             break;
                         default:
@@ -169,31 +170,31 @@ const JSONDisplay = ({ data, refreshGroups, comboSelector, setComboSelector, gro
                                 </div>
 
                             </MouseOverPopover>
-                            {groupRankCritera === 2 && (
-                                <div style={{ display: "flex" }}>
-                                    <div>Best hours:</div>
-                                    <select
-                                        style={{ maxWidth: '312px' }}
-                                        onChange={
-                                            (e) => {
-                                                setTokenSelections((current) => {
-                                                    let temp = { ...current };
-                                                    let select = Number(e.target.value)
-                                                    temp[index] = select;
-                                                    return temp;
-                                                })
-                                            }
+                            {/* {groupRankCritera === 2 && ( */}
+                            <div style={{ display: "flex" }}>
+                                <div style={{ marginRight: '12px' }}>Best hours:</div>
+                                <select
+                                    style={{ maxWidth: '312px' }}
+                                    onChange={
+                                        (e) => {
+                                            setTokenSelections((current) => {
+                                                let temp = { ...current };
+                                                let select = Number(e.target.value)
+                                                temp[index] = select;
+                                                return temp;
+                                            })
                                         }
-                                    >
-                                        {tokenInfo.map((value, indexInner) => {
-                                            return <option value={indexInner}>
-                                                {/* {`${value.hours} hours creating ${value.floored} (${value.totalTokens}) tokens at ${helper.roundTwoDecimal(value.effeciency * 100)}%`} */}
-                                                {`${value.hours} hours creating ${value.floored} (${helper.roundTwoDecimal(value.totalTokens)}) tokens wasting ${helper.roundTwoDecimal(value.wasted)} tokens`}
-                                            </option>
-                                        })}
-                                    </select>
-                                </div>
-                            )}
+                                    }
+                                >
+                                    {tokenInfo.map((value, indexInner) => {
+                                        return <option value={indexInner}>
+                                            {/* {`${value.hours} hours creating ${value.floored} (${value.totalTokens}) tokens at ${helper.roundTwoDecimal(value.effeciency * 100)}%`} */}
+                                            {`${value.hours} hours creating ${value.floored} (${helper.roundTwoDecimal(value.totalTokens)}) tokens wasting ${helper.roundTwoDecimal(value.wasted)} tokens`}
+                                        </option>
+                                    })}
+                                </select>
+                            </div>
+                            {/* )} */}
                         </div>
                     )
                     accum.push(
