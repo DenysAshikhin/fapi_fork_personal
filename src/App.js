@@ -412,11 +412,16 @@ function App() {
     return (
         <ThemeProvider theme={theme}>
             <RepoLink />
-            <Container>
-                <Box sx={{ flexGrow: 1 }} className={"main-content"}>
+            <Container sx={{
+                marginLeft: '0px', marginRight: '0px', maxWidth: '100000px !important', width: 'calc(100vw - 152px)',
+                maxHeight: `calc(100vh - 56px)`,
+                height: `calc(100vh - 56px)`,
+            }}>
+                <Box sx={{ width: '100%', height: '100%', overFlowX: 'hidden' }} className={"main-content"}>
                     {selectComponent()}
                 </Box>
-                <Box sx={{ height: '64px' }} /> {/* Add extra space at the bottom */}
+                {/* Add extra space at the bottom */}
+                {/* <Box sx={{ height: '64px' }} />  */}
                 <Box sx={{ width: '100%', position: 'fixed', bottom: 0 }}>
                     <BottomNavigation
                         showLabels

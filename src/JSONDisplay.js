@@ -60,7 +60,10 @@ const JSONDisplay = ({ data, refreshGroups, comboSelector, setComboSelector, gro
             })
 
     return (
-        <div className="grid-container">
+        <div className="grid-container" style={{
+            gridTemplateColumns: '4fr 8fr',
+            gridColumnGap: '400px'
+        }}>
             <div className="grid-left">
                 <div>
                     <Typography variant={"h4"} >{`If you have a large number of pets, please be patient`}</Typography>
