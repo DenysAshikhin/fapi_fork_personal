@@ -15,6 +15,7 @@ import { Container, Box } from '@mui/material';
 import Weights from "./weights/weights";
 import WeightedPetList from "./weightedPetList/WeightedPetList";
 import PetComboList from "./comboList/comboList";
+import helper from './util/helper.js';
 
 const theme = createTheme({
     palette: {
@@ -41,7 +42,7 @@ export const SYNERGY_MOD_STEP = .25;
 export const EXP_TOKEN_MOD = 0.05;
 export const SOUL_CLOVER_STEP = 0.25;
 
-export function calculateBestHours(group, hours, clover) {
+export function calculateBestHours(group, hours, clover, combo) {
 
     if (!hours) {
         hours = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
@@ -49,8 +50,11 @@ export function calculateBestHours(group, hours, clover) {
     if (!clover) {
         clover = 0;
     }
+    if (!combo) {
+        combo = 1.0
+    }
     const overall = calculateGroupScore(group);
-    const tokenHR = overall.tokenMult * (Math.pow(1 + SOUL_CLOVER_STEP, clover));
+    const tokenHR = overall.tokenMult * (Math.pow(1 + SOUL_CLOVER_STEP, clover)) * combo;
     let best = { hours: -1, totalTokens: -1, floored: -1, effeciency: -1 };
     let bestArr = [];
 
@@ -236,7 +240,7 @@ const calcBestTokenGroup = (petsCollection, defaultRank) => {
             const currentGroup = memoizedGroupScore(group);
             const bestGroup = memoizedGroupScore(best);
             if (currentGroup.token === bestGroup.token) {
-                if(currentGroup.other.tokenRewardCount === 4){
+                if (currentGroup.other.tokenRewardCount === 4) {
                     return currentGroup.damage < bestGroup.damage ? group : best;
                 }
                 return currentGroup.damage > bestGroup.damage ? group : best;
@@ -284,6 +288,7 @@ function App() {
     const [weightMap, setWeightMap] = useState(DefaultWeightMap);
     const [refreshGroups, setRefreshGroups] = useState(false);
     const [groupRankCritera, setGroupRankCriteria] = useState(1);//1 = overall damage + modifiers, 2 = token/hr + (damage and modifiers)
+    const [comboSelector, setComboSelector] = useState(1);
 
 
     const handleItemSelected = (items) => {
@@ -324,6 +329,14 @@ function App() {
                         }
                     }
                     defaultRank={defaultRank}
+                    comboSelector={comboSelector}
+                    setComboSelector={(val) => {
+                        if (refreshGroups) {
+                            return;
+                        }
+                        setComboSelector(val);
+                        setRefreshGroups(true);
+                    }}
                     groupRankCritera={groupRankCritera}
                     setGroupRankCriteria={(val) => {
                         if (refreshGroups) {
@@ -343,6 +356,19 @@ function App() {
 
     const handleData = (uploadedData) => {
         setData(uploadedData);
+
+        let specialPetCombo = 1;
+        for (let i = 0; i < uploadedData.PetsSpecial.length; i++) {
+            let t = uploadedData.PetsSpecial[i];
+            if (t.BonusID === 5007 && t.Active === 1) {
+                specialPetCombo += t.BonusPower / 100;
+            }
+        }
+        specialPetCombo = helper.roundTwoDecimal(specialPetCombo);
+
+        setComboSelector(specialPetCombo);
+
+
         setGroupCache({});
         console.log(uploadedData)
         const positiveRankedPets = uploadedData.PetsCollection.filter(

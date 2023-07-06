@@ -38,10 +38,9 @@ function ScoreSection({ data, group, totalScore, defaultRank }) {
     );
 }
 
-const JSONDisplay = ({ data, refreshGroups, groups, selectedItems, handleItemSelected, weightMap, setDefaultRank, defaultRank, groupRankCritera, setGroupRankCriteria }) => {
+const JSONDisplay = ({ data, refreshGroups, comboSelector, setComboSelector, groups, selectedItems, handleItemSelected, weightMap, setDefaultRank, defaultRank, groupRankCritera, setGroupRankCriteria }) => {
 
     const [tokenSelections, setTokenSelections] = useState({ 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 });
-
 
     if (!!data === false || !!data.PetsCollection === false) {
         return <div>Loading...</div>; // You can replace this with null or another element if you prefer
@@ -55,7 +54,7 @@ const JSONDisplay = ({ data, refreshGroups, groups, selectedItems, handleItemSel
                 // const groupTotal = calculateGroupScore(group, defaultRank);
                 // totalTokensHR += groupTotal.tokenMult * (Math.pow(1 + SOUL_CLOVER_STEP, data.SoulGoldenClover));
 
-                const groupBests = calculateBestHours(group, null, data.SoulGoldenClover)[tokenSelections[index]];
+                const groupBests = calculateBestHours(group, null, data.SoulGoldenClover, comboSelector)[tokenSelections[index]];
 
                 totalTokensHR += groupBests.floored / groupBests.hours;
             })
@@ -68,7 +67,6 @@ const JSONDisplay = ({ data, refreshGroups, groups, selectedItems, handleItemSel
                     <Typography variant={"h5"} >Best Teams {groupRankCritera === 2 ? ` || Total tokens/hr: ${helper.roundThreeDecimal(totalTokensHR)}` : ''}</Typography>
 
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-
                         <select
                             style={{ maxWidth: '144px' }}
                             disabled={refreshGroups}
@@ -95,6 +93,27 @@ const JSONDisplay = ({ data, refreshGroups, groups, selectedItems, handleItemSel
                                 setDefaultRank(e.target.checked ? 1 : 0)
                             }} />
                         </div>
+
+                        {groupRankCritera === 2 && (
+                            <div style={{ display: 'flex', }}>
+                                <div style={{ marginRight: '12px' }}>
+                                    Expedition Reward Combo
+                                </div>
+                                <select
+                                    style={{ maxWidth: '144px' }}
+                                    disabled={refreshGroups}
+                                    onChange={(e) => {
+                                        setComboSelector(Number(e.target.value))
+                                    }
+                                    }
+                                >
+                                    <option selected={comboSelector === 1} value="1">1.0</option>
+                                    <option selected={comboSelector === 1.1} value="1.1">1.1</option>
+                                    <option selected={comboSelector === 1.2} value="1.2">1.2</option>
+                                </select>
+
+                            </div>
+                        )}
                         {groupRankCritera === 2 && (
                             <div>
                                 {`Golden Clover Level: ${data.SoulGoldenClover}`}
@@ -123,7 +142,7 @@ const JSONDisplay = ({ data, refreshGroups, groups, selectedItems, handleItemSel
                             break;
                         case 2://token
                             groupLabel = `Group ${index + 1} Token: ${tokenScore} || Damage: ${displayedDamage}`
-                            tokenInfo = calculateBestHours(group, null, data.SoulGoldenClover);
+                            tokenInfo = calculateBestHours(group, null, data.SoulGoldenClover, comboSelector);
                             break;
                         default:
                             break;
@@ -209,7 +228,7 @@ const JSONDisplay = ({ data, refreshGroups, groups, selectedItems, handleItemSel
                     defaultRank={defaultRank}
                 />
             </div>
-        </div>
+        </div >
     );
 };
 export default JSONDisplay;
