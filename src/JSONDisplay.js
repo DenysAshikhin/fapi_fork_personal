@@ -7,8 +7,8 @@ import PetItem from './PetItem';
 import ItemSelection from "./ItemSelection";
 import MouseOverPopover from "./tooltip";
 import Typography from "@mui/material/Typography";
-import { calculateGroupScore, calculatePetBaseDamage, EXP_DMG_MOD, EXP_TIME_MOD } from "./App";
-
+import { calculateGroupScore, calculatePetBaseDamage, calculateBestHours, EXP_DMG_MOD, EXP_TIME_MOD } from "./App";
+import helper from './util/helper.js'
 
 function ScoreSection({ data, group, totalScore, defaultRank }) {
     const { baseGroupScore, dmgCount, timeCount, synergyBonus } = calculateGroupScore(group, defaultRank);
@@ -83,14 +83,11 @@ const JSONDisplay = ({ data, groups, selectedItems, handleItemSelected, weightMa
 
                     const groupTotal = calculateGroupScore(group, defaultRank);
                     let tokenScore = groupTotal.tokenMult;
-                    tokenScore = tokenScore.toExponential(2);
+                    tokenScore = tokenScore.toExponential(3);
                     const score = groupTotal.groupScore;
-                    const displayedDamage = (score * 5 * data.PetDamageBonuses).toExponential(2);
-                
-                    // const displayedDamage = group
-                    //     .map((pet) => calculatePetBaseDamage(pet, defaultRank) * 5 * data?.PetDamageBonuses)
-                    //     .reduce((accum, dmg) => (accum += dmg), Number(0))
-                    //     .toExponential(2);
+                    const displayedDamage = (score * 5 * data.PetDamageBonuses).toExponential(3);
+
+                    let tokenInfo = null;
 
 
 
@@ -100,13 +97,14 @@ const JSONDisplay = ({ data, groups, selectedItems, handleItemSelected, weightMa
                             break;
                         case 2://token
                             groupLabel = `Group ${index + 1} Token: ${tokenScore} || Damage: ${displayedDamage}`
+                            tokenInfo = calculateBestHours(group);
                             break;
                         default:
                             break;
 
                     }
 
-                    const totalScore = Number(Number(data?.PetDamageBonuses) * score * 5).toExponential(2);
+                    const totalScore = Number(Number(data?.PetDamageBonuses) * score * 5).toExponential(3);
                     const groupTooltip = (
                         <div className="groups-tooltip">
                             <span className="groups-tooltip-content">
@@ -118,7 +116,21 @@ const JSONDisplay = ({ data, groups, selectedItems, handleItemSelected, weightMa
                     accum.push(
                         <div className="grid-row" key={(1 + index) * 9001}>
                             <MouseOverPopover tooltip={groupTooltip}>
-                                {groupLabel}
+                                <div>
+                                    {groupLabel}
+                                </div>
+                                {groupRankCritera === 2 && (
+                                    <div style={{ display: "flex" }}>
+                                        <div>Best hours:</div>
+                                        <select
+                                            style={{ maxWidth: '312px' }}
+                                        >
+                                            {tokenInfo.map((value, index) => {
+                                                return <option value={index}> {`${value.hours} hours creating ${value.floored} (${value.totalTokens}) tokens at ${helper.roundTwoDecimal(value.effeciency * 100)}%`}</option>
+                                            })}
+                                        </select>
+                                    </div>
+                                )}
                             </MouseOverPopover>
                         </div>
                     )
@@ -149,13 +161,13 @@ const JSONDisplay = ({ data, groups, selectedItems, handleItemSelected, weightMa
             </div>
             <div className="grid-right">
                 <Typography variant={"h5"}>Highlighted: {'>'}0 rank pets (clickable)</Typography>
-                <ItemSelection 
-                weightMap={weightMap}
-                 data={data} 
-                 selectedItems={selectedItems}
-                  onItemSelected={handleItemSelected} 
-                  defaultRank={defaultRank}
-                  />
+                <ItemSelection
+                    weightMap={weightMap}
+                    data={data}
+                    selectedItems={selectedItems}
+                    onItemSelected={handleItemSelected}
+                    defaultRank={defaultRank}
+                />
             </div>
         </div>
     );

@@ -40,6 +40,34 @@ export const EXP_TIME_MOD = .05;
 export const SYNERGY_MOD_STEP = .25;
 export const EXP_TOKEN_MOD = 0.05;
 
+export function calculateBestHours(group, hours) {
+
+    if (!hours) {
+        hours = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    }
+    const overall = calculateGroupScore(group);
+    const tokenHR = overall.tokenMult;
+    let best = { hours: -1, totalTokens: -1, floored: -1, effeciency: -1 };
+    let bestArr = [];
+
+    for (let i = 0; i < hours.length; i++) {
+        let h = hours[i];
+        let totalTokens = tokenHR * h;
+        let floored = Math.floor(totalTokens);
+        let effeciency = floored / totalTokens;
+        if (effeciency > best.effeciency) {
+            bestArr = [];
+            best = { hours: h, totalTokens: totalTokens, floored: floored, effeciency: effeciency };
+            bestArr.push(best);
+        }
+        else if (effeciency === best.effeciency) {
+            best = { hours: h, totalTokens: totalTokens, floored: floored, effeciency: effeciency };
+            bestArr.push(best);
+        }
+    }
+    return bestArr;
+}
+
 export function calculatePetBaseDamage(pet, defaultRank) {
     const rankCount = defaultRank ? defaultRank : pet?.Rank;
     const result = pet?.BaseDungeonDamage * (1.0 + rankCount * 0.05);
@@ -178,7 +206,7 @@ const calcBestTokenGroup = (petsCollection, defaultRank) => {
 
     const memoizedGroupScore = (group) => {
         const key = group.map((pet) => pet.ID).join(',');
-        
+
         if (!memo[key] || memo[key]) {
             let res = calculateGroupScore(group, defaultRank);
             let sum = res.tokenMult;
