@@ -236,6 +236,9 @@ const calcBestTokenGroup = (petsCollection, defaultRank) => {
             const currentGroup = memoizedGroupScore(group);
             const bestGroup = memoizedGroupScore(best);
             if (currentGroup.token === bestGroup.token) {
+                if(currentGroup.other.tokenRewardCount === 4){
+                    return currentGroup.damage < bestGroup.damage ? group : best;
+                }
                 return currentGroup.damage > bestGroup.damage ? group : best;
             }
 
