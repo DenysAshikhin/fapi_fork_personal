@@ -39,14 +39,18 @@ export const EXP_DMG_MOD = .1;
 export const EXP_TIME_MOD = .05;
 export const SYNERGY_MOD_STEP = .25;
 export const EXP_TOKEN_MOD = 0.05;
+export const SOUL_CLOVER_STEP = 0.25;
 
-export function calculateBestHours(group, hours) {
+export function calculateBestHours(group, hours, clover) {
 
     if (!hours) {
         hours = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
     }
+    if (!clover) {
+        clover = 0;
+    }
     const overall = calculateGroupScore(group);
-    const tokenHR = overall.tokenMult;
+    const tokenHR = overall.tokenMult * (Math.pow(1 + SOUL_CLOVER_STEP, clover));
     let best = { hours: -1, totalTokens: -1, floored: -1, effeciency: -1 };
     let bestArr = [];
 
@@ -56,7 +60,7 @@ export function calculateBestHours(group, hours) {
         let floored = Math.floor(totalTokens);
         let effeciency = floored / totalTokens;
         let wasted = totalTokens - floored;
-        let temp = { wasted: wasted, hours: h, totalTokens: totalTokens, floored: floored, effeciency: effeciency };
+        let temp = { tokenHR: tokenHR, wasted: wasted, hours: h, totalTokens: totalTokens, floored: floored, effeciency: effeciency };
         bestArr.push(temp);
 
         // if (effeciency > best.effeciency) {

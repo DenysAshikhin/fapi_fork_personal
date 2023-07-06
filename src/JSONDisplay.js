@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Grid2 from '@mui/material/Unstable_Grid2';
 
 import './JSONDisplay.css'; // Add this line to import the CSS file
@@ -7,7 +7,7 @@ import PetItem from './PetItem';
 import ItemSelection from "./ItemSelection";
 import MouseOverPopover from "./tooltip";
 import Typography from "@mui/material/Typography";
-import { calculateGroupScore, calculatePetBaseDamage, calculateBestHours, EXP_DMG_MOD, EXP_TIME_MOD } from "./App";
+import { calculateGroupScore, calculatePetBaseDamage, SOUL_CLOVER_STEP, calculateBestHours, EXP_DMG_MOD, EXP_TIME_MOD } from "./App";
 import helper from './util/helper.js'
 
 function ScoreSection({ data, group, totalScore, defaultRank }) {
@@ -39,15 +39,33 @@ function ScoreSection({ data, group, totalScore, defaultRank }) {
 }
 
 const JSONDisplay = ({ data, refreshGroups, groups, selectedItems, handleItemSelected, weightMap, setDefaultRank, defaultRank, groupRankCritera, setGroupRankCriteria }) => {
+
+    const [tokenSelections, setTokenSelections] = useState({ 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 });
+
+
     if (!!data === false || !!data.PetsCollection === false) {
         return <div>Loading...</div>; // You can replace this with null or another element if you prefer
     }
+
+    let totalTokensHR = 0;
+
+    if (groups && groupRankCritera === 2)
+        if (groups.length > 0)
+            groups.map((group, index) => {
+                // const groupTotal = calculateGroupScore(group, defaultRank);
+                // totalTokensHR += groupTotal.tokenMult * (Math.pow(1 + SOUL_CLOVER_STEP, data.SoulGoldenClover));
+
+                const groupBests = calculateBestHours(group, null, data.SoulGoldenClover)[tokenSelections[index]];
+
+                totalTokensHR += groupBests.floored / groupBests.hours;
+            })
 
     return (
         <div className="grid-container">
             <div className="grid-left">
                 <div>
-                    <Typography variant={"h5"} >Best Teams</Typography>
+                    <Typography variant={"h4"} >{`If you have a large number of pets, please be patient`}</Typography>
+                    <Typography variant={"h5"} >Best Teams {groupRankCritera === 2 ? ` || Total tokens/hr: ${helper.roundThreeDecimal(totalTokensHR)}` : ''}</Typography>
 
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
 
@@ -77,6 +95,12 @@ const JSONDisplay = ({ data, refreshGroups, groups, selectedItems, handleItemSel
                                 setDefaultRank(e.target.checked ? 1 : 0)
                             }} />
                         </div>
+                        {groupRankCritera === 2 && (
+                            <div>
+                                {`Golden Clover Level: ${data.SoulGoldenClover}`}
+                            </div>
+                        )}
+
                     </div>
                 </div>
 
@@ -84,12 +108,12 @@ const JSONDisplay = ({ data, refreshGroups, groups, selectedItems, handleItemSel
                     let groupLabel = ``;
 
                     const groupTotal = calculateGroupScore(group, defaultRank);
-                    let tokenScore = groupTotal.tokenMult;
+                    let tokenScore = groupTotal.tokenMult * (Math.pow(1 + SOUL_CLOVER_STEP, data.SoulGoldenClover));
                     tokenScore = tokenScore.toExponential(3);
                     const score = groupTotal.groupScore;
                     const displayedDamage = (score * 5 * data.PetDamageBonuses).toExponential(3);
 
-                    let tokenInfo = null;
+                    let tokenInfo = ``;
 
 
 
@@ -99,7 +123,7 @@ const JSONDisplay = ({ data, refreshGroups, groups, selectedItems, handleItemSel
                             break;
                         case 2://token
                             groupLabel = `Group ${index + 1} Token: ${tokenScore} || Damage: ${displayedDamage}`
-                            tokenInfo = calculateBestHours(group);
+                            tokenInfo = calculateBestHours(group, null, data.SoulGoldenClover);
                             break;
                         default:
                             break;
@@ -126,9 +150,19 @@ const JSONDisplay = ({ data, refreshGroups, groups, selectedItems, handleItemSel
                                         <div>Best hours:</div>
                                         <select
                                             style={{ maxWidth: '312px' }}
+                                            onChange={
+                                                (e) => {
+                                                    setTokenSelections((current) => {
+                                                        let temp = { ...current };
+                                                        let select = Number(e.target.value)
+                                                        temp[index] = select;
+                                                        return temp;
+                                                    })
+                                                }
+                                            }
                                         >
-                                            {tokenInfo.map((value, index) => {
-                                                return <option value={index}>
+                                            {tokenInfo.map((value, indexInner) => {
+                                                return <option value={indexInner}>
                                                     {/* {`${value.hours} hours creating ${value.floored} (${value.totalTokens}) tokens at ${helper.roundTwoDecimal(value.effeciency * 100)}%`} */}
                                                     {`${value.hours} hours creating ${value.floored} (${helper.roundTwoDecimal(value.totalTokens)}) tokens wasting ${helper.roundTwoDecimal(value.wasted)} tokens`}
                                                 </option>
