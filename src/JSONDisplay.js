@@ -85,8 +85,8 @@ const JSONDisplay = ({ data, refreshGroups, groups, selectedItems, handleItemSel
                                 }
                             }}
                         >
-                            <option value="damage">Damage Focus</option>
-                            <option value="token">Token Focus</option>
+                            <option value="damage">Max Damage</option>
+                            <option value="token">Max Tokens {`->`} Damage</option>
                         </select>
                         <div style={{ display: 'flex' }}>
 
@@ -145,32 +145,33 @@ const JSONDisplay = ({ data, refreshGroups, groups, selectedItems, handleItemSel
                                 <div>
                                     {groupLabel}
                                 </div>
-                                {groupRankCritera === 2 && (
-                                    <div style={{ display: "flex" }}>
-                                        <div>Best hours:</div>
-                                        <select
-                                            style={{ maxWidth: '312px' }}
-                                            onChange={
-                                                (e) => {
-                                                    setTokenSelections((current) => {
-                                                        let temp = { ...current };
-                                                        let select = Number(e.target.value)
-                                                        temp[index] = select;
-                                                        return temp;
-                                                    })
-                                                }
-                                            }
-                                        >
-                                            {tokenInfo.map((value, indexInner) => {
-                                                return <option value={indexInner}>
-                                                    {/* {`${value.hours} hours creating ${value.floored} (${value.totalTokens}) tokens at ${helper.roundTwoDecimal(value.effeciency * 100)}%`} */}
-                                                    {`${value.hours} hours creating ${value.floored} (${helper.roundTwoDecimal(value.totalTokens)}) tokens wasting ${helper.roundTwoDecimal(value.wasted)} tokens`}
-                                                </option>
-                                            })}
-                                        </select>
-                                    </div>
-                                )}
+
                             </MouseOverPopover>
+                            {groupRankCritera === 2 && (
+                                <div style={{ display: "flex" }}>
+                                    <div>Best hours:</div>
+                                    <select
+                                        style={{ maxWidth: '312px' }}
+                                        onChange={
+                                            (e) => {
+                                                setTokenSelections((current) => {
+                                                    let temp = { ...current };
+                                                    let select = Number(e.target.value)
+                                                    temp[index] = select;
+                                                    return temp;
+                                                })
+                                            }
+                                        }
+                                    >
+                                        {tokenInfo.map((value, indexInner) => {
+                                            return <option value={indexInner}>
+                                                {/* {`${value.hours} hours creating ${value.floored} (${value.totalTokens}) tokens at ${helper.roundTwoDecimal(value.effeciency * 100)}%`} */}
+                                                {`${value.hours} hours creating ${value.floored} (${helper.roundTwoDecimal(value.totalTokens)}) tokens wasting ${helper.roundTwoDecimal(value.wasted)} tokens`}
+                                            </option>
+                                        })}
+                                    </select>
+                                </div>
+                            )}
                         </div>
                     )
                     accum.push(
