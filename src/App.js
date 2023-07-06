@@ -271,13 +271,6 @@ function App() {
     const [refreshGroups, setRefreshGroups] = useState(false);
     const [groupRankCritera, setGroupRankCriteria] = useState(1);//1 = overall damage + modifiers, 2 = token/hr + (damage and modifiers)
 
-    //Fires only when we need to refresh the best pet groups (like the rank being reset)
-    useEffect(() => {
-        if (refreshGroups) {
-            setRefreshGroups(false);
-            handleGroups(data, selectedItems, true);
-        }
-    }, [data, selectedItems, refreshGroups])
 
     const handleItemSelected = (items) => {
         setSelectedItems(items);
@@ -308,6 +301,9 @@ function App() {
                     handleItemSelected={handleItemSelected}
                     setDefaultRank={
                         (val) => {
+                            if (refreshGroups) {
+                                return;
+                            }
                             //Setting default rank to the value (0 for old functionality, otherwise groups are calcualted with all pets at specified rank)
                             setDefaultRank(val);
                             setRefreshGroups(true);//Forcing all the groups to be recalculated
@@ -316,9 +312,13 @@ function App() {
                     defaultRank={defaultRank}
                     groupRankCritera={groupRankCritera}
                     setGroupRankCriteria={(val) => {
+                        if (refreshGroups) {
+                            return;
+                        }
                         setGroupRankCriteria(val);
                         setRefreshGroups(true);
                     }}
+                    refreshGroups={refreshGroups}
                 />;
             case 0:
                 return <FileUpload onData={handleData} />;
@@ -362,6 +362,11 @@ function App() {
             setGroupCache({ ...groupCache, [keyString]: groups })
             setGroups(groups);
         }
+    }
+    //Fires only when we need to refresh the best pet groups (like the rank being reset)
+    if (refreshGroups) {
+        setRefreshGroups(false);
+        handleGroups(data, selectedItems, true);
     }
 
     return (

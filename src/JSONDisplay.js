@@ -38,7 +38,7 @@ function ScoreSection({ data, group, totalScore, defaultRank }) {
     );
 }
 
-const JSONDisplay = ({ data, groups, selectedItems, handleItemSelected, weightMap, setDefaultRank, defaultRank, groupRankCritera, setGroupRankCriteria }) => {
+const JSONDisplay = ({ data, refreshGroups, groups, selectedItems, handleItemSelected, weightMap, setDefaultRank, defaultRank, groupRankCritera, setGroupRankCriteria }) => {
     if (!!data === false || !!data.PetsCollection === false) {
         return <div>Loading...</div>; // You can replace this with null or another element if you prefer
     }
@@ -48,10 +48,12 @@ const JSONDisplay = ({ data, groups, selectedItems, handleItemSelected, weightMa
             <div className="grid-left">
                 <div>
                     <Typography variant={"h5"} >Best Teams</Typography>
+               
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
 
                         <select
                             style={{ maxWidth: '144px' }}
+                            disabled={refreshGroups}
                             onChange={(e) => {
                                 switch (e.target.value) {
                                     case 'damage':
@@ -71,7 +73,7 @@ const JSONDisplay = ({ data, groups, selectedItems, handleItemSelected, weightMa
                         <div style={{ display: 'flex' }}>
 
                             <div>{`Ignore Pets Rank`}</div>
-                            <input type="checkbox" onChange={(e) => {
+                            <input disabled={refreshGroups} type="checkbox" onChange={(e) => {
                                 setDefaultRank(e.target.checked ? 1 : 0)
                             }} />
                         </div>
