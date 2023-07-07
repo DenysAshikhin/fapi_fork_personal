@@ -198,7 +198,6 @@ const calcBestDamageGroup = (petsCollection, defaultRank) => {
     const memo = {};
 
     const memoizedGroupScore = (group) => {
-        // const key = group.map((pet) => pet.ID).join(',');
         const key = group.ID;
         if (!memo[key] || memo[key]) {
             memo[key] = calculateGroupScore(group.team, defaultRank).groupScore;
@@ -206,31 +205,70 @@ const calcBestDamageGroup = (petsCollection, defaultRank) => {
         return memo[key];
     };
 
+    const getCombinationsInner = (array, k) => {
+
+        // let temp = [];
+        let best = -1;
+
+        const f = (start, prevCombination) => {
+
+            if (prevCombination.length > 0) {
+                let id = '';
+                for (let i = 0; i < prevCombination.length; i++) {
+                    id = id + prevCombination[i].ID;
+                    if (i + 1 !== prevCombination.length) {
+                        id = id + ','
+                    }
+                }
+                let x = { ID: id, team: prevCombination };
+                // temp.push(x);
+                if (best === -1) {
+                    best = { ID: id, team: prevCombination, score: memoizedGroupScore(x) };
+                }
+                else {
+                    let cur = memoizedGroupScore(x);
+                    if (cur > best.score) {
+                        best = { ID: id, team: prevCombination, score: cur };
+                    }
+                }
+            }
+
+            if (prevCombination.length === k) {
+                return;
+            }
+            for (let i = start; i < array.length; i++) {
+                f(i + 1, [...prevCombination, array[i]]);
+            }
+        };
+        f(0, []);
+
+        return best;
+    }
+
     let time1 = new Date();
     let time2 = new Date();
+    let time3 = new Date();
+    let time4 = new Date();
 
     let bestGroups = [];
     for (let g = 0; g < numGroups; g++) {
         time1 = new Date();
-        const combinations = getCombinations(petsCollection, Math.min(k, petsCollection.length));
+        const combinations = getCombinationsInner(petsCollection, Math.min(k, petsCollection.length));
         time2 = new Date();
         console.log(`time to get combinations ${combinations.length}: ${(time2 - time1) / 1000} seconds`)
 
 
-        if (combinations.length === 0) {
+        if (combinations === -1) {
             break;
         }
-        const bestGroup = combinations.reduce((best, group) => {
-            const score = memoizedGroupScore(group);
-            return score > memoizedGroupScore(best) ? group : best;
-        }, combinations[0]);
+        else {
+            bestGroups.push(combinations.team);
+            petsCollection = petsCollection.filter((pet) => !combinations.team.includes(pet));
 
-        if (bestGroup) {
-            bestGroups.push(bestGroup.team);
-            petsCollection = petsCollection.filter((pet) => !bestGroup.team.includes(pet));
         }
     }
-
+    time4 = new Date();
+    console.log(`time to get best combo: ${(time4 - time3) / 1000} seconds`)
     return bestGroups;
 }
 
@@ -239,46 +277,89 @@ const calcBestTokenGroup = (petsCollection, defaultRank) => {
     const numGroups = 6; // Number of groups to find
     const memo = {};
 
-    const memoizedGroupScore = (group) => {
-        const key = group.map((pet) => pet.ID).join(',');
+    const memoizedGroupScore = (innerGroup) => {
+        const key = innerGroup.ID;
 
         if (!memo[key] || memo[key]) {
-            let res = calculateGroupScore(group, defaultRank);
+            let res = calculateGroupScore(innerGroup.team, defaultRank);
             let sum = res.tokenMult;
             memo[key] = { token: sum, damage: res.groupScore, other: res };
         }
         return memo[key];
     };
+    const getCombinationsInner = (array, k) => {
+
+        // let temp = [];
+        let best = -1;
+
+        const f = (start, prevCombination) => {
+
+            if (prevCombination.length > 0) {
+                let id = '';
+                for (let i = 0; i < prevCombination.length; i++) {
+                    id = id + prevCombination[i].ID;
+                    if (i + 1 !== prevCombination.length) {
+                        id = id + ','
+                    }
+                }
+                let x = { ID: id, team: prevCombination };
+                // temp.push(x);
+                if (best === -1) {
+                    best = { ID: id, team: prevCombination, score: memoizedGroupScore(x) };
+                }
+                else {
+                    let cur = memoizedGroupScore(x);
+
+
+
+                    if (cur.token === best.score.token) {
+                        if (cur.other.tokenRewardCount === 4) {
+                            if (cur.damage < best.score.damage) {
+                                best = { ID: id, team: prevCombination, score: cur };
+                            }
+                        }
+                        else {
+                            if (cur.damage > best.score.damage) {
+                                best = { ID: id, team: prevCombination, score: cur };
+                            }
+                        }
+
+                    }
+                    else if (cur.token > best.score.token) {
+                        best = { ID: id, team: prevCombination, score: cur };
+                    }
+                }
+            }
+
+            if (prevCombination.length === k) {
+                return;
+            }
+            for (let i = start; i < array.length; i++) {
+                f(i + 1, [...prevCombination, array[i]]);
+            }
+        };
+        f(0, []);
+
+        return best;
+    }
+
+    let time3 = new Date();
+    let time4 = new Date();
 
     let bestGroups = [];
     for (let g = 0; g < numGroups; g++) {
-        const combinations = getCombinations(petsCollection, Math.min(k, petsCollection.length));
-        if (combinations.length === 0) {
+        const combinations = getCombinationsInner(petsCollection, Math.min(k, petsCollection.length));
+        if (combinations === -1) {
             break;
         }
-        const bestGroup = combinations.reduce((best, group) => {
-            const currentGroup = memoizedGroupScore(group);
-            const bestGroup = memoizedGroupScore(best);
-            if (currentGroup.token === bestGroup.token) {
-                if (currentGroup.other.tokenRewardCount === 4) {
-                    return currentGroup.damage < bestGroup.damage ? group : best;
-                }
-                return currentGroup.damage > bestGroup.damage ? group : best;
-            }
-
-            return currentGroup.token > bestGroup.token ? group : best;
-        }, combinations[0]);
-
-        if (bestGroup) {
-            let temp = memoizedGroupScore(bestGroup);
-            bestGroups.push(bestGroup);
-            petsCollection = petsCollection.filter((pet) => !bestGroup.includes(pet));
-        }
         else {
-            throw new Error(`No best group calculated??`);
+            let temp = memoizedGroupScore(combinations);
+            bestGroups.push(combinations.team);
+            petsCollection = petsCollection.filter((pet) => !combinations.team.includes(pet));
         }
     }
-
+    time4 = new Date();
+    console.log(`time to get best combo: ${(time4 - time3) / 1000} seconds`)
     return bestGroups;
 }
 

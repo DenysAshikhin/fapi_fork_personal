@@ -51,11 +51,7 @@ const JSONDisplay = ({ data, refreshGroups, comboSelector, setComboSelector, gro
     // if (groups && groupRankCritera === 2)
     if (groups.length > 0)
         groups.map((group, index) => {
-            // const groupTotal = calculateGroupScore(group, defaultRank);
-            // totalTokensHR += groupTotal.tokenMult * (Math.pow(1 + SOUL_CLOVER_STEP, data.SoulGoldenClover));
-
             const groupBests = calculateBestHours(group, null, data.SoulGoldenClover, comboSelector)[tokenSelections[index]];
-
             totalTokensHR += groupBests.floored / groupBests.hours;
         })
 
