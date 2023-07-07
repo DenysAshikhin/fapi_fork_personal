@@ -38,7 +38,21 @@ function ScoreSection({ data, group, totalScore, defaultRank }) {
     );
 }
 
-const JSONDisplay = ({ data, refreshGroups, comboSelector, setComboSelector, groups, selectedItems, handleItemSelected, weightMap, setDefaultRank, defaultRank, groupRankCritera, setGroupRankCriteria }) => {
+const JSONDisplay = ({ data,
+    refreshGroups,
+    comboSelector,
+    setComboSelector,
+    groups,
+    selectedItems,
+    handleItemSelected,
+    weightMap,
+    setDefaultRank,
+    defaultRank,
+    groupRankCritera,
+    setGroupRankCriteria,
+    numTeams,
+    setNumTeams
+}) => {
 
     const [tokenSelections, setTokenSelections] = useState({ 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 });
 
@@ -56,75 +70,23 @@ const JSONDisplay = ({ data, refreshGroups, comboSelector, setComboSelector, gro
         })
 
     return (
-        <div className="grid-container" style={{
-            gridTemplateColumns: '4fr 8fr',
-            gridColumnGap: '400px'
-        }}>
-            <div className="grid-left">
+        <div
+            className="grid-container"
+            style={{
+                gridTemplateColumns: '4fr 4fr 4fr',
+                gridColumnGap: '12px'
+            }}
+        >
+            <div
+                className="grid-left"
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    // width: '100%'
+                }}
+            >
                 <div>
-                    <Typography variant={"h4"} >{`If you have a large number of pets, please be patient`}</Typography>
                     <Typography variant={"h5"} >Best Teams {` || Total tokens/hr: ${helper.roundThreeDecimal(totalTokensHR)}`}</Typography>
-
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <select
-                            style={{ maxWidth: '144px' }}
-                            disabled={refreshGroups}
-                            onChange={(e) => {
-                                switch (e.target.value) {
-                                    case 'damage':
-                                        setGroupRankCriteria(1);
-                                        break;
-                                    case 'token':
-                                        setGroupRankCriteria(2);
-                                        break;
-                                    default:
-                                        throw new Error('invalid dropdown selector');
-                                }
-                            }}
-                        >
-                            <option value="damage">Max Damage</option>
-                            <option value="token">Max Tokens {`->`} Damage</option>
-                        </select>
-                        <div style={{ display: 'flex' }}>
-
-                            <div>{`Ignore Pets Rank`}</div>
-                            <input disabled={refreshGroups} type="checkbox" onChange={(e) => {
-                                setDefaultRank(e.target.checked ? 1 : 0)
-                            }} />
-                        </div>
-
-                        {/* {groupRankCritera === 2 && ( */}
-                        <div style={{ display: 'flex', }}>
-                            <div style={{ marginRight: '12px' }}>
-                                Expedition Reward Combo
-                            </div>
-                            <select
-                                style={{ maxWidth: '144px' }}
-                                disabled={refreshGroups}
-                                onChange={
-                                    (e) => {
-                                        setComboSelector(Number(e.target.value))
-                                    }
-                                }
-                                defaultValue={comboSelector + ''}
-                            >
-                                <option
-                                    value="1">1.0</option>
-                                <option
-                                    value="1.1">1.1</option>
-                                <option
-                                    value="1.2">1.2</option>
-                            </select>
-
-                        </div>
-                        {/* )} */}
-                        {/* {groupRankCritera === 2 && ( */}
-                        <div>
-                            {`Golden Clover Level: ${data.SoulGoldenClover}`}
-                        </div>
-                        {/* )} */}
-
-                    </div>
                 </div>
 
                 {groups.reduce((accum, group, index) => {
@@ -138,8 +100,6 @@ const JSONDisplay = ({ data, refreshGroups, comboSelector, setComboSelector, gro
 
                     let tokenInfo = ``;
 
-
-
                     switch (groupRankCritera) {
                         case 1://damage
                             groupLabel = `Group ${index + 1} Damage: ${displayedDamage} || Token: ${tokenScore}`;
@@ -147,6 +107,10 @@ const JSONDisplay = ({ data, refreshGroups, comboSelector, setComboSelector, gro
                             break;
                         case 2://token
                             groupLabel = `Group ${index + 1} Token: ${tokenScore} || Damage: ${displayedDamage}`;
+                            tokenInfo = calculateBestHours(group, null, data.SoulGoldenClover, comboSelector);
+                            break;
+                        case 3://Advanced
+                            groupLabel = `Group ${index + 1} Damage: ${displayedDamage}`;
                             tokenInfo = calculateBestHours(group, null, data.SoulGoldenClover, comboSelector);
                             break;
                         default:
@@ -164,7 +128,14 @@ const JSONDisplay = ({ data, refreshGroups, comboSelector, setComboSelector, gro
                         </div>
                     );
                     accum.push(
-                        <div className="grid-row" key={(1 + index) * 9001}>
+                        <div
+                            className="grid-row"
+                            key={(1 + index) * 9001}
+                            style={{
+                                // height: '1px'
+                                marginTop: '12px'
+                            }}
+                        >
                             <MouseOverPopover tooltip={groupTooltip}>
                                 <div>
                                     {groupLabel}
@@ -199,7 +170,14 @@ const JSONDisplay = ({ data, refreshGroups, comboSelector, setComboSelector, gro
                         </div>
                     )
                     accum.push(
-                        <Grid2 container spacing={1} key={index}>
+                        <Grid2
+                            container
+                            spacing={1}
+                            key={index}
+                            style={{
+                                // height: '1px'
+                            }}
+                        >
                             {!!group && group.map((petData, idx) => {
                                 const { ID } = petData;
                                 const staticPetData = petNameArray.find(staticPetDatum => staticPetDatum.petId === ID)
@@ -222,6 +200,97 @@ const JSONDisplay = ({ data, refreshGroups, comboSelector, setComboSelector, gro
                     );
                     return accum;
                 }, [])}
+            </div>
+            <div className="grid-center"
+                style={{
+                    border: '1px black solid',
+                    marginRight: '6px'
+                }}>
+                <Typography variant={"h4"} >{`If you have a large number of pets, please be patient`}</Typography>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <select
+                        style={{ maxWidth: '144px' }}
+                        disabled={refreshGroups}
+                        onChange={(e) => {
+                            switch (e.target.value) {
+                                case 'damage':
+                                    setGroupRankCriteria(1);
+                                    break;
+                                case 'token':
+                                    setGroupRankCriteria(2);
+                                    break;
+                                case 'advanced':
+                                    setGroupRankCriteria(3);
+                                    break;
+                                default:
+                                    throw new Error('invalid dropdown selector');
+                            }
+                        }}
+                    >
+                        <option value="damage">Max Damage</option>
+                        <option value="token">Max Tokens {`->`} Damage</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                    <div style={{ display: 'flex' }}>
+
+                        <div>{`Ignore Pets Rank`}</div>
+                        <input disabled={refreshGroups} type="checkbox" onChange={(e) => {
+                            setDefaultRank(e.target.checked ? 1 : 0)
+                        }} />
+                    </div>
+                    <div>
+                        {`Golden Clover Level: ${data.SoulGoldenClover}`}
+                    </div>
+                    <div style={{ display: 'flex', }}>
+                        <div style={{ marginRight: '12px' }}>
+                            Expedition Reward Combo
+                        </div>
+                        <select
+                            style={{ maxWidth: '144px' }}
+                            disabled={refreshGroups}
+                            onChange={
+                                (e) => {
+                                    setComboSelector(Number(e.target.value))
+                                }
+                            }
+                            defaultValue={comboSelector + ''}
+                        >
+                            <option
+                                value="1">1.0</option>
+                            <option
+                                value="1.1">1.1</option>
+                            <option
+                                value="1.2">1.2</option>
+                        </select>
+
+                    </div>
+                </div>
+                <div
+                    style={{
+                        display: 'flex'
+                    }}
+                >
+                    <div
+                        style={{
+                            marginRight: '12px'
+                        }}>
+                        Number of teams:
+                    </div>
+                    <input id='prepFormInput'
+                        type='number'
+                        className='prepNumber'
+                        // value={props.prepField.numeral}
+                        onChange={
+                            (e) => {
+                                // console.log(`pressed: ${e.target.value}`)
+                                setNumTeams(e.target.value);
+                            }}
+                        placeholder='6'
+                        min="1"
+                        max="6"
+                    // onKeyDown={(e)=>{}}"javascript: return ['Backspace','Delete','ArrowLeft','ArrowRight'].includes(event.code) ? true : !isNaN(Number(event.key)) && event.code!=='Space'"
+                    />
+                </div>
             </div>
             <div className="grid-right">
                 <Typography variant={"h5"}>Highlighted: {'>'}0 rank pets (clickable)</Typography>

@@ -192,9 +192,9 @@ function getCombinations(array, k) {
     return temp;
 }
 
-const calcBestDamageGroup = (petsCollection, defaultRank) => {
+const calcBestDamageGroup = (petsCollection, defaultRank, numGroups) => {
     const k = 4; // Size of each group
-    const numGroups = 6; // Number of groups to find
+    numGroups = numGroups ? numGroups : 6;
     const memo = {};
 
     const memoizedGroupScore = (group) => {
@@ -272,9 +272,11 @@ const calcBestDamageGroup = (petsCollection, defaultRank) => {
     return bestGroups;
 }
 
-const calcBestTokenGroup = (petsCollection, defaultRank) => {
+const calcBestTokenGroup = (petsCollection, defaultRank, numGroups) => {
     const k = 4; // Size of each group
-    const numGroups = 6; // Number of groups to find
+
+    numGroups = numGroups ? numGroups : 6;
+
     const memo = {};
 
     const memoizedGroupScore = (innerGroup) => {
@@ -364,13 +366,15 @@ const calcBestTokenGroup = (petsCollection, defaultRank) => {
 }
 
 
-export const findBestGroups = (petsCollection, defaultRank, groupRankCritera) => {
+export const findBestGroups = (petsCollection, defaultRank, groupRankCritera, numGroups) => {
 
     switch (groupRankCritera) {
         case 1: //damage focus
-            return calcBestDamageGroup(petsCollection, defaultRank);
+            return calcBestDamageGroup(petsCollection, defaultRank, numGroups);
         case 2: // token focus
-            return calcBestTokenGroup(petsCollection, defaultRank);
+            return calcBestTokenGroup(petsCollection, defaultRank, numGroups);
+        case 3:
+            return calcBestDamageGroup(petsCollection, defaultRank, numGroups);
     }
 };
 
@@ -388,9 +392,9 @@ function App() {
     const [tabSwitch, setTabSwitch] = useState(0);
     const [weightMap, setWeightMap] = useState(DefaultWeightMap);
     const [refreshGroups, setRefreshGroups] = useState(false);
-    const [groupRankCritera, setGroupRankCriteria] = useState(1);//1 = overall damage + modifiers, 2 = token/hr + (damage and modifiers)
+    const [groupRankCritera, setGroupRankCriteria] = useState(1);//1 = overall damage + modifiers, 2 = token/hr + (damage and modifiers), 3 = advanced/custom
     const [comboSelector, setComboSelector] = useState(1);
-
+    const [numTeams, setNumTeams] = useState(6);
 
     const handleItemSelected = (items) => {
         setSelectedItems(items);
@@ -416,7 +420,8 @@ function App() {
             case 1:
                 return <JSONDisplay
                     weightMap={weightMap}
-                    data={data} groups={groups}
+                    data={data}
+                    groups={groups}
                     selectedItems={selectedItems}
                     handleItemSelected={handleItemSelected}
                     setDefaultRank={
@@ -447,6 +452,13 @@ function App() {
                         setRefreshGroups(true);
                     }}
                     refreshGroups={refreshGroups}
+                    numTeams={numTeams}
+                    setNumTeams={
+                        (val) => {
+                            setNumTeams(Number(val));
+                            setRefreshGroups(true);
+                        }
+                    }
                 />;
             case 0:
                 return <FileUpload onData={handleData} />;
@@ -503,7 +515,7 @@ function App() {
         if (groups && !recalculate) {
             setGroups(groups);
         } else {
-            groups = findBestGroups(localPets, defaultRank, groupRankCritera);
+            groups = findBestGroups(localPets, defaultRank, groupRankCritera, numTeams);
             setGroupCache({ ...groupCache, [keyString]: groups })
             setGroups(groups);
         }
@@ -518,7 +530,8 @@ function App() {
         <ThemeProvider theme={theme}>
             <RepoLink />
             <Container sx={{
-                marginLeft: '0px', marginRight: '0px', maxWidth: '100000px !important', width: 'calc(100vw - 152px)',
+                marginLeft: '0px', marginRight: '0px', maxWidth: '100000px !important',
+                width: 'calc(100vw - 126px)',
                 maxHeight: `calc(100vh - 56px)`,
                 height: `calc(100vh - 56px)`,
             }}>
