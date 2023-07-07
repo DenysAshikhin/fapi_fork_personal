@@ -105,14 +105,19 @@ const JSONDisplay = ({ data, refreshGroups, comboSelector, setComboSelector, gro
                             <select
                                 style={{ maxWidth: '144px' }}
                                 disabled={refreshGroups}
-                                onChange={(e) => {
-                                    setComboSelector(Number(e.target.value))
+                                onChange={
+                                    (e) => {
+                                        setComboSelector(Number(e.target.value))
+                                    }
                                 }
-                                }
+                                defaultValue={comboSelector + ''}
                             >
-                                <option selected={comboSelector === 1} value="1">1.0</option>
-                                <option selected={comboSelector === 1.1} value="1.1">1.1</option>
-                                <option selected={comboSelector === 1.2} value="1.2">1.2</option>
+                                <option
+                                    value="1">1.0</option>
+                                <option
+                                    value="1.1">1.1</option>
+                                <option
+                                    value="1.2">1.2</option>
                             </select>
 
                         </div>
@@ -187,7 +192,7 @@ const JSONDisplay = ({ data, refreshGroups, comboSelector, setComboSelector, gro
                                     }
                                 >
                                     {tokenInfo.map((value, indexInner) => {
-                                        return <option value={indexInner}>
+                                        return <option value={indexInner} key={indexInner}>
                                             {/* {`${value.hours} hours creating ${value.floored} (${value.totalTokens}) tokens at ${helper.roundTwoDecimal(value.effeciency * 100)}%`} */}
                                             {`${value.hours} hours creating ${value.floored} (${helper.roundTwoDecimal(value.totalTokens)}) tokens wasting ${helper.roundTwoDecimal(value.wasted)} tokens`}
                                         </option>

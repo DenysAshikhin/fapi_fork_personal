@@ -164,12 +164,22 @@ export const calculateGroupScore = (group, defaultRank) => {
 };
 
 function getCombinations(array, k) {
-    const combinations = new Set();
+
+    let temp = [];
+
     const f = (start, prevCombination) => {
-        if (prevCombination.length > 0 && prevCombination.length <= k && prevCombination.every((pet) => pet?.ID !== undefined)) {
-            const sortedIds = prevCombination.sort((a, b) => a.ID - b.ID).map((pet) => pet.ID).join(',');
-            combinations.add(sortedIds);
+
+        if (prevCombination.length > 0) {
+            let id = '';
+            for (let i = 0; i < prevCombination.length; i++) {
+                id = id + prevCombination[i].ID;
+                if (i + 1 !== prevCombination.length) {
+                    id = id + ','
+                }
+            }
+            temp.push({ ID: id, team: prevCombination });
         }
+
         if (prevCombination.length === k) {
             return;
         }
@@ -178,7 +188,8 @@ function getCombinations(array, k) {
         }
     };
     f(0, []);
-    return Array.from(combinations).map((combination) => combination.split(',').map((id) => array.find((pet) => pet.ID === parseInt(id))));
+
+    return temp;
 }
 
 const calcBestDamageGroup = (petsCollection, defaultRank) => {
@@ -187,16 +198,25 @@ const calcBestDamageGroup = (petsCollection, defaultRank) => {
     const memo = {};
 
     const memoizedGroupScore = (group) => {
-        const key = group.map((pet) => pet.ID).join(',');
+        // const key = group.map((pet) => pet.ID).join(',');
+        const key = group.ID;
         if (!memo[key] || memo[key]) {
-            memo[key] = calculateGroupScore(group, defaultRank).groupScore;
+            memo[key] = calculateGroupScore(group.team, defaultRank).groupScore;
         }
         return memo[key];
     };
 
+    let time1 = new Date();
+    let time2 = new Date();
+
     let bestGroups = [];
     for (let g = 0; g < numGroups; g++) {
+        time1 = new Date();
         const combinations = getCombinations(petsCollection, Math.min(k, petsCollection.length));
+        time2 = new Date();
+        console.log(`time to get combinations ${combinations.length}: ${(time2 - time1) / 1000} seconds`)
+
+
         if (combinations.length === 0) {
             break;
         }
@@ -206,8 +226,8 @@ const calcBestDamageGroup = (petsCollection, defaultRank) => {
         }, combinations[0]);
 
         if (bestGroup) {
-            bestGroups.push(bestGroup);
-            petsCollection = petsCollection.filter((pet) => !bestGroup.includes(pet));
+            bestGroups.push(bestGroup.team);
+            petsCollection = petsCollection.filter((pet) => !bestGroup.team.includes(pet));
         }
     }
 
@@ -371,6 +391,9 @@ function App() {
 
         setGroupCache({});
         console.log(uploadedData)
+
+        uploadedData.PetsCollection.sort((a, b) => a.ID - b.ID);
+
         const positiveRankedPets = uploadedData.PetsCollection.filter(
             (pet) => {
                 const isValidRank = !!pet.Rank;//Instead of relying on defaultRank always = 0, select valid ranks if they exist (not 0)
@@ -386,6 +409,7 @@ function App() {
 
     //Recalculate used to force the groups to be...recalculated
     const handleGroups = (data, selectedItems, recalculate) => {
+        console.log(`handle groups called`)
         const petData = data?.PetsCollection || [];
         const selectedItemsById = petData.reduce((accum, item) => {
             accum[parseInt(item.ID, 10)] = item;
