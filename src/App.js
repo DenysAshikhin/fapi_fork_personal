@@ -200,7 +200,9 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups) => {
     const memoizedGroupScore = (group) => {
         const key = group.ID;
         if (!memo[key] || memo[key]) {
-            memo[key] = calculateGroupScore(group.team, defaultRank).groupScore;
+            let res = calculateGroupScore(group.team, defaultRank);
+            let sum = res.tokenMult;
+            memo[key] = { token: sum, damage: res.groupScore, other: res };
         }
         return memo[key];
     };
@@ -227,7 +229,19 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups) => {
                 }
                 else {
                     let cur = memoizedGroupScore(x);
-                    if (cur > best.score) {
+
+
+                    // if (cur.damage > best.score.damage) {
+                    //     best = { ID: id, team: prevCombination, score: cur };
+                    // }
+
+
+                    if (cur.damage === best.score.damage) {
+                        if (cur.token > best.score.token) {
+                            best = { ID: id, team: prevCombination, score: cur };
+                        }
+                    }
+                    else if (cur.damage > best.score.damage) {
                         best = { ID: id, team: prevCombination, score: cur };
                     }
                 }
