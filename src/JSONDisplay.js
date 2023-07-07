@@ -282,8 +282,19 @@ const JSONDisplay = ({ data,
                         // value={props.prepField.numeral}
                         onChange={
                             (e) => {
+                                try {
+                                    let x = Number(e.target.value);
+                                    x = Math.floor(x);
+                                    if (x < 1 || x > 6) {
+                                        return;
+                                    }
+                                    setNumTeams(e.target.value);
+                                }
+                                catch (err) {
+                                    console.log(err);
+                                }
                                 // console.log(`pressed: ${e.target.value}`)
-                                setNumTeams(e.target.value);
+
                             }}
                         placeholder='6'
                         min="1"
