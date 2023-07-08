@@ -736,7 +736,10 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
         let tknGnd = 0;
 
         newPetsCollection = newPetsCollection.sort((a, b) => calculatePetBaseDamage(b, defaultRank) - calculatePetBaseDamage(a, defaultRank));
-
+        for (let i = 0; i < 3; i++) {
+            avgdMaxDmg += calculatePetBaseDamage(newPetsCollection[i], defaultRank);
+        }
+        avgdMaxDmg /= 3;
 
 
         newPetsCollection.forEach((pet) => {
@@ -760,6 +763,7 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
             })
         });
         avgTokenPetDmg /= numTokens;
+        // avgdMaxDmg = calculatePetBaseDamage(maxDmgPet, defaultRank);
 
         //Create a trash team first
         if (numTokens >= 4 && tknAir >= 2 && tknGnd >= 2) {
@@ -783,7 +787,7 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
         else if (numTokens > 1) {
 
             let percent = other.tokenDamageBias / 100;
-            let cutOff = percent * calculatePetBaseDamage(maxDmgPet, defaultRank); //50% of highest available pet's base damage          
+            let cutOff = percent * avgdMaxDmg; //50% of highest available pet's base damage          
 
             let numTokenGroups = Math.ceil(numTokens / 4);
 
@@ -877,7 +881,7 @@ function App() {
     const [groupRankCritera, setGroupRankCriteria] = useState(1);//1 = overall damage + modifiers, 2 = token/hr + (damage and modifiers), 3 = advanced/custom
     const [comboSelector, setComboSelector] = useState(1);
     const [numTeams, setNumTeams] = useState(-1);
-    const [tokenDamageBias, setTokenDamageBias] = useState(83);
+    const [tokenDamageBias, setTokenDamageBias] = useState(85);
 
 
     const handleItemSelected = (items) => {
