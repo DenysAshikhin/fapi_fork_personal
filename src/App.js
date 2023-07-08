@@ -285,9 +285,6 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, calcLowest)
     numGroups = numGroups ? numGroups : 6;
     const memo = {};
 
-
-
-
     const memoizedGroupScore = (group) => {
         const key = group.ID;
         if (!memo[key] || memo[key]) {
@@ -484,7 +481,7 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, calcLowest)
     return bestGroups;
 }
 
-const calcBestTokenGroup = (petsCollection, defaultRank, numGroups) => {
+const calcBestTokenGroupOLD = (petsCollection, defaultRank, numGroups) => {
     const k = 4; // Size of each group
 
     numGroups = numGroups ? numGroups : 6;
@@ -579,15 +576,264 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups) => {
 }
 
 
-export const findBestGroups = (petsCollection, defaultRank, groupRankCritera, numGroups) => {
+/*
+
+1. Calc # token pets
+2. Calc # of teams
+3. Calc # of token teams
+4. Calc # of max damage teams
+5. Calc all the max damage teams (this elimanates best pets from token teams)
+6. Calc best token -> damage teams
+
+
+Exceptions:
+1. If there are 3 token pets, first create the shittiest full token teams possible
+1.5. From there, reserve remaining token pets for later processing
+2. Create remaning max damage teams
+3. Create max damage 1.5 team
+
+
+1. If there is 1 token pet
+2. Calculate max damage teams
+3. If it is available on the last team, forcefully slot it in
+
+
+*/
+
+
+
+const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
+    const k = 4; // Size of each group
+
+    numGroups = numGroups ? numGroups : 6;
+    let damageMode = 1;//1 = max damage, 2 = min
+
+    const memo = {};
+
+    const memoizedGroupScore = (innerGroup) => {
+        const key = innerGroup.ID;
+
+        if (!memo[key] || memo[key]) {
+            let res = calculateGroupScore(innerGroup.team, defaultRank);
+            let sum = res.tokenMult;
+            memo[key] = { token: sum, damage: res.groupScore, other: res };
+        }
+        return memo[key];
+    };
+    const getCombinationsInner = (array, k, requiredPetsObj) => {
+
+        // let temp = [];
+        let best = -1;
+
+
+        const f = (start, prevCombination) => {
+
+            let required = 0;
+            let ignored = 0;
+            let requiredPets = [];
+            let ignoredPets = [];
+
+            if (requiredPetsObj) {
+                required = requiredPetsObj.min;
+                requiredPets = requiredPetsObj.pets;
+                ignoredPets = requiredPetsObj.ignoredPets ? requiredPetsObj.ignoredPets : [];
+            }
+
+            let requiredFound = 0;
+            if (prevCombination.length > 0) {
+                let id = '';
+                for (let i = 0; i < prevCombination.length; i++) {
+                    id = id + prevCombination[i].ID;
+                    if (i + 1 !== prevCombination.length) {
+                        id = id + ','
+                    }
+
+                    if (required > 0) {
+                        for (let x = 0; x < requiredPets.length; x++) {
+                            if (prevCombination[i].ID == requiredPets[x].ID) requiredFound++;
+                        }
+                    }
+                    if (ignoredPets.length > 0) {
+                        for (let x = 0; x < ignoredPets.length; x++) {
+                            if (prevCombination[i].ID == ignoredPets[x].ID) {
+                                ignored++;
+                            }
+                        }
+                    }
+                }
+                if (requiredFound === required && ignored === 0) {
+                    let x = { ID: id, team: prevCombination };
+                    // temp.push(x);
+                    if (best === -1) {
+                        best = { ID: id, team: prevCombination, score: memoizedGroupScore(x) };
+                    }
+                    else {
+                        let cur = memoizedGroupScore(x);
+
+                        //Max damage
+                        if (damageMode === 1) {
+                            if (cur.damage > best.score.damage) {
+                                best = { ID: id, team: prevCombination, score: cur };
+                            }
+                        }
+                        else {
+                            if (cur.token === best.score.token) {
+                                // if (cur.other.tokenRewardCount === 4) {
+                                if (cur.other.tokenRewardCount > 0) {
+                                    if (cur.damage < best.score.damage) {
+                                        best = { ID: id, team: prevCombination, score: cur };
+                                    }
+                                }
+                                else {
+                                    if (cur.damage > best.score.damage) {
+                                        best = { ID: id, team: prevCombination, score: cur };
+                                    }
+                                }
+
+                            }
+                            else if (cur.token > best.score.token) {
+                                best = { ID: id, team: prevCombination, score: cur };
+                            }
+                        }
+                    }
+                }
+                else {
+                    let temper = 3;
+                }
+            }
+
+            if (prevCombination.length === k) {
+                return;
+            }
+            for (let i = start; i < array.length; i++) {
+                f(i + 1, [...prevCombination, array[i]]);
+            }
+        };
+        f(0, []);
+        best.team.sort((a, b) => {
+            if (a.Type === b.Type) {
+                return a.ID - b.ID;
+            }
+            return a.Type - b.Type;
+        })
+        return best;
+    }
+
+    let time3 = new Date();
+    let time4 = new Date();
+
+    let bestGroups = [];
+    for (let g = 0; g < numGroups; g++) {
+        let combinations = -1;
+
+        let newPetsCollection = JSON.parse(JSON.stringify(petsCollection));
+        let numTokens = 0;
+        let avgTokenPetDmg = 0;
+        let tokenPets = [];
+        let maxDmgPet;
+        newPetsCollection.forEach((pet) => {
+            if (!maxDmgPet) maxDmgPet = pet;
+            else if (calculatePetBaseDamage(pet, defaultRank) > calculatePetBaseDamage(maxDmgPet, defaultRank)) {
+                maxDmgPet = pet;
+            }
+            pet.BonusList.forEach((bonus) => {
+                //token bonus
+                if (bonus.ID === 1016) {
+                    tokenPets.push(pet);
+                    avgTokenPetDmg += calculatePetBaseDamage(pet, defaultRank);
+                    numTokens++;
+                }
+            })
+        });
+        avgTokenPetDmg /= numTokens;
+
+        //Create a trash team first
+        if (numTokens >= 4) {
+            damageMode = 2;//Set damage mode to min
+            combinations = getCombinationsInner(newPetsCollection, Math.min(k, newPetsCollection.length), { pets: tokenPets, min: 4 });
+            damageMode = 1;//Set damage back to max
+        }
+        //Only 1 token pet left,
+        else if (numTokens === 1) {
+            //If it's the last team, slot it in forcefully
+            if (g === numGroups - 1) {
+                combinations = getCombinationsInner(newPetsCollection, Math.min(k, newPetsCollection.length), { pets: tokenPets, min: tokenPets.length });
+            }
+            //
+            else {
+                combinations = getCombinationsInner(newPetsCollection, Math.min(k, newPetsCollection.length));
+            }
+        }
+        else if (numTokens > 1) {
+
+            let percent = other.tokenDamageBias / 100;
+            let cutOff = percent * calculatePetBaseDamage(maxDmgPet, defaultRank); //50% of highest available pet's base damage          
+
+
+            //Maximise this team, this turn
+            if (avgTokenPetDmg > cutOff) {
+                //Maximise this team
+                combinations = getCombinationsInner(newPetsCollection, Math.min(k, newPetsCollection.length), { pets: tokenPets, min: tokenPets.length });
+            }
+            //Minimise this team, at the end
+            else if (g === numGroups - 1) {
+
+                combinations = getCombinationsInner(newPetsCollection, Math.min(k, newPetsCollection.length), { pets: tokenPets, min: tokenPets.length });
+            }
+            else {
+                combinations = getCombinationsInner(
+                    newPetsCollection,
+                    Math.min(k, newPetsCollection.length),
+                    {
+                        pets: [],
+                        min: 0,
+                        ignoredPets: tokenPets
+                    });
+            }
+        }
+        //no token pets
+        else {
+            combinations = getCombinationsInner(newPetsCollection, Math.min(k, newPetsCollection.length));
+        }
+
+
+        if (combinations === -1) {
+            break;
+        }
+        else {
+            let temp = memoizedGroupScore(combinations);
+            bestGroups.push(combinations.team);
+            petsCollection = petsCollection.filter(
+                (pet) => {
+
+                    let res = true;
+                    for (let i = 0; i < combinations.team.length; i++) {
+                        if (combinations.team[i].ID === pet.ID) {
+                            res = false;
+                            break;
+                        }
+                    }
+                    return res;
+                }
+            );
+        }
+    }
+    time4 = new Date();
+    console.log(`time to get best combo: ${(time4 - time3) / 1000} seconds`)
+    bestGroups.sort()
+    return bestGroups;
+}
+
+
+export const findBestGroups = (petsCollection, defaultRank, groupRankCritera, numGroups, other) => {
 
     switch (groupRankCritera) {
         case 1: //damage focus
-            return calcBestDamageGroup(petsCollection, defaultRank, numGroups);
+            return calcBestDamageGroup(petsCollection, defaultRank, numGroups, other);
         case 2: // token focus
-            return calcBestTokenGroup(petsCollection, defaultRank, numGroups);
+            return calcBestTokenGroup(petsCollection, defaultRank, numGroups, other);
         case 3:
-            return calcBestDamageGroup(petsCollection, defaultRank, numGroups);
+            return calcBestDamageGroup(petsCollection, defaultRank, numGroups, other);
     }
 };
 
@@ -608,6 +854,8 @@ function App() {
     const [groupRankCritera, setGroupRankCriteria] = useState(1);//1 = overall damage + modifiers, 2 = token/hr + (damage and modifiers), 3 = advanced/custom
     const [comboSelector, setComboSelector] = useState(1);
     const [numTeams, setNumTeams] = useState(-1);
+    const [tokenDamageBias, setTokenDamageBias] = useState(83);
+
 
     const handleItemSelected = (items) => {
         setSelectedItems(items);
@@ -672,6 +920,13 @@ function App() {
                             setRefreshGroups(true);
                         }
                     }
+                    tokenDamageBias={tokenDamageBias}
+                    setTokenDamageBias={
+                        (val) => {
+                            setTokenDamageBias(val);
+                            setRefreshGroups(true);
+                        }
+                    }
                 />;
             case 0:
                 return <FileUpload onData={handleData} />;
@@ -730,7 +985,7 @@ function App() {
         if (groups && !recalculate) {
             setGroups(groups);
         } else {
-            groups = findBestGroups(localPets, defaultRank, groupRankCritera, numTeams === -1 ? data.ExpeditionLimit : numTeams);
+            groups = findBestGroups(localPets, defaultRank, groupRankCritera, numTeams === -1 ? data.ExpeditionLimit : numTeams, { tokenDamageBias: tokenDamageBias });
             setGroupCache({ ...groupCache, [keyString]: groups })
             setGroups(groups);
         }

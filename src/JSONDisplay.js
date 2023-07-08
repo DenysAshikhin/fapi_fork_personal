@@ -51,7 +51,9 @@ const JSONDisplay = ({ data,
     groupRankCritera,
     setGroupRankCriteria,
     numTeams,
-    setNumTeams
+    setNumTeams,
+    tokenDamageBias,
+    setTokenDamageBias
 }) => {
 
     const [tokenSelections, setTokenSelections] = useState({ 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 });
@@ -302,6 +304,47 @@ const JSONDisplay = ({ data,
                     // onKeyDown={(e)=>{}}"javascript: return ['Backspace','Delete','ArrowLeft','ArrowRight'].includes(event.code) ? true : !isNaN(Number(event.key)) && event.code!=='Space'"
                     />
                 </div>
+
+
+                {/* Damage Bias */}
+                {groupRankCritera !== 1 && (<div
+                    style={{
+                        display: 'flex'
+                    }}
+                >
+                    <div
+                        style={{
+                            marginRight: '12px'
+                        }}>
+                        Token Team Damage Bias:
+                    </div>
+                    <input id='prepFormInput'
+                        type='number'
+                        className='prepNumber'
+                        // value={props.prepField.numeral}
+                        onChange={
+                            (e) => {
+                                try {
+                                    let x = Number(e.target.value);
+                                    x = Math.floor(x);
+                                    if (x < 1 || x > 100) {
+                                        return;
+                                    }
+                                    setTokenDamageBias(x);
+                                }
+                                catch (err) {
+                                    console.log(err);
+                                }
+                                // console.log(`pressed: ${e.target.value}`)
+
+                            }}
+                        placeholder={tokenDamageBias + ''}
+                        min="1"
+                        max="100"
+                    // onKeyDown={(e)=>{}}"javascript: return ['Backspace','Delete','ArrowLeft','ArrowRight'].includes(event.code) ? true : !isNaN(Number(event.key)) && event.code!=='Space'"
+                    />
+                </div>)}
+
             </div>
             <div className="grid-right">
                 <Typography variant={"h5"}>Highlighted: {'>'}0 rank pets (clickable)</Typography>
