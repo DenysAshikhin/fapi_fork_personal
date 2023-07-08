@@ -280,6 +280,113 @@ const calcBestDamageGroupOLD = (petsCollection, defaultRank, numGroups) => {
     return bestGroups;
 }
 
+const getBestDamagePets = (petsCollection, defaultRank, other) => {
+    let finalCollection = {};
+    let bestDamagePets = JSON.parse(JSON.stringify(petsCollection));
+    let dmgOnlyPets = [];
+    let requiredPets = {};
+    if (other)
+        if (other.requiredPets) {
+            for (let i = 0; i < other.requiredPets.length; i++) {
+                requiredPets[other.requiredPets[i].ID] = other.requiredPets[i];
+            }
+        }
+    for (let i = 0; i < bestDamagePets.length; i++) {
+
+        let cur = bestDamagePets[i];
+        let added = false;
+        for (let j = 0; j < cur.BonusList.length; j++) {
+            let bonus = cur.BonusList[j];
+
+            //Add any required pets to the list
+            if (cur.ID in requiredPets) {
+                finalCollection[cur.ID] = cur;
+                added = true;
+            }
+            //Dng dmg bonus
+            else if (bonus.ID === 1013) {
+                if (!finalCollection[cur.ID]) {
+                    finalCollection[cur.ID] = cur;
+                    added = true;
+                }
+            }
+            //Dng time bonus
+            if (bonus.ID === 1012) {
+                if (!finalCollection[cur.ID]) {
+                    finalCollection[cur.ID] = cur;
+                    added = true;
+                }
+            }
+        }
+        if (!added) {
+            dmgOnlyPets.push(cur);
+        }
+    }
+
+    dmgOnlyPets.sort((a, b) => calculatePetBaseDamage(b, defaultRank) - calculatePetBaseDamage(a, defaultRank));
+
+
+    let airTotal = 0;
+    let groundTotal = 0;
+    dmgOnlyPets.map((curr) => {
+        if (curr.Type === 1) groundTotal++;
+        if (curr.Type === 2) airTotal++;
+    })
+
+    if (groundTotal < 2) {
+        let ground = [];
+        groundTotal = 0;
+        dmgOnlyPets.map((cur) => {
+            if (cur.Type === 1) {
+                ground.push(cur);
+                finalCollection[cur.ID] = cur;
+                dmgOnlyPets = dmgOnlyPets.filter((current) => {
+                    return current.ID !== cur.ID
+                })
+            }
+        });
+    }
+    if (airTotal < 2) {
+        let air = [];
+        airTotal = 0;
+        dmgOnlyPets.map((cur) => {
+            if (cur.Type === 2) {
+                air.push(cur);
+                finalCollection[cur.ID] = cur;
+                dmgOnlyPets = dmgOnlyPets.filter((current) => {
+                    return current.ID !== cur.ID
+                })
+            }
+        });
+    }
+
+    let ground = 0;//type 1
+    let air = 0; //type 2
+    let counter = 0;
+    for (let i = 0; i < dmgOnlyPets.length; i++) {
+        let cur = dmgOnlyPets[i];
+
+        if (ground < 2 && cur.Type === 1 || airTotal <= 0) {
+            finalCollection[cur.ID] = cur;
+            ground++;
+            counter++;
+            groundTotal--;
+        }
+
+        else if (air < 2 && cur.Type === 2 || groundTotal <= 0) {
+            finalCollection[cur.ID] = cur;
+            air++;
+            counter++
+            airTotal--;
+        }
+        if (counter > 3) break;
+    }
+
+    let finalPetsCollection = Object.values(finalCollection);
+    finalPetsCollection.sort((a, b) => b.ID - a.ID);
+    return finalPetsCollection;
+}
+
 const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, calcLowest) => {
     const k = 4; // Size of each group
     numGroups = numGroups ? numGroups : 6;
@@ -355,100 +462,8 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, calcLowest)
     let bestGroups = [];
     for (let g = 0; g < numGroups; g++) {
 
-        let finalCollection = {};
-        let bestDamagePets = JSON.parse(JSON.stringify(petsCollection));
-        let dmgOnlyPets = [];
-        for (let i = 0; i < bestDamagePets.length; i++) {
 
-            let cur = bestDamagePets[i];
-            let added = false;
-            for (let j = 0; j < cur.BonusList.length; j++) {
-                let bonus = cur.BonusList[j];
-
-                //Dng dmg bonus
-                if (bonus.ID === 1013) {
-                    if (!finalCollection[cur.ID]) {
-                        finalCollection[cur.ID] = cur;
-                        added = true;
-                    }
-                }
-                //Dng time bonus
-                if (bonus.ID === 1012) {
-                    if (!finalCollection[cur.ID]) {
-                        finalCollection[cur.ID] = cur;
-                        added = true;
-                    }
-                }
-            }
-            if (!added) {
-                dmgOnlyPets.push(cur);
-            }
-        }
-
-        dmgOnlyPets.sort((a, b) => calculatePetBaseDamage(b, defaultRank) - calculatePetBaseDamage(a, defaultRank));
-
-
-        let airTotal = 0;
-        let groundTotal = 0;
-        dmgOnlyPets.map((curr) => {
-            if (curr.Type === 1) groundTotal++;
-            if (curr.Type === 2) airTotal++;
-        })
-
-
-        if (groundTotal < 2) {
-            let ground = [];
-            groundTotal = 0;
-            dmgOnlyPets.map((cur) => {
-                if (cur.Type === 1) {
-                    ground.push(cur);
-                    finalCollection[cur.ID] = cur;
-                    dmgOnlyPets = dmgOnlyPets.filter((current) => {
-                        return current.ID !== cur.ID
-                    })
-                }
-            });
-        }
-        if (airTotal < 2) {
-            let air = [];
-            airTotal = 0;
-            dmgOnlyPets.map((cur) => {
-                if (cur.Type === 2) {
-                    air.push(cur);
-                    finalCollection[cur.ID] = cur;
-                    dmgOnlyPets = dmgOnlyPets.filter((current) => {
-                        return current.ID !== cur.ID
-                    })
-                }
-            });
-        }
-
-        let ground = 0;//type 1
-        let air = 0; //type 2
-        let counter = 0;
-        for (let i = 0; i < dmgOnlyPets.length; i++) {
-            let cur = dmgOnlyPets[i];
-
-            if (ground < 2 && cur.Type === 1 || airTotal <= 0) {
-                finalCollection[cur.ID] = cur;
-                ground++;
-                counter++;
-                groundTotal--;
-            }
-
-            else if (air < 2 && cur.Type === 2 || groundTotal <= 0) {
-                finalCollection[cur.ID] = cur;
-                air++;
-                counter++
-                airTotal--;
-            }
-            if (counter > 3) break;
-        }
-
-        let finalPetsCollection = Object.values(finalCollection);
-        finalPetsCollection.sort((a, b) => b.ID - a.ID);
-
-
+        let finalPetsCollection = getBestDamagePets(petsCollection, defaultRank);
 
         time1 = new Date();
         const combinations = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length));
@@ -634,8 +649,8 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
             let ignoredPets = [];
 
             if (requiredPetsObj) {
-                required = requiredPetsObj.min;
-                requiredPets = requiredPetsObj.pets;
+                required = requiredPetsObj.min ? requiredPetsObj.min : 0;
+                requiredPets = requiredPetsObj.pets ? requiredPetsObj.pets : [];
                 ignoredPets = requiredPetsObj.ignoredPets ? requiredPetsObj.ignoredPets : [];
             }
 
@@ -710,12 +725,14 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
             }
         };
         f(0, []);
+
         best.team.sort((a, b) => {
             if (a.Type === b.Type) {
                 return a.ID - b.ID;
             }
             return a.Type - b.Type;
         })
+
         return best;
     }
 
@@ -735,18 +752,7 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
         let tknAir = 0;
         let tknGnd = 0;
 
-        newPetsCollection = newPetsCollection.sort((a, b) => calculatePetBaseDamage(b, defaultRank) - calculatePetBaseDamage(a, defaultRank));
-        for (let i = 0; i < 3; i++) {
-            avgdMaxDmg += calculatePetBaseDamage(newPetsCollection[i], defaultRank);
-        }
-        avgdMaxDmg /= 3;
-
-
         newPetsCollection.forEach((pet) => {
-            if (!maxDmgPet) maxDmgPet = pet;
-            else if (calculatePetBaseDamage(pet, defaultRank) > calculatePetBaseDamage(maxDmgPet, defaultRank)) {
-                maxDmgPet = pet;
-            }
             pet.BonusList.forEach((bonus) => {
                 //token bonus
                 if (bonus.ID === 1016) {
@@ -763,7 +769,17 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
             })
         });
         avgTokenPetDmg /= numTokens;
-        // avgdMaxDmg = calculatePetBaseDamage(maxDmgPet, defaultRank);
+
+        newPetsCollection = getBestDamagePets(newPetsCollection, defaultRank, { requiredPets: tokenPets });
+
+        newPetsCollection = newPetsCollection.sort((a, b) => calculatePetBaseDamage(b, defaultRank) - calculatePetBaseDamage(a, defaultRank));
+        for (let i = 0; i < 2; i++) {
+            avgdMaxDmg += calculatePetBaseDamage(newPetsCollection[i], defaultRank);
+        }
+        avgdMaxDmg /= 2;
+
+
+
 
         //Create a trash team first
         if (numTokens >= 4 && tknAir >= 2 && tknGnd >= 2) {

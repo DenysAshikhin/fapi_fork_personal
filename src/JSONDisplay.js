@@ -244,9 +244,19 @@ const JSONDisplay = ({ data,
                         {`Golden Clover Level: ${data.SoulGoldenClover}`}
                     </div>
                     <div style={{ display: 'flex', }}>
-                        <div style={{ marginRight: '12px' }}>
+
+                    <MouseOverPopover tooltip={
+                            <div>
+                               Expedition reward from active pets special combo (0, 10%, 20%)
+                            </div>
+                        }>
+                             <div style={{ marginRight: '12px' }}>
                             Expedition Reward Combo
                         </div>
+                        </MouseOverPopover>
+                      
+
+
                         <select
                             style={{ maxWidth: '144px' }}
                             disabled={refreshGroups}
@@ -307,43 +317,63 @@ const JSONDisplay = ({ data,
 
 
                 {/* Damage Bias */}
-                {groupRankCritera !== 1 && (<div
-                    style={{
-                        display: 'flex'
-                    }}
-                >
+                {groupRankCritera !== 1 && (
+
+
                     <div
                         style={{
-                            marginRight: '12px'
-                        }}>
-                        Token Team Damage Bias:
-                    </div>
-                    <input id='prepFormInput'
-                        type='number'
-                        className='prepNumber'
-                        // value={props.prepField.numeral}
-                        onChange={
-                            (e) => {
-                                try {
-                                    let x = Number(e.target.value);
-                                    x = Math.floor(x);
-                                    if (x < 1 || x > 100) {
-                                        return;
-                                    }
-                                    setTokenDamageBias(x);
-                                }
-                                catch (err) {
-                                    console.log(err);
-                                }
-                                // console.log(`pressed: ${e.target.value}`)
+                            display: 'flex'
+                        }}
+                    >
+                        <MouseOverPopover tooltip={
+                            <div>
+                                <div>
+                                    Importance of token teams' damage priority
+                                </div>
+                                <div>
+                                    Higher value means lower generated damage
+                                </div>
+                            </div>
+                        }>
+                            <div
+                                style={{
+                                    marginRight: '12px'
+                                }}>
+                                Token Team Damage Bias:
+                            </div>
+                        </MouseOverPopover>
 
-                            }}
-                        placeholder={tokenDamageBias + ''}
-                        min="1"
-                        max="100"
-                    // onKeyDown={(e)=>{}}"javascript: return ['Backspace','Delete','ArrowLeft','ArrowRight'].includes(event.code) ? true : !isNaN(Number(event.key)) && event.code!=='Space'"
-                    />
-                </div>)}
+                        <input id='prepFormInput'
+                            type='number'
+                            className='prepNumber'
+                            // value={props.prepField.numeral}
+                            onChange={
+                                (e) => {
+                                    try {
+                                        let x = Number(e.target.value);
+                                        x = Math.floor(x);
+                                        if (x < 1 || x > 100) {
+                                            return;
+                                        }
+                                        setTokenDamageBias(x);
+                                    }
+                                    catch (err) {
+                                        console.log(err);
+                                    }
+                                    // console.log(`pressed: ${e.target.value}`)
+
+                                }}
+                            placeholder={tokenDamageBias + ''}
+                            min="1"
+                            max="100"
+                            step={5}
+                        // onKeyDown={(e)=>{}}"javascript: return ['Backspace','Delete','ArrowLeft','ArrowRight'].includes(event.code) ? true : !isNaN(Number(event.key)) && event.code!=='Space'"
+                        />
+                    </div>
+
+
+
+                )}
 
             </div>
             <div className="grid-right">
