@@ -192,7 +192,7 @@ function getCombinations(array, k) {
     return temp;
 }
 
-const calcBestDamageGroup = (petsCollection, defaultRank, numGroups) => {
+const calcBestDamageGroupOLD = (petsCollection, defaultRank, numGroups) => {
     const k = 4; // Size of each group
     numGroups = numGroups ? numGroups : 6;
     const memo = {};
@@ -273,6 +273,210 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups) => {
             bestGroups.push(combinations.team);
             petsCollection = petsCollection.filter((pet) => !combinations.team.includes(pet));
 
+        }
+    }
+    time4 = new Date();
+    console.log(`time to get best combo: ${(time4 - time3) / 1000} seconds`)
+    return bestGroups;
+}
+
+const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, calcLowest) => {
+    const k = 4; // Size of each group
+    numGroups = numGroups ? numGroups : 6;
+    const memo = {};
+
+
+
+
+    const memoizedGroupScore = (group) => {
+        const key = group.ID;
+        if (!memo[key] || memo[key]) {
+            let res = calculateGroupScore(group.team, defaultRank);
+            let sum = res.tokenMult;
+            memo[key] = { token: sum, damage: res.groupScore, other: res };
+        }
+        return memo[key];
+    };
+
+    const getCombinationsInner = (array, k) => {
+
+        // let temp = [];
+        let best = -1;
+
+        const f = (start, prevCombination) => {
+
+            if (prevCombination.length > 0) {
+                let id = '';
+                for (let i = 0; i < prevCombination.length; i++) {
+                    id = id + prevCombination[i].ID;
+                    if (i + 1 !== prevCombination.length) {
+                        id = id + ','
+                    }
+                }
+                let x = { ID: id, team: prevCombination };
+                // temp.push(x);
+                if (best === -1) {
+                    best = { ID: id, team: prevCombination, score: memoizedGroupScore(x) };
+                }
+                else {
+                    let cur = memoizedGroupScore(x);
+
+                    if (cur.damage === best.score.damage) {
+                        if (cur.token > best.score.token) {
+                            best = { ID: id, team: prevCombination, score: cur };
+                        }
+                    }
+                    else if (cur.damage > best.score.damage) {
+                        best = { ID: id, team: prevCombination, score: cur };
+                    }
+                }
+            }
+
+            if (prevCombination.length === k) {
+                return;
+            }
+            for (let i = start; i < array.length; i++) {
+                f(i + 1, [...prevCombination, array[i]]);
+            }
+        };
+        f(0, []);
+
+        best.team.sort((a, b) => {
+            if (a.Type === b.Type) {
+                return a.ID - b.ID;
+            }
+            return a.Type - b.Type;
+        })
+        return best;
+    }
+
+    let time1 = new Date();
+    let time2 = new Date();
+    let time3 = new Date();
+    let time4 = new Date();
+
+    let bestGroups = [];
+    for (let g = 0; g < numGroups; g++) {
+
+        let finalCollection = {};
+        let bestDamagePets = JSON.parse(JSON.stringify(petsCollection));
+        let dmgOnlyPets = [];
+        for (let i = 0; i < bestDamagePets.length; i++) {
+
+            let cur = bestDamagePets[i];
+            let added = false;
+            for (let j = 0; j < cur.BonusList.length; j++) {
+                let bonus = cur.BonusList[j];
+
+                //Dng dmg bonus
+                if (bonus.ID === 1013) {
+                    if (!finalCollection[cur.ID]) {
+                        finalCollection[cur.ID] = cur;
+                        added = true;
+                    }
+                }
+                //Dng time bonus
+                if (bonus.ID === 1012) {
+                    if (!finalCollection[cur.ID]) {
+                        finalCollection[cur.ID] = cur;
+                        added = true;
+                    }
+                }
+            }
+            if (!added) {
+                dmgOnlyPets.push(cur);
+            }
+        }
+
+        dmgOnlyPets.sort((a, b) => calculatePetBaseDamage(b, defaultRank) - calculatePetBaseDamage(a, defaultRank));
+
+
+        let airTotal = 0;
+        let groundTotal = 0;
+        dmgOnlyPets.map((curr) => {
+            if (curr.Type === 1) groundTotal++;
+            if (curr.Type === 2) airTotal++;
+        })
+
+
+        if (groundTotal < 2) {
+            let ground = [];
+            groundTotal = 0;
+            dmgOnlyPets.map((cur) => {
+                if (cur.Type === 1) {
+                    ground.push(cur);
+                    finalCollection[cur.ID] = cur;
+                    dmgOnlyPets = dmgOnlyPets.filter((current) => {
+                        return current.ID !== cur.ID
+                    })
+                }
+            });
+        }
+        if (airTotal < 2) {
+            let air = [];
+            airTotal = 0;
+            dmgOnlyPets.map((cur) => {
+                if (cur.Type === 2) {
+                    air.push(cur);
+                    finalCollection[cur.ID] = cur;
+                    dmgOnlyPets = dmgOnlyPets.filter((current) => {
+                        return current.ID !== cur.ID
+                    })
+                }
+            });
+        }
+
+        let ground = 0;//type 1
+        let air = 0; //type 2
+        let counter = 0;
+        for (let i = 0; i < dmgOnlyPets.length; i++) {
+            let cur = dmgOnlyPets[i];
+
+            if (ground < 2 && cur.Type === 1 || airTotal <= 0) {
+                finalCollection[cur.ID] = cur;
+                ground++;
+                counter++;
+                groundTotal--;
+            }
+
+            else if (air < 2 && cur.Type === 2 || groundTotal <= 0) {
+                finalCollection[cur.ID] = cur;
+                air++;
+                counter++
+                airTotal--;
+            }
+            if (counter > 3) break;
+        }
+
+        let finalPetsCollection = Object.values(finalCollection);
+        finalPetsCollection.sort((a, b) => b.ID - a.ID);
+
+
+
+        time1 = new Date();
+        const combinations = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length));
+        time2 = new Date();
+        console.log(`time to get combinations ${combinations.length}: ${(time2 - time1) / 1000} seconds`)
+
+
+        if (combinations === -1) {
+            break;
+        }
+        else {
+            bestGroups.push(combinations.team);
+            petsCollection = petsCollection.filter((pet) => {
+
+                let res = true;
+                for (let i = 0; i < combinations.team.length; i++) {
+                    if (combinations.team[i].ID === pet.ID) {
+                        res = false;
+                        break;
+                    }
+                }
+
+                return res;
+            }
+            );
         }
     }
     time4 = new Date();
