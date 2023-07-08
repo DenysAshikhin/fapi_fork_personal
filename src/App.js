@@ -731,6 +731,14 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
         let avgTokenPetDmg = 0;
         let tokenPets = [];
         let maxDmgPet;
+        let avgdMaxDmg = 0;
+        let tknAir = 0;
+        let tknGnd = 0;
+
+        newPetsCollection = newPetsCollection.sort((a, b) => calculatePetBaseDamage(b, defaultRank) - calculatePetBaseDamage(a, defaultRank));
+
+
+
         newPetsCollection.forEach((pet) => {
             if (!maxDmgPet) maxDmgPet = pet;
             else if (calculatePetBaseDamage(pet, defaultRank) > calculatePetBaseDamage(maxDmgPet, defaultRank)) {
@@ -742,16 +750,24 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
                     tokenPets.push(pet);
                     avgTokenPetDmg += calculatePetBaseDamage(pet, defaultRank);
                     numTokens++;
+                    if (pet.Type === 1) {
+                        tknGnd++;
+                    }
+                    else if (pet.Type === 2) {
+                        tknAir++;
+                    }
                 }
             })
         });
         avgTokenPetDmg /= numTokens;
 
         //Create a trash team first
-        if (numTokens >= 4) {
+        if (numTokens >= 4 && tknAir >= 2 && tknGnd >= 2) {
+            //Only force 4 if there are enough for a full synergy
             damageMode = 2;//Set damage mode to min
             combinations = getCombinationsInner(newPetsCollection, Math.min(k, newPetsCollection.length), { pets: tokenPets, min: 4 });
             damageMode = 1;//Set damage back to max
+
         }
         //Only 1 token pet left,
         else if (numTokens === 1) {
@@ -769,16 +785,23 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
             let percent = other.tokenDamageBias / 100;
             let cutOff = percent * calculatePetBaseDamage(maxDmgPet, defaultRank); //50% of highest available pet's base damage          
 
+            let numTokenGroups = Math.ceil(numTokens / 4);
 
             //Maximise this team, this turn
             if (avgTokenPetDmg > cutOff) {
                 //Maximise this team
-                combinations = getCombinationsInner(newPetsCollection, Math.min(k, newPetsCollection.length), { pets: tokenPets, min: tokenPets.length });
+                combinations = getCombinationsInner(newPetsCollection, Math.min(
+                    k,
+                    newPetsCollection.length),
+                    { pets: tokenPets, min: tokenPets.length > 2 ? 3 : 2 });
             }
             //Minimise this team, at the end
-            else if (g === numGroups - 1) {
+            else if (g === numGroups - numTokenGroups) {
 
-                combinations = getCombinationsInner(newPetsCollection, Math.min(k, newPetsCollection.length), { pets: tokenPets, min: tokenPets.length });
+                combinations = getCombinationsInner(
+                    newPetsCollection,
+                    Math.min(k, newPetsCollection.length),
+                    { pets: tokenPets, min: tokenPets.length > 2 ? 3 : 2 });
             }
             else {
                 combinations = getCombinationsInner(
