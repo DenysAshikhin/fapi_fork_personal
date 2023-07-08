@@ -296,7 +296,7 @@ const JSONDisplay = ({ data,
                                 // console.log(`pressed: ${e.target.value}`)
 
                             }}
-                        placeholder='6'
+                        placeholder={numTeams + ''}
                         min="1"
                         max="6"
                     // onKeyDown={(e)=>{}}"javascript: return ['Backspace','Delete','ArrowLeft','ArrowRight'].includes(event.code) ? true : !isNaN(Number(event.key)) && event.code!=='Space'"

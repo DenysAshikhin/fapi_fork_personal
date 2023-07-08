@@ -230,12 +230,6 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups) => {
                 else {
                     let cur = memoizedGroupScore(x);
 
-
-                    // if (cur.damage > best.score.damage) {
-                    //     best = { ID: id, team: prevCombination, score: cur };
-                    // }
-
-
                     if (cur.damage === best.score.damage) {
                         if (cur.token > best.score.token) {
                             best = { ID: id, team: prevCombination, score: cur };
@@ -329,7 +323,8 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups) => {
 
 
                     if (cur.token === best.score.token) {
-                        if (cur.other.tokenRewardCount === 4) {
+                        // if (cur.other.tokenRewardCount === 4) {
+                        if (cur.other.tokenRewardCount > 0) {
                             if (cur.damage < best.score.damage) {
                                 best = { ID: id, team: prevCombination, score: cur };
                             }
@@ -408,7 +403,7 @@ function App() {
     const [refreshGroups, setRefreshGroups] = useState(false);
     const [groupRankCritera, setGroupRankCriteria] = useState(1);//1 = overall damage + modifiers, 2 = token/hr + (damage and modifiers), 3 = advanced/custom
     const [comboSelector, setComboSelector] = useState(1);
-    const [numTeams, setNumTeams] = useState(6);
+    const [numTeams, setNumTeams] = useState(-1);
 
     const handleItemSelected = (items) => {
         setSelectedItems(items);
@@ -495,6 +490,8 @@ function App() {
 
         setComboSelector(specialPetCombo);
 
+        setNumTeams(uploadedData.ExpeditionLimit);
+
 
         setGroupCache({});
         console.log(uploadedData)
@@ -529,7 +526,7 @@ function App() {
         if (groups && !recalculate) {
             setGroups(groups);
         } else {
-            groups = findBestGroups(localPets, defaultRank, groupRankCritera, numTeams);
+            groups = findBestGroups(localPets, defaultRank, groupRankCritera, numTeams === -1 ? data.ExpeditionLimit : numTeams);
             setGroupCache({ ...groupCache, [keyString]: groups })
             setGroups(groups);
         }
