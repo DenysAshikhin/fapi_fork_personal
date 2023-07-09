@@ -811,7 +811,7 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
         }
         else if (numTokens > 1) {
 
-            let percent = other.tokenDamageBias / 100;
+            let percent = (100-other.tokenDamageBias) / 100;
             let cutOff = percent * avgdMaxDmg.groupScore; //% of highest available pet's base damage          
 
             cutOff /= 5.75; // used for comparing with full team score
@@ -930,7 +930,7 @@ function App() {
     const [groupRankCritera, setGroupRankCriteria] = useState(1);//1 = overall damage + modifiers, 2 = token/hr + (damage and modifiers), 3 = advanced/custom
     const [comboSelector, setComboSelector] = useState(1);
     const [numTeams, setNumTeams] = useState(-1);
-    const [tokenDamageBias, setTokenDamageBias] = useState(85);
+    const [tokenDamageBias, setTokenDamageBias] = useState(15);
 
 
     const handleItemSelected = (items) => {

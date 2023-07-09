@@ -350,10 +350,10 @@ const JSONDisplay = ({ data,
                                     Importance of token teams' damage priority
                                 </div>
                                 <div>
-                                    Higher value means lower generated damage
+                                    Higher value means higher generated damage (by giving higher damage pets to token teams)
                                 </div>
                                 <div>
-                                    Recommended range: 70-100
+                                    Recommended range: 0-30
                                 </div>
                             </div>
                         }>
@@ -387,7 +387,7 @@ const JSONDisplay = ({ data,
 
                                 }}
                             placeholder={tokenDamageBias + ''}
-                            min="1"
+                            min="0"
                             max="100"
                             step={5}
                         // onKeyDown={(e)=>{}}"javascript: return ['Backspace','Delete','ArrowLeft','ArrowRight'].includes(event.code) ? true : !isNaN(Number(event.key)) && event.code!=='Space'"
