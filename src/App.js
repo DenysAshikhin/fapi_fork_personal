@@ -839,11 +839,21 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
                 damageMode = 1;
             }
             else if (avgTokenPetDmg > cutOff) {
+
+                let remainingGroups = numGroups - g;
+                //There are not enough groups for all token pets
+                if ((remainingGroups - numTokenGroups ) >= 0) {
+                    damageMode = 1;
+                }
+                else
+                    damageMode = 2;
+
                 //Maximise this team
                 combinations = getCombinationsInner(newPetsCollection, Math.min(
                     k,
                     newPetsCollection.length),
                     { pets: tokenPets, min: minPets });
+                damageMode = 1;
             }
             //Minimise this team, at the end
             else {
