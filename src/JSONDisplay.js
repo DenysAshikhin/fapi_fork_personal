@@ -129,110 +129,129 @@ const JSONDisplay = ({ data,
                             </span>
                         </div>
                     );
-                    accum.push(
-                        <div
-                            className="grid-row"
-                            key={(1 + index) * 9001}
-                            style={{
-                                // height: '1px'
-                                marginTop: '12px'
-                            }}
-                        >
-                            <MouseOverPopover tooltip={groupTooltip}>
-                                <div>
-                                    {groupLabel}
-                                </div>
 
-                            </MouseOverPopover>
-                            {/* {groupRankCritera === 2 && ( */}
-                            <div style={{ display: "flex" }}>
-                                <div style={{ marginRight: '12px' }}>Best hours:</div>
-                                <select
-                                    style={{ maxWidth: '312px' }}
-                                    onChange={
-                                        (e) => {
-                                            setTokenSelections((current) => {
-                                                let temp = { ...current };
-                                                let select = Number(e.target.value)
-                                                temp[index] = select;
-                                                return temp;
-                                            })
-                                        }
-                                    }
-                                >
-                                    {tokenInfo.map((value, indexInner) => {
-                                        return <option value={indexInner} key={indexInner}>
-                                            {/* {`${value.hours} hours creating ${value.floored} (${value.totalTokens}) tokens at ${helper.roundTwoDecimal(value.effeciency * 100)}%`} */}
-                                            {`${value.hours} hours creating ${value.floored} (${helper.roundTwoDecimal(value.totalTokens)}) tokens wasting ${helper.roundTwoDecimal(value.wasted)} tokens`}
-                                        </option>
-                                    })}
-                                </select>
+                    let GroupTitle = <div
+                        className="grid-row"
+                        key={(1 + index) * 9001}
+                        style={{
+                            // height: '1px'
+                            marginTop: '12px',
+                            marginBottom: '12px'
+                        }}
+                    >
+                        <MouseOverPopover tooltip={groupTooltip}>
+                            <div>
+                                {groupLabel}
                             </div>
-                            {/* )} */}
-                        </div>
-                    )
-                    accum.push(
-                        <Grid2
-                            container
-                            spacing={1}
-                            key={index}
-                            style={{
-                                // height: '1px'
-                            }}
-                        >
-                            {!!group && group.map((petData, idx) => {
-                                const { ID } = petData;
-                                const staticPetData = petNameArray.find(staticPetDatum => staticPetDatum.petId === ID)
 
-                                return (
-                                    <Grid2 xs={3} key={idx}>
-                                        <PetItem
-                                            key={ID}
-                                            petData={staticPetData}
-                                            data={data}
-                                            isSelected={true}
-                                            onClick={() => { }}
-                                            weightMap={weightMap}
-                                            defaultRank={defaultRank}
-                                        />
-                                    </Grid2>
-                                );
-                            })}
-                        </Grid2>
-                    );
+                        </MouseOverPopover>
+                        {/* {groupRankCritera === 2 && ( */}
+                        <div style={{ display: "flex" }}>
+                            <div style={{ marginRight: '12px' }}>Best hours:</div>
+                            <select
+                                style={{ maxWidth: '312px' }}
+                                onChange={
+                                    (e) => {
+                                        setTokenSelections((current) => {
+                                            let temp = { ...current };
+                                            let select = Number(e.target.value)
+                                            temp[index] = select;
+                                            return temp;
+                                        })
+                                    }
+                                }
+                            >
+                                {tokenInfo.map((value, indexInner) => {
+                                    return <option value={indexInner} key={indexInner}>
+                                        {/* {`${value.hours} hours creating ${value.floored} (${value.totalTokens}) tokens at ${helper.roundTwoDecimal(value.effeciency * 100)}%`} */}
+                                        {`${value.hours} hours creating ${value.floored} (${helper.roundTwoDecimal(value.totalTokens)}) tokens wasting ${helper.roundTwoDecimal(value.wasted)} tokens`}
+                                    </option>
+                                })}
+                            </select>
+                        </div>
+                        {/* )} */}
+                    </div>
+                    let GroupIcons = <Grid2
+                        container
+                        spacing={1}
+                        key={index}
+                        style={{
+                            // height: '1px'
+                        }}
+                    >
+                        {!!group && group.map((petData, idx) => {
+                            const { ID } = petData;
+                            const staticPetData = petNameArray.find(staticPetDatum => staticPetDatum.petId === ID)
+
+                            return (
+                                <Grid2 xs={3} key={idx}>
+                                    <PetItem
+                                        key={ID}
+                                        petData={staticPetData}
+                                        data={data}
+                                        isSelected={true}
+                                        onClick={() => { }}
+                                        weightMap={weightMap}
+                                        defaultRank={defaultRank}
+                                    />
+                                </Grid2>
+                            );
+                        })}
+                    </Grid2>
+                    let finalRow = <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            border: groupRankCritera === 2 && groupTotal.tokenRewardCount > 0 ? '1px black solid' : 'none'
+                        }}>
+                        {GroupTitle}
+                        {GroupIcons}
+                    </div>
+                    accum.push(finalRow);
+
                     return accum;
                 }, [])}
             </div>
             <div className="grid-center"
                 style={{
                     border: '1px black solid',
-                    marginRight: '6px'
+                    marginRight: '6px',
+                    padding: '0 12px 0 12px'
                 }}>
                 <Typography variant={"h4"} >{`If you have a large number of pets, please be patient`}</Typography>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <select
-                        style={{ maxWidth: '144px' }}
-                        disabled={refreshGroups}
-                        onChange={(e) => {
-                            switch (e.target.value) {
-                                case 'damage':
-                                    setGroupRankCriteria(1);
-                                    break;
-                                case 'token':
-                                    setGroupRankCriteria(2);
-                                    break;
-                                case 'advanced':
-                                    setGroupRankCriteria(3);
-                                    break;
-                                default:
-                                    throw new Error('invalid dropdown selector');
-                            }
-                        }}
-                    >
-                        <option value="damage">Max Damage</option>
-                        <option value="token">Max Tokens {`->`} Damage</option>
-                        <option value="advanced">Advanced</option>
-                    </select>
+                    <div style={{ display: 'flex' }}>
+                        <div
+                            style={{
+                                marginRight: '12px',
+                                color: 'blue',
+                                fontWeight: 'bold'
+                            }}
+                        >Filter</div>
+                        <select
+                            style={{ maxWidth: '144px' }}
+                            disabled={refreshGroups}
+                            onChange={(e) => {
+                                switch (e.target.value) {
+                                    case 'damage':
+                                        setGroupRankCriteria(1);
+                                        break;
+                                    case 'token':
+                                        setGroupRankCriteria(2);
+                                        break;
+                                    case 'advanced':
+                                        setGroupRankCriteria(3);
+                                        break;
+                                    default:
+                                        throw new Error('invalid dropdown selector');
+                                }
+                            }}
+                        >
+                            <option value="damage">Max Damage</option>
+                            <option value="token">Max Tokens {`->`} Damage</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
+                    </div>
                     <div style={{ display: 'flex' }}>
 
                         <div>{`Ignore Pets Rank`}</div>
@@ -245,16 +264,16 @@ const JSONDisplay = ({ data,
                     </div>
                     <div style={{ display: 'flex', }}>
 
-                    <MouseOverPopover tooltip={
+                        <MouseOverPopover tooltip={
                             <div>
-                               Expedition reward from active pets special combo (0, 10%, 20%)
+                                Expedition reward from active pets special combo (0, 10%, 20%)
                             </div>
                         }>
-                             <div style={{ marginRight: '12px' }}>
-                            Expedition Reward Combo
-                        </div>
+                            <div style={{ marginRight: '12px' }}>
+                                Expedition Reward Combo
+                            </div>
                         </MouseOverPopover>
-                      
+
 
 
                         <select
@@ -340,7 +359,8 @@ const JSONDisplay = ({ data,
                         }>
                             <div
                                 style={{
-                                    marginRight: '12px'
+                                    marginRight: '12px',
+                                    color: 'red'
                                 }}>
                                 Token Team Damage Bias:
                             </div>

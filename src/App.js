@@ -445,12 +445,14 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, calcLowest)
         };
         f(0, []);
 
-        best.team.sort((a, b) => {
-            if (a.Type === b.Type) {
-                return a.ID - b.ID;
-            }
-            return a.Type - b.Type;
-        })
+        if (best.team)
+
+            best.team.sort((a, b) => {
+                if (a.Type === b.Type) {
+                    return a.ID - b.ID;
+                }
+                return a.Type - b.Type;
+            })
         return best;
     }
 
@@ -726,12 +728,13 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
         };
         f(0, []);
 
-        best.team.sort((a, b) => {
-            if (a.Type === b.Type) {
-                return a.ID - b.ID;
-            }
-            return a.Type - b.Type;
-        })
+        if (best.team)
+            best.team.sort((a, b) => {
+                if (a.Type === b.Type) {
+                    return a.ID - b.ID;
+                }
+                return a.Type - b.Type;
+            })
 
         return best;
     }
@@ -813,24 +816,36 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
 
             cutOff /= 5.75; // used for comparing with full team score
 
-            let numTokenGroups = Math.ceil(numTokens / 2);
+
+            let minPets = 2;
+            if ((tknAir > 1 && tknGnd > 0) || (tknGnd > 1 && tknAir > 0)) {
+                minPets = 3;
+            }
+            let numTokenGroups = Math.ceil(numTokens / minPets);
 
             //Maximise this team, this turn
-            if (avgTokenPetDmg > cutOff) {
-                //Maximise this team
-                combinations = getCombinationsInner(newPetsCollection, Math.min(
-                    k,
-                    newPetsCollection.length),
-                    { pets: tokenPets, min: 2 });
-            }
-            //Minimise this team, at the end
-            else if (g === numGroups - numTokenGroups) {
+            if (numTokenGroups >= (numGroups - g)) {
+                //There are not enough groups for all token pets
+                if ((numTokenGroups - (numGroups - g)) > 0) {
+                    damageMode = 1;
+                }
+                else
+                    damageMode = 2;
 
                 combinations = getCombinationsInner(
                     newPetsCollection,
                     Math.min(k, newPetsCollection.length),
-                    { pets: tokenPets, min: 2 });
+                    { pets: tokenPets, min: minPets });
+                damageMode = 1;
             }
+            else if (avgTokenPetDmg > cutOff) {
+                //Maximise this team
+                combinations = getCombinationsInner(newPetsCollection, Math.min(
+                    k,
+                    newPetsCollection.length),
+                    { pets: tokenPets, min: minPets });
+            }
+            //Minimise this team, at the end
             else {
                 combinations = getCombinationsInner(
                     newPetsCollection,
