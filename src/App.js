@@ -783,7 +783,8 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
 
 
         let bestDamageTeam = calcBestDamageGroup(newPetsCollection, defaultRank, 1)[0];
-        avgdMaxDmg = calculateGroupScore(bestDamageTeam, defaultRank)
+
+        avgdMaxDmg = bestDamageTeam ? calculateGroupScore(bestDamageTeam, defaultRank) : [];
 
 
 
@@ -811,7 +812,7 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
         }
         else if (numTokens > 1) {
 
-            let percent = (100-other.tokenDamageBias) / 100;
+            let percent = (100 - other.tokenDamageBias) / 100;
             let cutOff = percent * avgdMaxDmg.groupScore; //% of highest available pet's base damage          
 
             cutOff /= 5.75; // used for comparing with full team score
@@ -842,7 +843,7 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
 
                 let remainingGroups = numGroups - g;
                 //There are not enough groups for all token pets
-                if ((remainingGroups - numTokenGroups ) >= 0) {
+                if ((remainingGroups - numTokenGroups) >= 0) {
                     damageMode = 1;
                 }
                 else
@@ -896,7 +897,7 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
     }
     time4 = new Date();
     console.log(`time to get best combo: ${(time4 - time3) / 1000} seconds`)
-    bestGroups.sort()
+    // bestGroups.sort()
     return bestGroups;
 }
 
