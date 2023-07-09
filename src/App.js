@@ -779,6 +779,11 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
         avgdMaxDmg /= 2;
 
 
+        let bestDamageTeam = calcBestDamageGroup(newPetsCollection, defaultRank, 1)[0];
+        avgdMaxDmg = calculateGroupScore(bestDamageTeam, defaultRank)
+
+
+
 
 
         //Create a trash team first
@@ -793,7 +798,8 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
         else if (numTokens === 1) {
             //If it's the last team, slot it in forcefully
             if (g === numGroups - 1) {
-                combinations = getCombinationsInner(newPetsCollection, Math.min(k, newPetsCollection.length), { pets: tokenPets, min: tokenPets.length });
+                combinations = getCombinationsInner(newPetsCollection, Math.min(k, newPetsCollection.length),
+                    { pets: tokenPets, min: tokenPets.length });
             }
             //
             else {
@@ -803,9 +809,11 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
         else if (numTokens > 1) {
 
             let percent = other.tokenDamageBias / 100;
-            let cutOff = percent * avgdMaxDmg; //50% of highest available pet's base damage          
+            let cutOff = percent * avgdMaxDmg.groupScore; //% of highest available pet's base damage          
 
-            let numTokenGroups = Math.ceil(numTokens / 4);
+            cutOff /= 5.75; // used for comparing with full team score
+
+            let numTokenGroups = Math.ceil(numTokens / 2);
 
             //Maximise this team, this turn
             if (avgTokenPetDmg > cutOff) {
@@ -813,7 +821,7 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
                 combinations = getCombinationsInner(newPetsCollection, Math.min(
                     k,
                     newPetsCollection.length),
-                    { pets: tokenPets, min: tokenPets.length > 2 ? 3 : 2 });
+                    { pets: tokenPets, min: 2 });
             }
             //Minimise this team, at the end
             else if (g === numGroups - numTokenGroups) {
@@ -821,7 +829,7 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
                 combinations = getCombinationsInner(
                     newPetsCollection,
                     Math.min(k, newPetsCollection.length),
-                    { pets: tokenPets, min: tokenPets.length > 2 ? 3 : 2 });
+                    { pets: tokenPets, min: 2 });
             }
             else {
                 combinations = getCombinationsInner(

@@ -333,6 +333,9 @@ const JSONDisplay = ({ data,
                                 <div>
                                     Higher value means lower generated damage
                                 </div>
+                                <div>
+                                    Recommended range: 70-100
+                                </div>
                             </div>
                         }>
                             <div
