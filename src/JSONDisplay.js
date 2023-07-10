@@ -337,7 +337,7 @@ const JSONDisplay = ({ data,
                         placeholder={numTeams + ''}
                         min="1"
                         max="6"
-                    // onKeyDown={(e)=>{}}"javascript: return ['Backspace','Delete','ArrowLeft','ArrowRight'].includes(event.code) ? true : !isNaN(Number(event.key)) && event.code!=='Space'"
+
                     />
                 </div>
 
@@ -395,7 +395,7 @@ const JSONDisplay = ({ data,
                             min="0"
                             max="100"
                             step={5}
-                        // onKeyDown={(e)=>{}}"javascript: return ['Backspace','Delete','ArrowLeft','ArrowRight'].includes(event.code) ? true : !isNaN(Number(event.key)) && event.code!=='Space'"
+
                         />
                     </div>
 
@@ -566,6 +566,7 @@ const JSONDisplay = ({ data,
                                     <input
                                         type='number'
                                         className='prepNumber'
+                                        value={currentBonus.amount}
                                         onChange={
                                             (num) => {
                                                 try {
@@ -589,7 +590,7 @@ const JSONDisplay = ({ data,
                                         placeholder={1 + ''}
                                         min="1"
                                         max="4"
-                                    // onKeyDown={(e)=>{}}"javascript: return ['Backspace','Delete','ArrowLeft','ArrowRight'].includes(event.code) ? true : !isNaN(Number(event.key)) && event.code!=='Space'"
+
                                     />
                                 </div>
                                 <div
@@ -638,8 +639,10 @@ const JSONDisplay = ({ data,
                                                     let bonus = newBonuses.find((a) => a.id === e.id);
                                                     bonus.placement = choice.target.value;
 
-                                                    if (choice.target.value === 'rel')
+                                                    if (choice.target.value === 'rel') {
                                                         bonus.equation = 'max';
+                                                        bonus.amount = 4;
+                                                    }
 
                                                     return newBonuses;
                                                 })
@@ -688,7 +691,7 @@ const JSONDisplay = ({ data,
                                         placeholder={24 + ''}
                                         min="0"
                                         max="24"
-                                    // onKeyDown={(e)=>{}}"javascript: return ['Backspace','Delete','ArrowLeft','ArrowRight'].includes(event.code) ? true : !isNaN(Number(event.key)) && event.code!=='Space'"
+
                                     />
                                 </div>
                             </div>
