@@ -778,29 +778,51 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
         else {
 
 
+
+            let bestCurrTeamScore = calculateGroupScore(combinations.team, defaultRank);
+            let score = bestCurrTeamScore.baseGroupScore;
+            let mult = 0.15;
+            let cutOff = score * mult;
+
+
             if (activeBonuses.length > 0) {
+                let added = false;
                 for (let j = 0; j < activeBonuses.length; j++) {
                     let curBonus = activeBonuses[j];
                     let counterBonus = 0;
 
+                    if (curBonus.placement === 'rel') {
+                        let temp = requiredPetBonusMap[curBonus.id];
 
+                        let bonusPets = temp.pets;
 
-
-                    // combinations.team.forEach((currPet) => {
-                    //     currPet.BonusList.forEach((innerBonus) => {
-                    //         if (innerBonus.ID === curBonus.id) {
-                    //             counterBonus++;
-                    //         }
-                    //     })
-                    // })
-                    // console.log(`done counting`);
+                        bonusPets.forEach((bonusPet) => {
+                            let dmg = calculatePetBaseDamage(bonusPet);
+                            if (dmg > cutOff) {
+                                added = true;
+                                let exists = finalPetsCollection.find((a) => a.ID === bonusPet.ID);
+                                if (exists) {
+                                    let z = 0;
+                                }
+                            }
+                        })
+                    }
                 }
+
+                //At least 1 rel pet was added, recalc teams with it
+                if (added) {
+                    finalPetsCollection = getBestDamagePets(petsCollection, defaultRank, { requiredPets: requiredPetsOverall });
+                    time1 = new Date();
+                    let combinations = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length), Object.values(requiredPetBonusMap));
+                }
+
+
+
             }
 
-            let bestCurrTeamScore = calculateGroupScore(combinations.team, defaultRank);
-            let score = bestCurrTeamScore.baseGroupScore;
-            let mult = 0.1;
-            let cutOff = score * mult;
+
+
+
 
 
 
@@ -864,8 +886,6 @@ const calcBestTokenGroupOLD = (petsCollection, defaultRank, numGroups) => {
                 }
                 else {
                     let cur = memoizedGroupScore(x);
-
-
 
                     if (cur.token === best.score.token) {
                         // if (cur.other.tokenRewardCount === 4) {
