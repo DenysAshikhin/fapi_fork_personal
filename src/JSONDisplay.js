@@ -517,6 +517,7 @@ const JSONDisplay = ({ data,
                         {activeCustomBonuses.map((e) => {
 
                             let bonusName = e.label;
+                            let currentBonus = activeCustomBonuses.find((a) => a.id === e.id);
 
                             switch (e.id) {
                                 case 1016:
@@ -601,7 +602,8 @@ const JSONDisplay = ({ data,
                                 >
                                     <select
                                         style={{ maxWidth: '144px' }}
-                                        disabled={refreshGroups}
+                                        disabled={currentBonus.placement === 'rel'}
+                                        value={currentBonus.equation}
                                         onChange={
                                             (choice) => {
                                                 setActiveCustomBonuses((bonuses) => {
@@ -635,6 +637,10 @@ const JSONDisplay = ({ data,
                                                     let newBonuses = [...bonuses];
                                                     let bonus = newBonuses.find((a) => a.id === e.id);
                                                     bonus.placement = choice.target.value;
+
+                                                    if (choice.target.value === 'rel')
+                                                        bonus.equation = 'max';
+
                                                     return newBonuses;
                                                 })
                                             }
@@ -643,7 +649,7 @@ const JSONDisplay = ({ data,
                                         <option value={'top'}> Top</option>
                                         <option value={'mid'} disabled> Middle</option>
                                         <option value={'bottom'} >Bottom</option>
-                                        <option value={'rel'} disabled>Relative</option>
+                                        <option value={'rel'}>Relative</option>
 
                                     </select>
                                 </div>

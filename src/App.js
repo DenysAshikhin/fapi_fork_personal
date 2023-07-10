@@ -675,7 +675,6 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
                 requiredPetBonusMap[activeBonuses[j].id] = { bonus: activeBonuses[j], pets: [], active: true };
             }
 
-
             petsCollection.forEach((currPet) => {
                 currPet.BonusList.forEach((currBonus) => {
                     if (currBonus.ID in requiredBonuses) {
@@ -728,9 +727,7 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
                     else {
                         requiredPetBonusMap[currBonus.bonus.id].active = false;
                     }
-
                 }
-
             }
 
 
@@ -767,8 +764,9 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
         let finalPetsCollection = getBestDamagePets(petsCollection, defaultRank, { requiredPets: requiredPetsOverall });
 
 
+
         time1 = new Date();
-        const combinations = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length), Object.values(requiredPetBonusMap));
+        let combinations = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length), Object.values(requiredPetBonusMap));
         time2 = new Date();
         console.log(`time to get combinations ${combinations.length}: ${(time2 - time1) / 1000} seconds`)
 
@@ -784,16 +782,27 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
                 for (let j = 0; j < activeBonuses.length; j++) {
                     let curBonus = activeBonuses[j];
                     let counterBonus = 0;
-                    combinations.team.forEach((currPet) => {
-                        currPet.BonusList.forEach((innerBonus) => {
-                            if (innerBonus.ID === curBonus.id) {
-                                counterBonus++;
-                            }
-                        })
-                    })
-                    console.log(`done counting`);
+
+
+
+
+                    // combinations.team.forEach((currPet) => {
+                    //     currPet.BonusList.forEach((innerBonus) => {
+                    //         if (innerBonus.ID === curBonus.id) {
+                    //             counterBonus++;
+                    //         }
+                    //     })
+                    // })
+                    // console.log(`done counting`);
                 }
             }
+
+            let bestCurrTeamScore = calculateGroupScore(combinations.team, defaultRank);
+            let score = bestCurrTeamScore.baseGroupScore;
+            let mult = 0.1;
+            let cutOff = score * mult;
+
+
 
             bestGroups.push(combinations.team);
             petsCollection = petsCollection.filter((pet) => {
