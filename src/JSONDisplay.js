@@ -10,6 +10,8 @@ import Typography from "@mui/material/Typography";
 import { calculateGroupScore, calculatePetBaseDamage, SOUL_CLOVER_STEP, calculateBestHours, EXP_DMG_MOD, EXP_TIME_MOD } from "./App";
 import helper from './util/helper.js'
 
+import xIcon from "./assets/images/x_icon.svg"
+
 function ScoreSection({ data, group, totalScore, defaultRank }) {
     const { baseGroupScore, dmgCount, timeCount, synergyBonus } = calculateGroupScore(group, defaultRank);
     return (
@@ -53,7 +55,12 @@ const JSONDisplay = ({ data,
     numTeams,
     setNumTeams,
     tokenDamageBias,
-    setTokenDamageBias
+    setTokenDamageBias,
+    availableCustomBonuses,
+    setAvailableCustomBonuses,
+    activeCustomBonuses,
+    setActiveCustomBonuses,
+    deleteActiveCustomBonuses
 }) => {
 
     const [tokenSelections, setTokenSelections] = useState({ 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 });
@@ -336,9 +343,7 @@ const JSONDisplay = ({ data,
 
 
                 {/* Damage Bias */}
-                {groupRankCritera !== 1 && (
-
-
+                {groupRankCritera === 2 && (
                     <div
                         style={{
                             display: 'flex'
@@ -397,6 +402,295 @@ const JSONDisplay = ({ data,
 
 
                 )}
+
+                {groupRankCritera === 3 && (
+                    <div
+                        style={{
+                            margin: '12px 0 12px 0',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            flex: '1',
+                            border: 'black 1px solid'
+                        }}
+                    >
+                        <div
+                            style={{
+                                display: 'flex'
+                            }}
+                        >
+                            <div>
+                                Custom Bonuses
+                            </div>
+
+
+                            <div
+                                style={{
+                                    margin: '0 12px 0 auto'
+                                }}
+                            >
+                                Available bonuses:
+                            </div>
+                            <select
+                                style={{ maxWidth: '144px' }}
+                                disabled={refreshGroups}
+                                onChange={
+                                    (e) => {
+                                        if (e.target.value.length > 0)
+                                            setAvailableCustomBonuses(e.target.value);
+                                    }
+                                }
+                            // defaultValue={'Select a bonus'}
+                            // placeholder={'Select a bonus'}
+                            >
+                                {[<option value='' selected>Select Bonus</option>, ...availableCustomBonuses.map((e) => {
+                                    return <option value={e.id}> {e.label}</option>
+                                })]
+                                }
+                                {/* <option
+                                    value="1">1.0</option>
+                                <option
+                                    value="1.1">1.1</option>
+                                <option
+                                    value="1.2">1.2</option> */}
+                            </select>
+                        </div>
+
+                        {/* Bonus headers */}
+                        <div
+                            style={{
+                                display: 'flex'
+                            }}
+                        >
+                            <div
+                                style={{
+                                    background: 'red',
+                                    width: '20%',
+                                    display: 'flex',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                Bonus
+                            </div>
+                            <div
+                                style={{
+                                    background: 'blue',
+                                    width: '20%',
+                                    display: 'flex',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                Amount
+                            </div>
+                            <div
+                                style={{
+                                    background: 'green',
+                                    width: '20%',
+                                    display: 'flex',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                Equation
+                            </div>
+                            <div
+                                style={{
+                                    background: 'yellow',
+                                    width: '20%',
+                                    display: 'flex',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                Placement
+                            </div>
+                            <div
+                                style={{
+                                    background: 'gray',
+                                    width: '20%',
+                                    display: 'flex',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                Total Max
+                            </div>
+                        </div>
+
+                        {/* Active bonuses list */}
+                        {activeCustomBonuses.map((e) => {
+
+                            let bonusName = e.label;
+
+                            switch (e.id) {
+                                case 1016:
+                                    bonusName = 'Token Gain'
+                            }
+
+                            return <div
+                                style={{
+                                    display: 'flex'
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        // background: 'red',
+                                        width: '20%',
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center'
+                                    }}
+                                >
+                                    <div>
+                                        {bonusName}
+                                    </div>
+                                    <img
+                                        style={{
+                                            maxHeight: '12px',
+                                            margin: '0 6px 0 auto'
+                                        }}
+                                        onClick={() => {
+                                            deleteActiveCustomBonuses(e)
+                                            // setActiveCustomBonuses(activeCustomBonuses.filter((bonus) => bonus.id === e.id));
+                                            // setAvailableCustomBonuses([...availableCustomBonuses, e])
+                                        }}
+                                        src={xIcon}
+                                    />
+                                </div>
+
+                                <div
+                                    style={{
+                                        // background: 'blue',
+                                        width: '20%',
+                                        display: 'flex',
+                                        justifyContent: 'center'
+                                    }}
+                                >
+                                    <input
+                                        type='number'
+                                        className='prepNumber'
+                                        onChange={
+                                            (num) => {
+                                                try {
+                                                    let x = Number(num.target.value);
+                                                    x = Math.floor(x);
+                                                    if (x < 1 || x > 4) {
+                                                        return;
+                                                    };
+
+                                                    setActiveCustomBonuses((bonuses) => {
+                                                        let newBonuses = [...bonuses];
+                                                        let bonus = newBonuses.find((a) => a.id === e.id);
+                                                        bonus.amount = x;
+                                                        return newBonuses;
+                                                    })
+                                                }
+                                                catch (err) {
+                                                    console.log(err);
+                                                }
+                                            }}
+                                        placeholder={1 + ''}
+                                        min="1"
+                                        max="4"
+                                    // onKeyDown={(e)=>{}}"javascript: return ['Backspace','Delete','ArrowLeft','ArrowRight'].includes(event.code) ? true : !isNaN(Number(event.key)) && event.code!=='Space'"
+                                    />
+                                </div>
+                                <div
+                                    style={{
+                                        // background: 'green',
+                                        width: '20%',
+                                        display: 'flex',
+                                        justifyContent: 'center'
+                                    }}
+                                >
+                                    <select
+                                        style={{ maxWidth: '144px' }}
+                                        disabled={refreshGroups}
+                                        onChange={
+                                            (choice) => {
+                                                setActiveCustomBonuses((bonuses) => {
+                                                    let newBonuses = [...bonuses];
+                                                    let bonus = newBonuses.find((a) => a.id === e.id);
+                                                    bonus.equation = choice.target.value;
+                                                    return newBonuses;
+                                                })
+                                            }
+                                        }
+                                    >
+                                        <option value={'min'}> Minimum</option>
+                                        <option value={'eq'} > Exactly</option>
+                                        <option value={'max'} disabled>Maximum</option>
+                                    </select>
+                                </div>
+                                <div
+                                    style={{
+                                        // background: 'yellow',
+                                        width: '20%',
+                                        display: 'flex',
+                                        justifyContent: 'center'
+                                    }}
+                                >
+                                    <select
+                                        style={{ maxWidth: '144px' }}
+                                        disabled={refreshGroups}
+                                        onChange={
+                                            (choice) => {
+                                                setActiveCustomBonuses((bonuses) => {
+                                                    let newBonuses = [...bonuses];
+                                                    let bonus = newBonuses.find((a) => a.id === e.id);
+                                                    bonus.placement = choice.target.value;
+                                                    return newBonuses;
+                                                })
+                                            }
+                                        }
+                                    >
+                                        <option value={'top'}> Top</option>
+                                        <option value={'mid'} disabled> Middle</option>
+                                        <option value={'bottom'} >Bottom</option>
+                                        <option value={'rel'} disabled>Relative</option>
+
+                                    </select>
+                                </div>
+                                <div
+                                    style={{
+                                        // background: 'blue',
+                                        width: '20%',
+                                        display: 'flex',
+                                        justifyContent: 'center'
+                                    }}
+                                >
+                                    <input
+                                        type='number'
+                                        className='prepNumber'
+                                        disabled
+                                        onChange={
+                                            (num) => {
+                                                try {
+                                                    let x = Number(num.target.value);
+                                                    x = Math.floor(x);
+                                                    if (x < 0 || x > 24) {
+                                                        return;
+                                                    };
+
+                                                    setActiveCustomBonuses((bonuses) => {
+                                                        let newBonuses = [...bonuses];
+                                                        let bonus = newBonuses.find((a) => a.id === e.id);
+                                                        bonus.totalMax = x;
+                                                        return newBonuses;
+                                                    })
+                                                }
+                                                catch (err) {
+                                                    console.log(err);
+                                                }
+                                            }}
+                                        placeholder={24 + ''}
+                                        min="0"
+                                        max="24"
+                                    // onKeyDown={(e)=>{}}"javascript: return ['Backspace','Delete','ArrowLeft','ArrowRight'].includes(event.code) ? true : !isNaN(Number(event.key)) && event.code!=='Space'"
+                                    />
+                                </div>
+                            </div>
+                        })}
+                    </div>
+                )
+
+                }
 
             </div>
             <div className="grid-right">

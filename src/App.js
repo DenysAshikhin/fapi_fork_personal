@@ -4,7 +4,7 @@ import FileUpload from './FileUpload';
 import JSONDisplay from './JSONDisplay';
 import RepoLink from './RepoLink';
 import CardComponent, { ExpeditionCardComponent } from './cards/card';
-import { DefaultWeightMap, petNameArray, standardBonusesWeightList } from './itemMapping';
+import { DefaultWeightMap, petNameArray, standardBonusesWeightList, BonusMap } from './itemMapping';
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { BottomNavigation, BottomNavigationAction } from '@mui/material';
@@ -283,6 +283,66 @@ const calcBestDamageGroupOLD = (petsCollection, defaultRank, numGroups) => {
 const getBestDamagePets = (petsCollection, defaultRank, other) => {
     let finalCollection = {};
     let bestDamagePets = JSON.parse(JSON.stringify(petsCollection));
+
+    //As required + miscellenaous pets are added, keep track of top 4 strongest -> to prevent adding non-special weak pets
+    let strongestGnd = [];
+    let strongestAir = [];
+
+    const updateStrongest = (pet) => {
+        //Ground
+        if (pet.Type === 1) {
+            //No pets yet, just add it
+            if (strongestGnd.length === 0) {
+                strongestGnd.push(pet);
+            }
+            //If there is 1, check if new is stronger than initial (if yes, make #1 -> #2, then add new to #1), else add it #2
+            else if (strongestGnd.length === 1) {
+                if (calculatePetBaseDamage(strongestGnd[0], defaultRank) < calculatePetBaseDamage(pet, defaultRank)) {
+                    strongestGnd[1] = strongestGnd[0];
+                    strongestGnd[0] = pet;
+                }
+                else {
+                    strongestGnd[1] = pet;
+                }
+            }
+            //Check if it is stronger than strongest
+            else if (calculatePetBaseDamage(strongestGnd[0], defaultRank) < calculatePetBaseDamage(pet, defaultRank)) {
+                strongestGnd[1] = strongestGnd[0];
+                strongestGnd[0] = pet;
+            }
+            //Check if it is stronger than weakest
+            else if (calculatePetBaseDamage(strongestGnd[1], defaultRank) < calculatePetBaseDamage(pet, defaultRank)) {
+                strongestGnd[1] = pet;
+            }
+        }
+        //Air
+        else if (pet.Type === 2) {
+            //No pets yet, just add it
+            if (strongestAir.length === 0) {
+                strongestAir.push(pet);
+            }
+            //If there is 1, check if new is stronger than initial (if yes, make #1 -> #2, then add new to #1), else add it #2
+            else if (strongestAir.length === 1) {
+                if (calculatePetBaseDamage(strongestAir[0], defaultRank) < calculatePetBaseDamage(pet, defaultRank)) {
+                    strongestAir[1] = strongestAir[0];
+                    strongestAir[0] = pet;
+                }
+                else {
+                    strongestAir[1] = pet;
+                }
+            }
+            //Check if it is stronger than strongest
+            else if (calculatePetBaseDamage(strongestAir[0], defaultRank) < calculatePetBaseDamage(pet, defaultRank)) {
+                strongestAir[1] = strongestAir[0];
+                strongestAir[0] = pet;
+            }
+            //Check if it is stronger than weakest
+            else if (calculatePetBaseDamage(strongestAir[1], defaultRank) < calculatePetBaseDamage(pet, defaultRank)) {
+                strongestAir[1] = pet;
+            }
+        }
+    }
+
     let dmgOnlyPets = [];
     let requiredPets = {};
     if (other)
@@ -321,6 +381,10 @@ const getBestDamagePets = (petsCollection, defaultRank, other) => {
         if (!added) {
             dmgOnlyPets.push(cur);
         }
+        //Since it was added, update strongest list
+        else {
+            updateStrongest(cur);
+        }
     }
 
     dmgOnlyPets.sort((a, b) => calculatePetBaseDamage(b, defaultRank) - calculatePetBaseDamage(a, defaultRank));
@@ -332,6 +396,12 @@ const getBestDamagePets = (petsCollection, defaultRank, other) => {
         if (curr.Type === 1) groundTotal++;
         if (curr.Type === 2) airTotal++;
     })
+
+
+
+    let ground = 0;//type 1
+    let air = 0; //type 2
+    let counter = 0;
 
     if (groundTotal < 2) {
         let ground = [];
@@ -360,24 +430,71 @@ const getBestDamagePets = (petsCollection, defaultRank, other) => {
         });
     }
 
-    let ground = 0;//type 1
-    let air = 0; //type 2
-    let counter = 0;
+
     for (let i = 0; i < dmgOnlyPets.length; i++) {
         let cur = dmgOnlyPets[i];
 
         if (ground < 2 && cur.Type === 1 || airTotal <= 0) {
-            finalCollection[cur.ID] = cur;
-            ground++;
-            counter++;
-            groundTotal--;
+
+
+            //Check if we need to add current pet, or the strongestGnd are strong enough
+            if (strongestGnd.length > 0) {
+                let j = 0;
+                while (strongestGnd.length > 0 && j <= strongestGnd.length) {
+                    let stng = strongestGnd[j];
+                    if (stng) {
+
+                        if (calculatePetBaseDamage(stng, defaultRank) >= calculatePetBaseDamage(cur, defaultRank)) {
+                            strongestGnd.splice(j, 1);
+                            finalCollection[cur.ID] = cur;
+                            ground++;
+                            counter++;
+                            j--;
+                        }
+                    }
+                    j++;
+                }
+            }
+
+            //Potentially 2 strongest are better than current, so don't add it if we added the other 2, or if there are no air and counter less than 3
+            if (ground < 2 || (counter < 4 && airTotal <= 0)) {
+
+                finalCollection[cur.ID] = cur;
+                ground++;
+                counter++;
+                groundTotal--;
+            }
         }
 
         else if (air < 2 && cur.Type === 2 || groundTotal <= 0) {
-            finalCollection[cur.ID] = cur;
-            air++;
-            counter++
-            airTotal--;
+
+            //Check if we need to add current pet, or the strongestGnd are strong enough
+            if (strongestAir.length > 0) {
+                let j = 0;
+                while (strongestAir.length > 0 && j <= strongestAir.length) {
+                    let stng = strongestAir[j];
+                    if (stng) {
+
+                        if (calculatePetBaseDamage(stng, defaultRank) >= calculatePetBaseDamage(cur, defaultRank)) {
+                            strongestAir.splice(j, 1);
+                            finalCollection[cur.ID] = cur;
+                            air++;
+                            counter++;
+                            j--;
+                        }
+                    }
+                    j++;
+                }
+            }
+
+            //Potentially 2 strongest are better than current, so don't add it if we added the other 2, or if there are no air and counter less than 3
+            if (air < 2 || (counter < 4 && groundTotal <= 0)) {
+
+                finalCollection[cur.ID] = cur;
+                air++;
+                counter++
+                airTotal--;
+            }
         }
         if (counter > 3) break;
     }
@@ -387,10 +504,13 @@ const getBestDamagePets = (petsCollection, defaultRank, other) => {
     return finalPetsCollection;
 }
 
-const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, calcLowest) => {
+const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
     const k = 4; // Size of each group
     numGroups = numGroups ? numGroups : 6;
     const memo = {};
+
+    let activeBonuses = other?.activeBonuses;
+    if (!activeBonuses) activeBonuses = [];
 
     const memoizedGroupScore = (group) => {
         const key = group.ID;
@@ -402,7 +522,7 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, calcLowest)
         return memo[key];
     };
 
-    const getCombinationsInner = (array, k) => {
+    const getCombinationsInner = (array, k, bonusList) => {
 
         // let temp = [];
         let best = -1;
@@ -410,28 +530,87 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, calcLowest)
         const f = (start, prevCombination) => {
 
             if (prevCombination.length > 0) {
-                let id = '';
-                for (let i = 0; i < prevCombination.length; i++) {
-                    id = id + prevCombination[i].ID;
-                    if (i + 1 !== prevCombination.length) {
-                        id = id + ','
-                    }
-                }
-                let x = { ID: id, team: prevCombination };
-                // temp.push(x);
-                if (best === -1) {
-                    best = { ID: id, team: prevCombination, score: memoizedGroupScore(x) };
-                }
-                else {
-                    let cur = memoizedGroupScore(x);
 
-                    if (cur.damage === best.score.damage) {
-                        if (cur.token > best.score.token) {
-                            best = { ID: id, team: prevCombination, score: cur };
+                let validTeam = true;
+
+                //First confirm the the combination satisfies all bonuses
+                for (let i = 0; i < bonusList.length; i++) {
+                    let bonus = bonusList[i];
+
+                    //Meaning there are required pets that have to be in the comp
+                    if (bonus.requiredNumber > 0) {
+                        let currCount = 0;
+
+                        for (let j = 0; j < prevCombination.length; j++) {
+                            let pet = prevCombination[j];
+                            if (prevCombination.length > 3) {
+                                let z = 0;
+                            }
+                            if (pet.BonusList.find((a) => a.ID === bonus.bonus.id)) {
+                                currCount++;
+                            }
+                        }
+
+                        if (currCount >= bonus.requiredNumber) {
+                            // console.log(`we good`);
+                        }
+                        else {
+                            // console.log(`we not good`);
+                            validTeam = false;
+                            break;
                         }
                     }
-                    else if (cur.damage > best.score.damage) {
-                        best = { ID: id, team: prevCombination, score: cur };
+                    else if (bonus.exactNumber > -1) {
+                        let currCount = 0;
+
+                        for (let j = 0; j < prevCombination.length; j++) {
+                            let pet = prevCombination[j];
+                            if (prevCombination.length > 3) {
+                                let z = 0;
+                            }
+                            if (pet.BonusList.find((a) => a.ID === bonus.bonus.id)) {
+                                currCount++;
+                            }
+                        }
+
+                        if (currCount === bonus.exactNumber) {
+                            console.log(`we good`);
+                        }
+                        else {
+                            // console.log(`we not good`);
+                            validTeam = false;
+                            break;
+                        }
+                    }
+                    if (!validTeam) break;
+
+                }
+
+                if (validTeam) {
+
+                    let id = '';
+                    for (let i = 0; i < prevCombination.length; i++) {
+                        id = id + prevCombination[i].ID;
+                        if (i + 1 !== prevCombination.length) {
+                            id = id + ','
+                        }
+                    }
+                    let x = { ID: id, team: prevCombination };
+                    // temp.push(x);
+                    if (best === -1) {
+                        best = { ID: id, team: prevCombination, score: memoizedGroupScore(x) };
+                    }
+                    else {
+                        let cur = memoizedGroupScore(x);
+
+                        if (cur.damage === best.score.damage) {
+                            if (cur.token > best.score.token) {
+                                best = { ID: id, team: prevCombination, score: cur };
+                            }
+                        }
+                        else if (cur.damage > best.score.damage) {
+                            best = { ID: id, team: prevCombination, score: cur };
+                        }
                     }
                 }
             }
@@ -446,7 +625,6 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, calcLowest)
         f(0, []);
 
         if (best.team)
-
             best.team.sort((a, b) => {
                 if (a.Type === b.Type) {
                     return a.ID - b.ID;
@@ -465,18 +643,158 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, calcLowest)
     for (let g = 0; g < numGroups; g++) {
 
 
-        let finalPetsCollection = getBestDamagePets(petsCollection, defaultRank);
+
+        // let minPets = 2;
+        // if ((tknAir > 1 && tknGnd > 0) || (tknGnd > 1 && tknAir > 0)) {
+        //     minPets = 3;
+        // }
+        // let numTokenGroups = Math.ceil(numTokens / minPets);
+
+        // //Maximise this team, this turn
+        // if (numTokenGroups >= (numGroups - g)) {
+        //     //There are not enough groups for all token pets
+        //     if ((numTokenGroups - (numGroups - g)) > 0) {
+        //         damageMode = 1;
+        //     }
+        //     else
+        //         damageMode = 2;
+
+
+
+        let remainingGroups = numGroups - g;
+        let requiredPetsOverall = [];
+        let requiredBonuses = {};
+
+        let requiredPetBonusMap = {};
+        let requiredPetsByBonus = [];
+
+        if (activeBonuses.length > 0) {
+            //NOTE later need to add logic to determine if a bonus met its criteria or not before adding!!
+            for (let j = 0; j < activeBonuses.length; j++) {
+                requiredBonuses[activeBonuses[j].id] = activeBonuses[j];
+                requiredPetBonusMap[activeBonuses[j].id] = { bonus: activeBonuses[j], pets: [], active: true };
+            }
+
+
+            petsCollection.forEach((currPet) => {
+                currPet.BonusList.forEach((currBonus) => {
+                    if (currBonus.ID in requiredBonuses) {
+                        if (requiredBonuses[currBonus.ID].placement === 'top') {
+                            requiredPetsOverall.push(currPet);
+                        }
+                        requiredPetBonusMap[currBonus.ID].pets.push(currPet);
+                    }
+                })
+            });
+
+
+            //Check the bonuses placement, and if it needs to be added (top is always active)
+            for (let j = 0; j < activeBonuses.length; j++) {
+                let currBonus = requiredPetBonusMap[activeBonuses[j].id];
+
+                if (currBonus.bonus.placement === 'bottom') {
+                    //Need to check that it is time to place these or not
+                    let numPets = currBonus.pets.length;
+                    let requiredGroups = 0;
+                    let remainder;
+                    switch (currBonus.bonus.equation) {
+                        case 'min':
+                            //If there are not enough pets to meet the min, then set the min to # of pets
+                            remainder = numPets % currBonus.bonus.amount;
+                            numPets -= remainder;
+                            requiredGroups = numPets > 0 ? Math.ceil(numPets / currBonus.bonus.amount) : 0;
+                            break;
+                        case 'max':
+
+                            break;
+                        case 'eq':
+                            remainder = numPets % currBonus.bonus.amount;
+                            numPets -= remainder;
+                            requiredGroups = currBonus.pets.length > currBonus.bonus.amount ? Math.ceil(numPets / currBonus.bonus.amount) : 0;
+                            break;
+                        default:
+                            break;
+                    }
+
+                    //Time to slot in the pets
+                    if (remainingGroups <= requiredGroups) {
+
+                        currBonus.pets.forEach((bonusPet) => {
+
+                            requiredPetsOverall.push(bonusPet);
+                        });
+
+                    }
+                    else {
+                        requiredPetBonusMap[currBonus.bonus.id].active = false;
+                    }
+
+                }
+
+            }
+
+
+
+            //Calculate how many pets are actually supposed to go into this team NOTE LATER also if they should even be added in the first place
+            for (let j = 0; j < activeBonuses.length; j++) {
+                let temp = requiredPetBonusMap[activeBonuses[j].id];
+                if (!temp.active) continue;
+                let requiredNumber = 0;
+                let exactNumber = -1;
+
+                switch (temp.bonus.equation) {
+                    case 'min':
+                        //If there are not enough pets to meet the min, then set the min to # of pets
+                        requiredNumber = temp.pets.length > temp.bonus.amount ? temp.bonus.amount : temp.pets.length
+                        break;
+                    case 'max':
+
+                        break;
+                    case 'eq':
+                        exactNumber = temp.pets.length > temp.bonus.amount ? temp.bonus.amount : temp.pets.length
+                        // exactNumber = temp.bonus.amount;
+                        break;
+                    default:
+                        break;
+                }
+
+                temp.requiredNumber = requiredNumber;
+                temp.exactNumber = exactNumber;
+            }
+        }
+
+        //Get a subset of pets: the required based on bonuses, any that have dmgBonus or timeBonus, up to 4 more for max raw dungeonDamage
+        let finalPetsCollection = getBestDamagePets(petsCollection, defaultRank, { requiredPets: requiredPetsOverall });
+
 
         time1 = new Date();
-        const combinations = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length));
+        const combinations = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length), Object.values(requiredPetBonusMap));
         time2 = new Date();
         console.log(`time to get combinations ${combinations.length}: ${(time2 - time1) / 1000} seconds`)
+
 
 
         if (combinations === -1) {
             break;
         }
         else {
+
+
+            if (activeBonuses.length > 0) {
+                for (let j = 0; j < activeBonuses.length; j++) {
+                    let curBonus = activeBonuses[j];
+                    let counterBonus = 0;
+                    combinations.team.forEach((currPet) => {
+                        currPet.BonusList.forEach((innerBonus) => {
+                            if (innerBonus.ID === curBonus.id) {
+                                counterBonus++;
+                            }
+                        })
+                    })
+                    console.log(`done counting`);
+                }
+            }
+
             bestGroups.push(combinations.team);
             petsCollection = petsCollection.filter((pet) => {
 
@@ -591,32 +909,6 @@ const calcBestTokenGroupOLD = (petsCollection, defaultRank, numGroups) => {
     console.log(`time to get best combo: ${(time4 - time3) / 1000} seconds`)
     return bestGroups;
 }
-
-
-/*
-
-1. Calc # token pets
-2. Calc # of teams
-3. Calc # of token teams
-4. Calc # of max damage teams
-5. Calc all the max damage teams (this elimanates best pets from token teams)
-6. Calc best token -> damage teams
-
-
-Exceptions:
-1. If there are 3 token pets, first create the shittiest full token teams possible
-1.5. From there, reserve remaining token pets for later processing
-2. Create remaning max damage teams
-3. Create max damage 1.5 team
-
-
-1. If there is 1 token pet
-2. Calculate max damage teams
-3. If it is available on the last team, forcefully slot it in
-
-
-*/
-
 
 
 const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
@@ -932,6 +1224,8 @@ function App() {
     const [comboSelector, setComboSelector] = useState(1);
     const [numTeams, setNumTeams] = useState(-1);
     const [tokenDamageBias, setTokenDamageBias] = useState(15);
+    const [availableCustomBonuses, setAvailableCustomBonuses] = useState([{ id: 1012, label: "DUNGEON TIME GAIN" }, { id: 1013, label: "DUNGEON DMG" }, { id: 1016, label: "EXPE TOKEN GAIN" }]);
+    const [activeCustomBonuses, setActiveCustomBonuses] = useState([]);
 
 
     const handleItemSelected = (items) => {
@@ -1004,6 +1298,44 @@ function App() {
                             setRefreshGroups(true);
                         }
                     }
+                    availableCustomBonuses={availableCustomBonuses}
+                    setAvailableCustomBonuses={(e) => {
+
+                        setActiveCustomBonuses((curr) => {
+                            let newBonusList = [...curr];
+
+                            newBonusList.push({ ...BonusMap[e], amount: 1, equation: 'min', placement: 'top', runningTotal: 0, totalMax: 24 });
+                            return newBonusList;
+                        })
+                        setAvailableCustomBonuses((curr) => {
+                            let newBonusList = [...curr];
+                            newBonusList = newBonusList.filter((a) => a.id !== Number(e));
+                            return newBonusList;
+                        });
+                        // setRefreshGroups(true);
+                    }}
+
+                    activeCustomBonuses={activeCustomBonuses}
+                    setActiveCustomBonuses={(val) => {
+                        setActiveCustomBonuses(val);
+                    }}
+
+                    deleteActiveCustomBonuses={
+                        (e) => {
+
+                            setActiveCustomBonuses((curr) => {
+                                let newBonusList = [...curr];
+                                newBonusList = newBonusList.filter((a) => a.id !== e.id);
+                                return newBonusList;
+                            })
+                            setAvailableCustomBonuses((curr) => {
+                                let newBonusList = [...curr];
+                                newBonusList.push(BonusMap[e.id]);
+                                return newBonusList;
+                            });
+                        }
+                    }
+
                 />;
             case 0:
                 return <FileUpload onData={handleData} />;
@@ -1062,7 +1394,7 @@ function App() {
         if (groups && !recalculate) {
             setGroups(groups);
         } else {
-            groups = findBestGroups(localPets, defaultRank, groupRankCritera, numTeams === -1 ? data.ExpeditionLimit : numTeams, { tokenDamageBias: tokenDamageBias });
+            groups = findBestGroups(localPets, defaultRank, groupRankCritera, numTeams === -1 ? data.ExpeditionLimit : numTeams, { tokenDamageBias: tokenDamageBias, activeBonuses: activeCustomBonuses });
             setGroupCache({ ...groupCache, [keyString]: groups })
             setGroups(groups);
         }
