@@ -579,25 +579,39 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
                         }
                     }
                     //Meaning there is a `rel` filter active
-                    else if (bonus.tempRequired > 0) {
+                    else if (bonus.bonus.placement === 'rel') {
                         let currCount = 0;
+                        let maxCounter = 0;
 
                         for (let j = 0; j < prevCombination.length; j++) {
                             let pet = prevCombination[j];
+                            if (pet.BonusList.find((a) => a.ID === bonus.bonus.id)) maxCounter++;
+                            // if (bonus.tempRequired > 0)
+                            //     if (bonus.tempRequiredPets.find((a) => a.ID === pet.ID)) {
+                            //         currCount++;
+                            //     }
+                        }
 
-                            if (bonus.tempRequiredPets.find((a) => a.ID === pet.ID)) {
-                                currCount++;
+                        if (maxCounter <= bonus.bonus.amount)
+                            //Only check for min number of required pets, if there are any to consider
+                            if (bonus.tempRequired > 0) {
+                                if (
+                                    (maxCounter === bonus.tempRequired || maxCounter === 4)
+
+                                ) {
+                                    console.log(`we good`);
+                                }
+                                else {
+                                    // console.log(`we not good`);
+                                    validTeam = false;
+                                    break;
+                                }
                             }
-                        }
+                            else {
 
-                        if (
-                            (currCount === bonus.tempRequired || currCount === 4)
-                            || (currCount > 0 && currCount <= bonus.bonus.amount)
-                        ) {
-                            // console.log(`we good`);
-                        }
+                            }
+                        //otherwise, ensure we don't exceed the maximum
                         else {
-                            // console.log(`we not good`);
                             validTeam = false;
                             break;
                         }
