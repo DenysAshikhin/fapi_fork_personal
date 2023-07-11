@@ -71,12 +71,30 @@ const JSONDisplay = ({ data,
 
     let totalTokensHR = 0;
 
+    let bonusTotals = { 1012: 0, 1013: 0, 1016: 0 };
+
+
     // if (groups && groupRankCritera === 2)
     if (groups.length > 0)
         groups.map((group, index) => {
+
+            group.forEach((pet) => {
+                pet.BonusList.forEach((bon) => {
+                    if (bon.ID in bonusTotals) bonusTotals[bon.ID]++;
+                })
+            })
+
+
             const groupBests = calculateBestHours(group, null, data.SoulGoldenClover, comboSelector)[tokenSelections[index]];
             totalTokensHR += groupBests.floored / groupBests.hours;
         })
+
+
+    let totalMessages = [];
+
+    for (const [key, value] of Object.entries(bonusTotals)) {
+        totalMessages.push(`${BonusMap[key].label}: ${value} pets`)
+    }
 
     return (
         <div
@@ -696,6 +714,85 @@ const JSONDisplay = ({ data,
                                 </div>
                             </div>
                         })}
+
+                        <div
+                            style={{
+                                margin: '6px 0 6px 0'
+                            }} >
+                            {activeCustomBonuses.map((e) => {
+
+
+                                let bonusName = e.label;
+                                let currentBonus = activeCustomBonuses.find((a) => a.id === e.id);
+                                if (currentBonus.placement !== 'rel') return null;
+                                switch (currentBonus.id) {
+                                    case 1016:
+                                        bonusName = 'Token Gain'
+                                }
+
+                                return <div
+                                    style={{
+                                        // margin: '6px 0 6px 0',
+                                        display: 'flex'
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            marginRight: '12px'
+                                        }}
+                                    >
+                                        {`${bonusName} damage bias`}
+                                    </div>
+                                    <input
+                                        type='number'
+                                        className='prepNumber'
+                                        value={currentBonus.relThresh}
+                                        onChange={
+                                            (num) => {
+                                                try {
+                                                    let x = Number(num.target.value);
+                                                    x = Math.floor(x);
+                                                    if (x < 0 || x > 100) {
+                                                        return;
+                                                    };
+
+                                                    setActiveCustomBonuses((bonuses) => {
+                                                        let newBonuses = [...bonuses];
+                                                        let bonus = newBonuses.find((a) => a.id === e.id);
+                                                        bonus.relThresh = x;
+                                                        return newBonuses;
+                                                    })
+                                                }
+                                                catch (err) {
+                                                    console.log(err);
+                                                }
+                                            }}
+                                        placeholder={1 + ''}
+                                        min="0"
+                                        max="100"
+
+                                    />
+                                </div>
+                            })}
+                        </div>
+
+
+                        <div
+                            style={{
+                                margin: '6px 0 6px 0'
+                            }}>
+                            {totalMessages.map((e) => {
+                                return <div
+                                    style={{
+                                        // margin: '6px 0 6px 0'
+                                    }}
+                                >
+                                    {e}
+                                </div>
+                            })}
+                        </div>
+
+
                     </div>
                 )
 

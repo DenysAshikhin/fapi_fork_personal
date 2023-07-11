@@ -543,9 +543,7 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
 
                         for (let j = 0; j < prevCombination.length; j++) {
                             let pet = prevCombination[j];
-                            if (prevCombination.length > 3) {
-                                let z = 0;
-                            }
+
                             if (pet.BonusList.find((a) => a.ID === bonus.bonus.id)) {
                                 currCount++;
                             }
@@ -565,16 +563,38 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
 
                         for (let j = 0; j < prevCombination.length; j++) {
                             let pet = prevCombination[j];
-                            if (prevCombination.length > 3) {
-                                let z = 0;
-                            }
+
                             if (pet.BonusList.find((a) => a.ID === bonus.bonus.id)) {
                                 currCount++;
                             }
                         }
 
                         if (currCount === bonus.exactNumber) {
-                            console.log(`we good`);
+                            // console.log(`we good`);
+                        }
+                        else {
+                            // console.log(`we not good`);
+                            validTeam = false;
+                            break;
+                        }
+                    }
+                    //Meaning there is a `rel` filter active
+                    else if (bonus.tempRequired > 0) {
+                        let currCount = 0;
+
+                        for (let j = 0; j < prevCombination.length; j++) {
+                            let pet = prevCombination[j];
+
+                            if (bonus.tempRequiredPets.find((a) => a.ID === pet.ID)) {
+                                currCount++;
+                            }
+                        }
+
+                        if (
+                            (currCount === bonus.tempRequired || currCount === 4)
+                            || (currCount > 0 && currCount <= bonus.bonus.amount)
+                        ) {
+                            // console.log(`we good`);
                         }
                         else {
                             // console.log(`we not good`);
@@ -641,24 +661,6 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
 
     let bestGroups = [];
     for (let g = 0; g < numGroups; g++) {
-
-
-
-        // let minPets = 2;
-        // if ((tknAir > 1 && tknGnd > 0) || (tknGnd > 1 && tknAir > 0)) {
-        //     minPets = 3;
-        // }
-        // let numTokenGroups = Math.ceil(numTokens / minPets);
-
-        // //Maximise this team, this turn
-        // if (numTokenGroups >= (numGroups - g)) {
-        //     //There are not enough groups for all token pets
-        //     if ((numTokenGroups - (numGroups - g)) > 0) {
-        //         damageMode = 1;
-        //     }
-        //     else
-        //         damageMode = 2;
-
 
 
         let remainingGroups = numGroups - g;
@@ -742,14 +744,26 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
                 switch (temp.bonus.equation) {
                     case 'min':
                         //If there are not enough pets to meet the min, then set the min to # of pets
-                        requiredNumber = temp.pets.length > temp.bonus.amount ? temp.bonus.amount : temp.pets.length
+                        // requiredNumber = temp.pets.length > temp.bonus.amount ? temp.bonus.amount : temp.pets.length
+                        if (temp.bonus.amount > temp.pets.length) {
+                            // FAILED filter
+                            requiredNumber = 0;
+                        }
+                        else
+                            requiredNumber = temp.bonus.amount;
+
                         break;
                     case 'max':
 
                         break;
                     case 'eq':
-                        exactNumber = temp.pets.length > temp.bonus.amount ? temp.bonus.amount : temp.pets.length
-                        // exactNumber = temp.bonus.amount;
+                        // exactNumber = temp.pets.length > temp.bonus.amount ? temp.bonus.amount : temp.pets.length
+                        if (temp.bonus.amount > temp.pets.length) {
+                            // FAILED filter
+                            exactNumber = -1;
+                        }
+                        else
+                            exactNumber = temp.bonus.amount;
                         break;
                     default:
                         break;
@@ -764,6 +778,12 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
         let finalPetsCollection = getBestDamagePets(petsCollection, defaultRank, { requiredPets: requiredPetsOverall });
 
 
+        //NOTE :
+        /*
+1. bottom placement needs to reserve pets for it's own purposes;
+2. rel needs to take into the `max` and if there are more required than max, select top `max #` to slot in
+        */
+
 
         time1 = new Date();
         let combinations = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length), Object.values(requiredPetBonusMap));
@@ -777,43 +797,101 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
         }
         else {
 
-
-
             let bestCurrTeamScore = calculateGroupScore(combinations.team, defaultRank);
-            let score = bestCurrTeamScore.baseGroupScore;
-            let mult = 0.15;
-            let cutOff = score * mult;
+            let score = bestCurrTeamScore.groupScore;
+
 
 
             if (activeBonuses.length > 0) {
                 let added = false;
                 for (let j = 0; j < activeBonuses.length; j++) {
                     let curBonus = activeBonuses[j];
+                    let mult = curBonus.relThresh / 100;
+                    let cutOff = score * mult;
+
                     let counterBonus = 0;
+                    let innerAdded = false;
+                    let temp = requiredPetBonusMap[curBonus.id];
 
                     if (curBonus.placement === 'rel') {
-                        let temp = requiredPetBonusMap[curBonus.id];
+
 
                         let bonusPets = temp.pets;
 
                         bonusPets.forEach((bonusPet) => {
-                            let dmg = calculatePetBaseDamage(bonusPet);
+                            let dmg = calculatePetBaseDamage(bonusPet, defaultRank);
+                            let tmLength = combinations.team.length;
+                            let amountToAdd = 0;
+                            bonusPet.BonusList.forEach((e) => {
+                                let modifiedAddition = 0;
+                                //Dng dmg
+                                if (e.ID === 1013) {
+                                    dmg *= (1 + EXP_DMG_MOD);
+                                    if (tmLength > 1) {
+                                        //Get avg base group score, then remove 1, apply mult (iplier), apply modifier, add it
+                                        modifiedAddition += ((bestCurrTeamScore.baseGroupScore / tmLength) * (tmLength - 1) * mult * (1 + EXP_DMG_MOD));
+                                    }
+                                    else {
+                                        modifiedAddition = bestCurrTeamScore.baseGroupScore * mult * (1 + EXP_DMG_MOD);
+                                    }
+                                    amountToAdd += modifiedAddition;
+                                }
+                                else if (e.ID === 1012) {
+                                    dmg *= (1 + EXP_TIME_MOD);
+                                    if (tmLength > 1) {
+                                        //Get avg base group score, then remove 1, apply mult (iplier), apply modifier, add it
+                                        modifiedAddition += ((bestCurrTeamScore.baseGroupScore / tmLength) * (tmLength - 1) * mult * (1 + EXP_TIME_MOD));
+                                    }
+                                    else {
+                                        modifiedAddition = bestCurrTeamScore.baseGroupScore * mult * (1 + EXP_TIME_MOD);
+                                    }
+                                    amountToAdd += modifiedAddition;
+                                }
+                            })
+
+                            dmg += amountToAdd;
+
                             if (dmg > cutOff) {
                                 added = true;
+                                innerAdded = true;
+                                temp.active = true;
+                                temp.tempMin = true;
+                                temp.tempRequired = temp.tempRequired !== 0 && temp.tempRequired ? temp.tempRequired + 1 : 1;
+
+                                if (!temp.tempRequiredPets) {
+                                    temp.tempRequiredPets = [];
+                                }
+
+                                temp.tempRequiredPets.push(bonusPet);
                                 let exists = finalPetsCollection.find((a) => a.ID === bonusPet.ID);
-                                if (exists) {
-                                    let z = 0;
+
+                                if (!exists) {
+                                    finalPetsCollection.push(bonusPet);
+                                    // exists = requiredPetsOverall.find((a) => a.ID === bonusPet.ID);
+                                    // if (!exists) {
+                                    //     requiredPetsOverall.push(bonusPet);
+                                    // }
                                 }
                             }
                         })
+                        if (!innerAdded) {
+                            temp.tempMin = null;
+                            temp.tempRequired = 0;
+
+                            temp.tempRequiredPets = [];
+                            temp.active = false;
+                        }
                     }
                 }
 
                 //At least 1 rel pet was added, recalc teams with it
                 if (added) {
-                    finalPetsCollection = getBestDamagePets(petsCollection, defaultRank, { requiredPets: requiredPetsOverall });
+                    // finalPetsCollection = getBestDamagePets(petsCollection, defaultRank, { requiredPets: requiredPetsOverall });
                     time1 = new Date();
-                    let combinations = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length), Object.values(requiredPetBonusMap));
+                    combinations = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length), Object.values(requiredPetBonusMap));
+                    console.log(`got new combinations after the rel calcs`)
+                    if (combinations === -1)
+                        break;
                 }
 
 
@@ -1253,7 +1331,13 @@ function App() {
     const [comboSelector, setComboSelector] = useState(1);
     const [numTeams, setNumTeams] = useState(-1);
     const [tokenDamageBias, setTokenDamageBias] = useState(15);
-    const [availableCustomBonuses, setAvailableCustomBonuses] = useState([{ id: 1012, label: "DUNGEON TIME GAIN" }, { id: 1013, label: "DUNGEON DMG" }, { id: 1016, label: "EXPE TOKEN GAIN" }]);
+    const [availableCustomBonuses, setAvailableCustomBonuses] = useState(
+        [
+            { id: 1012, label: "DUNGEON TIME GAIN" },
+            { id: 1013, label: "DUNGEON DMG" },
+            { id: 1016, label: "EXPE TOKEN GAIN" }
+        ]
+    );
     const [activeCustomBonuses, setActiveCustomBonuses] = useState([]);
 
 
@@ -1333,7 +1417,15 @@ function App() {
                         setActiveCustomBonuses((curr) => {
                             let newBonusList = [...curr];
 
-                            newBonusList.push({ ...BonusMap[e], amount: 1, equation: 'min', placement: 'top', runningTotal: 0, totalMax: 24 });
+                            newBonusList.push({
+                                ...BonusMap[e],
+                                amount: 1,
+                                equation: 'min',
+                                placement: 'top',
+                                runningTotal: 0,
+                                totalMax: 24,
+                                relThresh: 20
+                            });
                             return newBonusList;
                         })
                         setAvailableCustomBonuses((curr) => {
@@ -1341,12 +1433,13 @@ function App() {
                             newBonusList = newBonusList.filter((a) => a.id !== Number(e));
                             return newBonusList;
                         });
-                        // setRefreshGroups(true);
+                        setRefreshGroups(true);
                     }}
 
                     activeCustomBonuses={activeCustomBonuses}
                     setActiveCustomBonuses={(val) => {
                         setActiveCustomBonuses(val);
+                        setRefreshGroups(true);
                     }}
 
                     deleteActiveCustomBonuses={
@@ -1362,6 +1455,7 @@ function App() {
                                 newBonusList.push(BonusMap[e.id]);
                                 return newBonusList;
                             });
+                            setRefreshGroups(true);
                         }
                     }
 
