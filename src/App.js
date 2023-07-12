@@ -616,6 +616,27 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
                             break;
                         }
                     }
+                    //`eq` or `min` isn't active, but needs to reserve certain pets
+                    else if (bonus.tempMax || bonus.tempMax === 0) {
+                        let currCount = 0;
+
+                        for (let j = 0; j < prevCombination.length; j++) {
+                            let pet = prevCombination[j];
+
+                            if (pet.BonusList.find((a) => a.ID === bonus.bonus.id)) {
+                                currCount++;
+                            }
+                        }
+
+                        if (currCount <= bonus.tempMax) {
+                            // console.log(`we good`);
+                        }
+                        else {
+                            // console.log(`we not good`);
+                            validTeam = false;
+                            break;
+                        }
+                    }
                     if (!validTeam) break;
 
                 }
@@ -717,7 +738,7 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
                             //If there are not enough pets to meet the min, then set the min to # of pets
                             remainder = numPets % currBonus.bonus.amount;
                             numPets -= remainder;
-                            requiredGroups = numPets > 0 ? Math.ceil(numPets / currBonus.bonus.amount) : 0;
+                            requiredGroups = numPets >= 0 ? Math.ceil(numPets / currBonus.bonus.amount) : 0;
                             break;
                         case 'max':
 
@@ -725,7 +746,7 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
                         case 'eq':
                             remainder = numPets % currBonus.bonus.amount;
                             numPets -= remainder;
-                            requiredGroups = currBonus.pets.length > currBonus.bonus.amount ? Math.ceil(numPets / currBonus.bonus.amount) : 0;
+                            requiredGroups = currBonus.pets.length >= currBonus.bonus.amount ? Math.ceil(numPets / currBonus.bonus.amount) : 0;
                             break;
                         default:
                             break;
@@ -735,13 +756,13 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
                     if (remainingGroups <= requiredGroups) {
 
                         currBonus.pets.forEach((bonusPet) => {
-
                             requiredPetsOverall.push(bonusPet);
                         });
-
                     }
+                    //If it's not time yet, check to see if we need to put a limit on a certain subset of pets from being slotted in
                     else {
-                        requiredPetBonusMap[currBonus.bonus.id].active = false;
+                        requiredPetBonusMap[currBonus.bonus.id].active = false;//Only prevents enforcing the required pets pet team
+                        requiredPetBonusMap[currBonus.bonus.id].tempMax = remainder;
                     }
                 }
             }
@@ -791,20 +812,10 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
         //Get a subset of pets: the required based on bonuses, any that have dmgBonus or timeBonus, up to 4 more for max raw dungeonDamage
         let finalPetsCollection = getBestDamagePets(petsCollection, defaultRank, { requiredPets: requiredPetsOverall });
 
-
-        //NOTE :
-        /*
-1. bottom placement needs to reserve pets for it's own purposes;
-2. rel needs to take into the `max` and if there are more required than max, select top `max #` to slot in
-        */
-
-
         time1 = new Date();
         let combinations = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length), Object.values(requiredPetBonusMap));
         time2 = new Date();
         console.log(`time to get combinations ${combinations.length}: ${(time2 - time1) / 1000} seconds`)
-
-
 
         if (combinations === -1) {
             break;
@@ -813,8 +824,6 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
 
             let bestCurrTeamScore = calculateGroupScore(combinations.team, defaultRank);
             let score = bestCurrTeamScore.groupScore;
-
-
 
             if (activeBonuses.length > 0) {
                 let added = false;
