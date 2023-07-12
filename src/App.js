@@ -1249,7 +1249,7 @@ const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
             //Maximise this team, this turn
             if (numTokenGroups >= (numGroups - g)) {
                 //There are not enough groups for all token pets
-                if ((numTokenGroups - (numGroups - g)) > 0) {
+                if ((numTokenGroups - (numGroups - g)) >= 0) {
                     damageMode = 1;
                 }
                 else
@@ -1514,9 +1514,10 @@ function App() {
 
         const positiveRankedPets = uploadedData.PetsCollection.filter(
             (pet) => {
-                const isValidRank = !!pet.Rank;//Instead of relying on defaultRank always = 0, select valid ranks if they exist (not 0)
+                // const isValidRank = !!pet.Rank;//Instead of relying on defaultRank always = 0, select valid ranks if they exist (not 0)
                 const isValidLocked = includeLocked ? true : !!pet.Locked;
-                return isValidRank && isValidLocked;
+                return isValidLocked;
+                // return isValidRank && isValidLocked;
             }
         ).map((pet) => pet.ID);
         setSelectedItems(positiveRankedPets);

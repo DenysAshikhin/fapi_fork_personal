@@ -70,6 +70,7 @@ const JSONDisplay = ({ data,
     }
 
     let totalTokensHR = 0;
+    let damageTotal = 0;
 
     let bonusTotals = { 1012: 0, 1013: 0, 1016: 0 };
 
@@ -77,7 +78,7 @@ const JSONDisplay = ({ data,
     // if (groups && groupRankCritera === 2)
     if (groups.length > 0)
         groups.map((group, index) => {
-
+            damageTotal += calculateGroupScore(group, defaultRank).groupScore;
             group.forEach((pet) => {
                 pet.BonusList.forEach((bon) => {
                     if (bon.ID in bonusTotals) bonusTotals[bon.ID]++;
@@ -113,7 +114,7 @@ const JSONDisplay = ({ data,
                 }}
             >
                 <div>
-                    <Typography variant={"h5"} >Best Teams {` || Total tokens/hr: ${helper.roundThreeDecimal(totalTokensHR)}`}</Typography>
+                    <Typography variant={"h5"} >Best Teams {` || Total tokens/hr: ${helper.roundThreeDecimal(totalTokensHR)} || Total Damage: ${damageTotal.toExponential(3)}`}</Typography>
                 </div>
 
                 {groups.reduce((accum, group, index) => {
@@ -335,7 +336,7 @@ const JSONDisplay = ({ data,
                     <input id='prepFormInput'
                         type='number'
                         className='prepNumber'
-                        // value={props.prepField.numeral}
+                        value={numTeams}
                         onChange={
                             (e) => {
                                 try {
@@ -376,7 +377,7 @@ const JSONDisplay = ({ data,
                                     Higher value means higher generated damage (by giving higher damage pets to token teams)
                                 </div>
                                 <div>
-                                    Recommended range: 0-30
+                                    Recommended range: 5-40
                                 </div>
                             </div>
                         }>
@@ -392,7 +393,7 @@ const JSONDisplay = ({ data,
                         <input id='prepFormInput'
                             type='number'
                             className='prepNumber'
-                            // value={props.prepField.numeral}
+                            value={tokenDamageBias}
                             onChange={
                                 (e) => {
                                     try {
