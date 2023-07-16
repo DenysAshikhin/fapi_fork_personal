@@ -1,7 +1,8 @@
 .repo-link {
-    position: fixed;
-    top: 10px;
-    right: 10px;
+    /* position: fixed; */
+    /* top: 10px; */
+    /* right: 10px; */
+    margin-right: 'auto';
     text-decoration: none;
     font-weight: bold;
     font-size: 14px;

@@ -1577,10 +1577,11 @@ function App() {
 
     return (
         <ThemeProvider theme={theme}>
-            <RepoLink />
+         
             <Container sx={{
                 marginLeft: '0px', marginRight: '0px', maxWidth: '100000px !important',
-                width: 'calc(100vw - 126px)',
+                // width: 'calc(100vw - 126px)',
+                width: '100%',
                 maxHeight: `calc(100vh - 56px)`,
                 height: `calc(100vh - 56px)`,
             }}>
@@ -1602,6 +1603,7 @@ function App() {
                         {!!data && <BottomNavigationAction label="Pet Combo List" icon={<BadgeIcon />} />}
                         {/*{!!data && <BottomNavigationAction label="Weighted Pets" icon={<ScaleIcon />} />}*/}
                         {<BottomNavigationAction label="Weights" icon={<ScaleIcon />} />}
+                        <RepoLink />
                     </BottomNavigation>
                 </Box>
             </Container>
