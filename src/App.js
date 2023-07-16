@@ -593,13 +593,14 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
                         }
 
                         if (maxCounter <= bonus.bonus.amount)
-                            //Only check for min number of required pets, if there are any to consider
+                            //Check that we have some of the required pets, but not exceeding the max amount
                             if (bonus.tempRequired > 0) {
                                 if (
-                                    (maxCounter === bonus.tempRequired || maxCounter === 4)
 
+                                    (bonus.bonus.amount < bonus.tempRequired && maxCounter === bonus.bonus.amount) ||//max is < required (i.e. we could fit 4 but max is set to 2) -> ensure # pets === max
+                                    (maxCounter >= bonus.tempRequired) //Max is >= required, ensure #pet >= required
                                 ) {
-                                    console.log(`we good`);
+                                    // console.log(`we good`);
                                 }
                                 else {
                                     // console.log(`we not good`);
@@ -1356,16 +1357,32 @@ function App() {
     const [tokenDamageBias, setTokenDamageBias] = useState(15);
     const [availableCustomBonuses, setAvailableCustomBonuses] = useState(
         [
+            { id: 1001, label: "POTATO GAIN" },
+            { id: 1002, label: "CLASS EXP GAIN" },
+            { id: 1003, label: "SKULL GAIN" },
+            { id: 1009, label: "RESIDUE GAIN" },
             { id: 1012, label: "DUNGEON TIME GAIN" },
             { id: 1013, label: "DUNGEON DMG" },
-            { id: 1016, label: "EXPE TOKEN GAIN" }
+            { id: 1014, label: "CARD EXP" },
+            { id: 1015, label: "REINC PTS GAIN" },
+            { id: 1016, label: "EXPE TOKEN GAIN" },
         ]
     );
     const [activeCustomBonuses, setActiveCustomBonuses] = useState([]);
+    const [selectedPets, setSelectedPets] = useState([]);
 
 
     const handleItemSelected = (items) => {
         setSelectedItems(items);
+
+        const petData = data?.PetsCollection || [];
+        const selectedItemsById = petData.reduce((accum, item) => {
+            accum[parseInt(item.ID, 10)] = item;
+            return accum;
+        }, {})
+
+        const localPets = selectedItems.map(petId => selectedItemsById[petId])
+        setSelectedPets(localPets);
 
         if (items) handleGroups(data, items);
     };
@@ -1481,6 +1498,7 @@ function App() {
                             setRefreshGroups(true);
                         }
                     }
+                    selectedPets={selectedPets}
 
                 />;
             case 0:
@@ -1512,15 +1530,20 @@ function App() {
 
         uploadedData.PetsCollection.sort((a, b) => a.ID - b.ID);
 
+        let tempPets = [];
         const positiveRankedPets = uploadedData.PetsCollection.filter(
             (pet) => {
                 // const isValidRank = !!pet.Rank;//Instead of relying on defaultRank always = 0, select valid ranks if they exist (not 0)
                 const isValidLocked = includeLocked ? true : !!pet.Locked;
+                if (isValidLocked) {
+                    tempPets.push(pet);
+                }
                 return isValidLocked;
                 // return isValidRank && isValidLocked;
             }
         ).map((pet) => pet.ID);
         setSelectedItems(positiveRankedPets);
+        setSelectedPets(tempPets);
 
         handleGroups(uploadedData, positiveRankedPets);
         if (tabSwitch === 0) setTabSwitch(1);  // move upload to expedition when done

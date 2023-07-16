@@ -1,5 +1,6 @@
 import React from 'react';
 import './PetItem.css';
+import helper from './util/helper.js'
 
 import { BonusMap } from "./itemMapping";
 
@@ -8,7 +9,7 @@ const filterBonuses = (bonuses, filterFn) => {
         .filter(filterFn);
 };
 
-const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, defaultRank }) => {
+const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, defaultRank, borderActive, enabledBonusHighlight, fullPetData }) => {
     if (!!data === false) return <div></div>;
     const { petId, img, name } = petData;
 
@@ -65,13 +66,45 @@ const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, de
         </ul>
     );
 
+
+    let numHighlights = [];
+    if (enabledBonusHighlight) {
+        for (const [key, value] of Object.entries(enabledBonusHighlight)) {
+            if (value) {
+                let found = fullPetData.BonusList.find((a) => a.ID === Number(key));
+                if (found) {
+                    numHighlights.push(key)
+                }
+            }
+        }
+    }
+
+
     return (
         <div
             key={petId}
             onClick={onClick}
             className={`item-tile ${isSelected ? '' : 'unselected'}`}
         >
-            <div className="item-image-container">
+            <div className="item-image-container" style={{
+                border: borderActive ? 'black 1px solid' : '',
+                position: 'relative'
+            }}>
+                {numHighlights.map((item, index) => {
+                    return (<div
+                        style={{
+                            background: helper.bonusColorMap[item].color,
+                            position: 'absolute',
+                            top: '0%',
+                            left: `${(100 / numHighlights.length) * index}%`,
+                            height: '100%',
+                            width: `${100 / numHighlights.length}%`,
+                            zIndex: -1
+                        }}
+                    >
+
+                    </div>)
+                })}
                 <div className="tooltip">
                     <span className="tooltip-content">
                         <h3>

@@ -12,6 +12,7 @@ import helper from './util/helper.js'
 
 import xIcon from "./assets/images/x_icon.svg"
 
+
 function ScoreSection({ data, group, totalScore, defaultRank }) {
     const { baseGroupScore, dmgCount, timeCount, synergyBonus } = calculateGroupScore(group, defaultRank);
     return (
@@ -60,10 +61,15 @@ const JSONDisplay = ({ data,
     setAvailableCustomBonuses,
     activeCustomBonuses,
     setActiveCustomBonuses,
-    deleteActiveCustomBonuses
+    deleteActiveCustomBonuses,
+    selectedPets
 }) => {
 
     const [tokenSelections, setTokenSelections] = useState({ 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 });
+    const [hoveredBonus, setHoveredBonus] = useState(0);
+    const [enabledBonusHighlight, setEnabledBonusHighlight] = useState({});
+    const [showAllBonusTally, setShowAllBonusTally] = useState(false);
+
 
     if (!!data === false || !!data.PetsCollection === false) {
         return <div>Loading...</div>; // You can replace this with null or another element if you prefer
@@ -72,7 +78,9 @@ const JSONDisplay = ({ data,
     let totalTokensHR = 0;
     let damageTotal = 0;
 
-    let bonusTotals = { 1012: 0, 1013: 0, 1016: 0 };
+    let bonusTotals = { 1001: 0, 1002: 0, 1003: 0, 1009: 0, 1012: 0, 1013: 0, 1014: 0, 1015: 0, 1016: 0 };
+    let bonusPets = {};
+    let totalMessages = [];
 
 
     // if (groups && groupRankCritera === 2)
@@ -90,11 +98,21 @@ const JSONDisplay = ({ data,
             totalTokensHR += groupBests.floored / groupBests.hours;
         })
 
-
-    let totalMessages = [];
+    if (selectedPets) {
+        for (let i = 0; i < selectedPets.length; i++) {
+            selectedPets[i].BonusList.forEach((bonus) => {
+                if (!bonusPets[bonus.ID]) {
+                    bonusPets[bonus.ID] = { total: 0, pets: [] }
+                }
+                bonusPets[bonus.ID].total++;
+                bonusPets[bonus.ID].pets.push(selectedPets[i])
+            })
+        }
+    }
 
     for (const [key, value] of Object.entries(bonusTotals)) {
-        totalMessages.push(`${BonusMap[key].label}: ${value} pets`)
+        if (activeCustomBonuses.find((a) => a.id === Number(key)) || showAllBonusTally)
+            totalMessages.push({ text: `${BonusMap[key].label}: ${value}/${bonusPets[key] ? bonusPets[key].total : 0} pets`, bonus: key })
     }
 
     return (
@@ -214,11 +232,14 @@ const JSONDisplay = ({ data,
                                     <PetItem
                                         key={ID}
                                         petData={staticPetData}
+                                        fullPetData={petData}
                                         data={data}
                                         isSelected={true}
                                         onClick={() => { }}
                                         weightMap={weightMap}
                                         defaultRank={defaultRank}
+                                        borderActive={petData.BonusList.find((a) => a.ID === hoveredBonus)}
+                                        enabledBonusHighlight={enabledBonusHighlight}
                                     />
                                 </Grid2>
                             );
@@ -421,11 +442,20 @@ const JSONDisplay = ({ data,
 
 
                 )}
+                {groupRankCritera === 3 && (
+                    <div style={{ display: 'flex', marginTop: '12px' }}>
 
+                        <div>{`Show all bonus totals`}</div>
+                        <input disabled={refreshGroups} type="checkbox" onChange={(e) => {
+                            setShowAllBonusTally(e.target.checked ? true : false)
+                        }} />
+                    </div>
+                )}
+                {/* Advanced filter table */}
                 {groupRankCritera === 3 && (
                     <div
                         style={{
-                            margin: '12px 0 12px 0',
+                            margin: '0px 0 12px 0',
                             display: 'flex',
                             flexDirection: 'column',
                             flex: '1',
@@ -437,6 +467,8 @@ const JSONDisplay = ({ data,
                                 display: 'flex'
                             }}
                         >
+
+
                             <div>
                                 Custom Bonuses
                             </div>
@@ -454,12 +486,13 @@ const JSONDisplay = ({ data,
                                 disabled={refreshGroups}
                                 onChange={
                                     (e) => {
-                                        if (e.target.value.length > 0)
+                                        if (e.target.value.length > 0) {
                                             setAvailableCustomBonuses(e.target.value);
+
+                                        }
                                     }
                                 }
-                            // defaultValue={'Select a bonus'}
-                            // placeholder={'Select a bonus'}
+                                value={''}
                             >
                                 {[<option value='' selected>Select Bonus</option>, ...availableCustomBonuses.map((e) => {
                                     return <option value={e.id}> {e.label}</option>
@@ -545,7 +578,15 @@ const JSONDisplay = ({ data,
 
                             return <div
                                 style={{
-                                    display: 'flex'
+                                    display: 'flex',
+                                    borderBottom: '1px solid black'
+                                }}
+
+                                onMouseEnter={(e_inner) => {
+                                    setHoveredBonus(e.id)
+                                }}
+                                onMouseLeave={(e_inner) => {
+                                    setHoveredBonus(-1);
                                 }}
                             >
                                 <div
@@ -716,7 +757,8 @@ const JSONDisplay = ({ data,
                             </div>
                         })}
 
-                        <div
+                        {/* Rel bonus damage bias */}
+                        {/* <div
                             style={{
                                 margin: '6px 0 6px 0'
                             }} >
@@ -724,72 +766,257 @@ const JSONDisplay = ({ data,
 
 
                                 let bonusName = e.label;
-                                let currentBonus = activeCustomBonuses.find((a) => a.id === e.id);
+                                // let currentBonus = activeCustomBonuses.find((a) => a.id === e.id);
+                                let currentBonus = e;
                                 if (currentBonus.placement !== 'rel') return null;
                                 switch (currentBonus.id) {
                                     case 1016:
                                         bonusName = 'Token Gain'
                                 }
 
-                                return <div
-                                    style={{
-                                        // margin: '6px 0 6px 0',
-                                        display: 'flex'
-                                    }}
-                                >
+                                return (
                                     <div
                                         style={{
-                                            marginRight: '12px'
+                                            // margin: '6px 0 6px 0',
+                                            display: 'flex'
                                         }}
                                     >
-                                        {`${bonusName} damage bias`}
-                                    </div>
-                                    <input
-                                        type='number'
-                                        className='prepNumber'
-                                        value={currentBonus.relThresh}
-                                        onChange={
-                                            (num) => {
-                                                try {
-                                                    let x = Number(num.target.value);
-                                                    x = Math.floor(x);
-                                                    if (x < 0 || x > 100) {
-                                                        return;
-                                                    };
-
-                                                    setActiveCustomBonuses((bonuses) => {
-                                                        let newBonuses = [...bonuses];
-                                                        let bonus = newBonuses.find((a) => a.id === e.id);
-                                                        bonus.relThresh = x;
-                                                        return newBonuses;
-                                                    })
-                                                }
-                                                catch (err) {
-                                                    console.log(err);
-                                                }
+                                        <div
+                                            style={{
+                                                marginRight: '12px'
                                             }}
-                                        placeholder={1 + ''}
-                                        min="0"
-                                        max="100"
+                                        >
+                                            {`${bonusName} damage bias`}
+                                        </div>
+                                        <input
+                                            type='number'
+                                            className='prepNumber'
+                                            value={currentBonus.relThresh}
+                                            onChange={
+                                                (num) => {
+                                                    try {
+                                                        let x = Number(num.target.value);
+                                                        x = Math.floor(x);
+                                                        if (x < 0 || x > 100) {
+                                                            return;
+                                                        };
 
-                                    />
-                                </div>
+                                                        setActiveCustomBonuses((bonuses) => {
+                                                            let newBonuses = [...bonuses];
+                                                            let bonus = newBonuses.find((a) => a.id === e.id);
+                                                            bonus.relThresh = x;
+                                                            return newBonuses;
+                                                        })
+                                                    }
+                                                    catch (err) {
+                                                        console.log(err);
+                                                    }
+                                                }}
+                                            placeholder={1 + ''}
+                                            min="0"
+                                            max="100"
+                                        />
+                                    </div>
+                                )
                             })}
-                        </div>
+                        </div> */}
 
-
+                        {/* Total bonuses pet amounts */}
                         <div
                             style={{
-                                margin: '6px 0 6px 0'
+                                margin: '6px 0 6px 0',
+                                display: 'flex',
+                                flexDirection: 'column'
                             }}>
-                            {totalMessages.map((e) => {
-                                return <div
-                                    style={{
-                                        // margin: '6px 0 6px 0'
-                                    }}
-                                >
-                                    {e}
-                                </div>
+                            {totalMessages.map((e, index) => {
+                                if (index % 2 !== 0 && index > 0) return;
+
+                                let firstDmgBias = Number(e.bonus);
+                                let secondDmgBias = (index + 1) < totalMessages.length ? Number(totalMessages[index + 1].bonus) : null;
+
+
+                                activeCustomBonuses.forEach((active_bon) => {
+                                    if (active_bon.placement !== 'rel') return null;
+                                    // return;
+                                    if (active_bon.id === firstDmgBias) {
+                                        firstDmgBias = <div
+                                            style={{
+                                                // margin: '6px 0 6px 0',
+                                                display: 'flex'
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    marginRight: '12px'
+                                                }}
+                                            >
+                                                {`damage bias`}
+                                            </div>
+                                            <input
+                                                type='number'
+                                                className='prepNumber'
+                                                value={active_bon.relThresh}
+                                                onChange={
+                                                    (num) => {
+                                                        try {
+                                                            let x = Number(num.target.value);
+                                                            x = Math.floor(x);
+                                                            if (x < 0 || x > 100) {
+                                                                return;
+                                                            };
+
+                                                            setActiveCustomBonuses((bonuses) => {
+                                                                let newBonuses = [...bonuses];
+                                                                let bonus = newBonuses.find((a) => a.id === active_bon.id);
+                                                                bonus.relThresh = x;
+                                                                return newBonuses;
+                                                            })
+                                                        }
+                                                        catch (err) {
+                                                            console.log(err);
+                                                        }
+                                                    }}
+                                                placeholder={1 + ''}
+                                                min="0"
+                                                max="100"
+                                            />
+                                        </div>
+                                    }
+                                    if (active_bon.id === secondDmgBias) {
+                                        secondDmgBias = <div
+                                            style={{
+                                                // margin: '6px 0 6px 0',
+                                                display: 'flex'
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    marginRight: '12px'
+                                                }}
+                                            >
+                                                {`damage bias`}
+                                            </div>
+                                            <input
+                                                type='number'
+                                                className='prepNumber'
+                                                value={active_bon.relThresh}
+                                                onChange={
+                                                    (num) => {
+                                                        try {
+                                                            let x = Number(num.target.value);
+                                                            x = Math.floor(x);
+                                                            if (x < 0 || x > 100) {
+                                                                return;
+                                                            };
+
+                                                            setActiveCustomBonuses((bonuses) => {
+                                                                let newBonuses = [...bonuses];
+                                                                let bonus = newBonuses.find((a) => a.id === active_bon.id);
+                                                                bonus.relThresh = x;
+                                                                return newBonuses;
+                                                            })
+                                                        }
+                                                        catch (err) {
+                                                            console.log(err);
+                                                        }
+                                                    }}
+                                                placeholder={1 + ''}
+                                                min="0"
+                                                max="100"
+                                            />
+                                        </div>
+                                    }
+                                })
+
+
+
+                                return (
+                                    <div
+                                        style={{
+                                            display: 'flex'
+                                        }}
+                                    >
+                                        <div
+                                            style={{
+                                                width: '50%'
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    // margin: '6px 0 6px 0'
+                                                    // color: helper.bonusColorMap[e.bonus].color
+                                                }}
+                                                onMouseEnter={(e_inner) => {
+                                                    setHoveredBonus(Number(e.bonus))
+                                                }}
+                                                onMouseLeave={(e_inner) => {
+                                                    setHoveredBonus(-1);
+                                                }}
+
+                                            >
+                                                {totalMessages[index].text}
+                                                <div>
+                                                    <div style={{ display: 'flex' }}>
+                                                        <div>{`Enable highlight`}</div>
+                                                        <input type="checkbox" onChange={(e_inner) => {
+                                                            setEnabledBonusHighlight({ ...enabledBonusHighlight, [e.bonus]: e_inner.target.checked ? 1 : 0 })
+                                                        }} />
+                                                        <div
+                                                            style={{
+                                                                width: '24px',
+                                                                background: helper.bonusColorMap[e.bonus].color
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="dmgBias">
+                                                    {isNaN(firstDmgBias) && firstDmgBias}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {(index + 1 < totalMessages.length) && (
+                                            <div
+                                                style={{
+                                                    width: '50%'
+                                                }}
+                                            >
+                                                <div
+                                                    style={{
+                                                        // margin: '6px 0 6px 0'
+                                                    }}
+                                                    onMouseEnter={(e_inner) => {
+                                                        setHoveredBonus(Number(totalMessages[index + 1].bonus))
+                                                    }}
+                                                    onMouseLeave={(e_inner) => {
+                                                        setHoveredBonus(-1);
+                                                    }}
+                                                >
+                                                    {totalMessages[index + 1].text}
+                                                    <div>
+                                                        <div style={{ display: 'flex' }}>
+                                                            <div>{`Enable highlight`}</div>
+                                                            <input type="checkbox" onChange={(e_inner) => {
+                                                                setEnabledBonusHighlight({ ...enabledBonusHighlight, [totalMessages[index + 1].bonus]: e_inner.target.checked ? 1 : 0 })
+                                                            }} />
+                                                            <div
+                                                                style={{
+                                                                    width: '24px',
+                                                                    background: helper.bonusColorMap[totalMessages[index + 1].bonus].color
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className='dmgBias'>
+
+                                                        {isNaN(secondDmgBias) && secondDmgBias}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+
+
                             })}
                         </div>
 
