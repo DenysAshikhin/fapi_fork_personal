@@ -302,9 +302,15 @@ const JSONDisplay = ({ data,
                     <div style={{ display: 'flex' }}>
 
                         <div>{`Ignore Pets Rank`}</div>
-                        <input disabled={refreshGroups} type="checkbox" onChange={(e) => {
-                            setDefaultRank(e.target.checked ? 1 : 0)
-                        }} />
+                        <input
+                            disabled={refreshGroups}
+                            type="checkbox"
+                            onChange={(e) => {
+                                setDefaultRank(e.target.checked ? 1 : 0)
+                            }}
+                            checked={!!defaultRank}
+                            value={!!defaultRank}
+                        />
                     </div>
                     <div>
                         {`Golden Clover Level: ${data.SoulGoldenClover}`}
