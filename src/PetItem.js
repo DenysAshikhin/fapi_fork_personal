@@ -40,9 +40,12 @@ const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, de
             {filterBonuses(pet.BonusList, (bonus) => {
                 return bonus.ID < 1000;
             }).map((activePetBonus, i) => {
+                if(pet.ID > 72){
+                    console.log(`test`)
+                }
                 const bonusBase = Number(1.0 + activePetBonus.Gain);
-                const bonusPower = Number(pet.Level);
-                const result = (Math.pow(bonusBase, bonusPower) - 1) * (1 + .02 * Number(pet.Rank));
+                const bonusPower = Number(defaultRank ? defaultRank : pet.Level);
+                const result = (Math.pow(bonusBase, bonusPower) - 1) * (1 + .02 * Number(rank));
 
                 return (
                     <li key={i}>

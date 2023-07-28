@@ -627,7 +627,7 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
                         }
                     }
                     //`eq` or `min` isn't active, but needs to reserve certain pets
-                    if (bonus.tempMax || (bonus.tempMax === 0 && !bonus.disabled)) {
+                    if (bonus.tempMax || (bonus.tempMax === 0 && !bonus.disabled && bonus.disabled !== undefined)) {
                         let currCount = 0;
 
                         for (let j = 0; j < prevCombination.length; j++) {

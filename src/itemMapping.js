@@ -366,7 +366,16 @@ export const BonusMap = {
     20: {id: 20, label: "Pet RANK EXP"},
     21: {id: 21, label: "Card POWER B"},
     22: {id: 22, label: "Card EXP B"},
-    26: {id: 26, label: "Reinc Point Bonus"},
+    23: {id: 23, label: "HEALTHY POTATOE"},
+    24: {id: 24, label: "PLANT RANK EXP"},
+    25: {id: 25, label: "PLANT MANUAL HARVEST"},
+    26: {id: 26, label: "PLANT FINAL PROD"},
+    27: {id: 27, label: "FRIES BONUS"},
+    28: {id: 28, label: "PROTEIN BONUS"},
+    29: {id: 29, label: "GRASSHOPPER DMG"},
+    30: {id: 30, label: "CONTAGION HP DMG"},
+    31: {id: 31, label: "Reinc Point Bonus"},
+    32: {id: 32, label: "PLANT GROWTH"},
     1001: {id: 1001, label: "POTATO GAIN"},
     1002: {id: 1002, label: "CLASS EXP GAIN"},
     1003: {id: 1003, label: "SKULL GAIN"},
@@ -428,7 +437,7 @@ export const DefaultWeightMappings = {
     20: {id: 20, weight: 10},
     21: {id: 21, weight: 201},
     22: {id: 22, weight: 10},
-    26: {id: 26, weight: 50},
+    31: {id: 31, weight: 50},
 }
 const StandardBonusesWeightMap = standardBonusesWeightList.reduce((accum, item, i) => {
     const newItem = {
