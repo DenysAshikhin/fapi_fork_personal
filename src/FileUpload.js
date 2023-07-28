@@ -1,5 +1,6 @@
 import React from 'react';
 import pako from 'pako';
+import saveFileImg from './assets/images/fapi_save_file.png'
 
 const FileUpload = ({ onData }) => {
     const handleFileUpload = async (e) => {
@@ -31,9 +32,10 @@ const FileUpload = ({ onData }) => {
         <div className="FileUpload">
             <h1>SPOILERS AWAIT</h1>
             <h2>Upload your save file for top 6 teams according to base dmg, current rank, and expedition dmg/time bonuses:</h2>
-            <h3>Written with ChatGPT. Calculations may take a minute. All data stays client-side.</h3>
-            <h3>currentRank*baseDmg*groupBonus; rank > 0 to be considered</h3>
-            <input type="file" onChange={handleFileUpload} />
+            <img src={saveFileImg} />
+            <div>
+                <input type="file" onChange={handleFileUpload} />
+            </div>
         </div>
     );
 };

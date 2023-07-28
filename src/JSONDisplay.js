@@ -62,7 +62,8 @@ const JSONDisplay = ({ data,
     activeCustomBonuses,
     setActiveCustomBonuses,
     deleteActiveCustomBonuses,
-    selectedPets
+    selectedPets,
+    failedFilters
 }) => {
 
     const [tokenSelections, setTokenSelections] = useState({ 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 });
@@ -549,6 +550,7 @@ const JSONDisplay = ({ data,
                             >
                                 Equation
                             </div>
+
                             <div
                                 style={{
                                     background: 'yellow',
@@ -557,8 +559,31 @@ const JSONDisplay = ({ data,
                                     justifyContent: 'center'
                                 }}
                             >
-                                Placement
+                                <MouseOverPopover tooltip={
+                                    <div style={{ padding: '6px' }}>
+                                        <div>
+
+                                            Determines the order in which the pets are slotted in:
+                                        </div>
+                                        <div>
+                                            Top: attempts to fill the top teams while satisfying each criteria first
+                                        </div>
+                                        <div>
+                                            Bottom: Will precalculate and reserve the minimum number of pets for the bottom teams, without affecting tops teams
+                                        </div>
+                                        <div>
+                                            Relative: Will dynamically place pets based on the damage bias, higher bias means the pets will be slotted in more aggresively.
+                                            This is based on the strongest team at each step vs how much damage is lost by slotting the `relative` pets
+                                        </div>
+                                    </div>
+                                }>
+                                    <div>
+                                        Placement
+                                    </div>
+                                </MouseOverPopover>
+
                             </div>
+
                             <div
                                 style={{
                                     background: 'gray',
@@ -840,6 +865,12 @@ const JSONDisplay = ({ data,
                                 let firstDmgBias = Number(e.bonus);
                                 let secondDmgBias = (index + 1) < totalMessages.length ? Number(totalMessages[index + 1].bonus) : null;
 
+                                let firstFailMsg = failedFilters[e.bonus];
+                                let secondFailMsg = secondDmgBias ? failedFilters[totalMessages[index + 1].bonus] : null;
+
+                                if (firstFailMsg) {
+                                    console.log(`aaa`)
+                                }
 
                                 activeCustomBonuses.forEach((active_bon) => {
                                     if (active_bon.placement !== 'rel') return null;
@@ -934,8 +965,6 @@ const JSONDisplay = ({ data,
                                     }
                                 })
 
-
-
                                 return (
                                     <div
                                         style={{
@@ -976,8 +1005,36 @@ const JSONDisplay = ({ data,
                                                     </div>
                                                 </div>
                                                 <div className="dmgBias">
-                                                    {isNaN(firstDmgBias) && firstDmgBias}
+                                                    {isNaN(firstDmgBias) &&
+
+
+                                                        <MouseOverPopover tooltip={
+                                                            <div>
+                                                                <div>
+                                                                    How aggressively to slot in these pets
+                                                                </div>
+                                                                <div>
+                                                                    Higher value means these pets need to be stronger to considered, lower means smaller threshold to slot them in
+                                                                </div>
+                                                                <div>
+                                                                    This is based on the best team at each step without these pets, vs with it.
+                                                                </div>
+                                                            </div>
+                                                        }>
+                                                            {firstDmgBias}
+                                                        </MouseOverPopover>
+
+
+
+                                                    }
                                                 </div>
+                                                {!!firstFailMsg &&
+                                                    <div
+                                                        style={{ color: 'red' }}>
+                                                        {firstFailMsg}
+                                                    </div>
+                                                }
+
                                             </div>
                                         </div>
                                         {(index + 1 < totalMessages.length) && (
@@ -1016,6 +1073,12 @@ const JSONDisplay = ({ data,
 
                                                         {isNaN(secondDmgBias) && secondDmgBias}
                                                     </div>
+                                                    {!!secondFailMsg &&
+                                                        <div
+                                                            style={{ color: 'red' }}>
+                                                            {secondFailMsg}
+                                                        </div>
+                                                    }
                                                 </div>
                                             </div>
                                         )}
@@ -1025,6 +1088,15 @@ const JSONDisplay = ({ data,
 
                             })}
                         </div>
+                        {/* Alerting overall impossible filters combinations */}
+                        {failedFilters['generic'] && (
+                            <div
+                                style={{ fontWeight: 'bold', color: 'red', display: 'flex', width: '100%', justifyContent: 'center' }}
+
+                            >
+                                {failedFilters['generic']}
+                            </div>
+                        )}
 
 
                     </div>

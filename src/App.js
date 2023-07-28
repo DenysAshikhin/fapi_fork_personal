@@ -508,6 +508,7 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
     const k = 4; // Size of each group
     numGroups = numGroups ? numGroups : 6;
     const memo = {};
+    let failedFiltersObj = {};
 
     let activeBonuses = other?.activeBonuses;
     if (!activeBonuses) activeBonuses = [];
@@ -536,7 +537,7 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
                 //First confirm the the combination satisfies all bonuses
                 for (let i = 0; i < bonusList.length; i++) {
                     let bonus = bonusList[i];
-
+                    let pass = false;
                     //Meaning there are required pets that have to be in the comp
                     if (bonus.requiredNumber > 0) {
                         let currCount = 0;
@@ -551,10 +552,12 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
 
                         if (currCount >= bonus.requiredNumber) {
                             // console.log(`we good`);
+                            pass = true;
                         }
                         else {
                             // console.log(`we not good`);
                             validTeam = false;
+                            pass = false;
                             break;
                         }
                     }
@@ -571,10 +574,12 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
 
                         if (currCount === bonus.exactNumber) {
                             // console.log(`we good`);
+                            pass = true;
                         }
                         else {
                             // console.log(`we not good`);
                             validTeam = false;
+                            pass = false;
                             break;
                         }
                     }
@@ -592,7 +597,7 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
                             //     }
                         }
 
-                        if (maxCounter <= bonus.bonus.amount)
+                        if (maxCounter <= bonus.bonus.amount) {
                             //Check that we have some of the required pets, but not exceeding the max amount
                             if (bonus.tempRequired > 0) {
                                 if (
@@ -601,24 +606,28 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
                                     (maxCounter >= bonus.tempRequired) //Max is >= required, ensure #pet >= required
                                 ) {
                                     // console.log(`we good`);
+                                    pass = true;
                                 }
                                 else {
                                     // console.log(`we not good`);
                                     validTeam = false;
+                                    pass = false;
                                     break;
                                 }
                             }
                             else {
-
+                                pass = true;
                             }
+                        }
                         //otherwise, ensure we don't exceed the maximum
                         else {
                             validTeam = false;
+                            pass = false;
                             break;
                         }
                     }
                     //`eq` or `min` isn't active, but needs to reserve certain pets
-                    else if (bonus.tempMax || bonus.tempMax === 0) {
+                    if (bonus.tempMax || (bonus.tempMax === 0 && !bonus.disabled)) {
                         let currCount = 0;
 
                         for (let j = 0; j < prevCombination.length; j++) {
@@ -631,19 +640,24 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
 
                         if (currCount <= bonus.tempMax) {
                             // console.log(`we good`);
+                            pass = true;
                         }
                         else {
                             // console.log(`we not good`);
                             validTeam = false;
+                            pass = false;
                             break;
                         }
                     }
-                    if (!validTeam) break;
 
+                    if (pass) {
+                        bonus.passed++;
+                    }
+
+                    if (!validTeam) break;
                 }
 
                 if (validTeam) {
-
                     let id = '';
                     for (let i = 0; i < prevCombination.length; i++) {
                         id = id + prevCombination[i].ID;
@@ -734,20 +748,52 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
                     let numPets = currBonus.pets.length;
                     let requiredGroups = 0;
                     let remainder;
+                    let disabled = false;
+                    let max = 0; // in case of min 1/team,  3 pets total among 3 groups, max is 1 - can not be 0 (is disabled)
                     switch (currBonus.bonus.equation) {
                         case 'min':
                             //If there are not enough pets to meet the min, then set the min to # of pets
-                            remainder = numPets % currBonus.bonus.amount;
-                            numPets -= remainder;
-                            requiredGroups = numPets >= 0 ? Math.ceil(numPets / currBonus.bonus.amount) : 0;
+
+                            //Not enough pets at all, do not reserve current pets
+                            if (numPets < currBonus.bonus.amount) {
+                                remainder = 0;
+                                disabled = true;
+                            }
+                            else {
+                                //While the min is possible, we need to check whether we should silently enforce a max, to populate future groups
+                                // if (remainingGroups <= requiredGroups) {
+                                let maxTemp = remainingGroups * currBonus.bonus.amount;
+                                if (numPets <= maxTemp) {
+                                    max = currBonus.bonus.amount;
+                                }
+                                // }
+
+                                remainder = numPets % currBonus.bonus.amount;
+                                numPets -= remainder;
+                                requiredGroups = numPets >= 0 ? Math.ceil(numPets / currBonus.bonus.amount) : 0;
+                            }
+
+
                             break;
                         case 'max':
 
                             break;
                         case 'eq':
-                            remainder = numPets % currBonus.bonus.amount;
-                            numPets -= remainder;
-                            requiredGroups = currBonus.pets.length >= currBonus.bonus.amount ? Math.ceil(numPets / currBonus.bonus.amount) : 0;
+                            //Not enough pets at all, do not reserve current pets
+                            if (numPets < currBonus.bonus.amount) {
+                                remainder = 0;
+                                disabled = true;
+                            }
+                            else {
+                                let maxTemp = remainingGroups * currBonus.bonus.amount;
+                                if (numPets <= maxTemp) {
+                                    max = currBonus.bonus.amount;
+                                }
+                                remainder = numPets % currBonus.bonus.amount;
+                                numPets -= remainder;
+                                requiredGroups = currBonus.pets.length >= currBonus.bonus.amount ? Math.ceil(numPets / currBonus.bonus.amount) : 0;
+                            }
+
                             break;
                         default:
                             break;
@@ -755,7 +801,7 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
 
                     //Time to slot in the pets
                     if (remainingGroups <= requiredGroups) {
-
+                        requiredPetBonusMap[currBonus.bonus.id].tempMax = max;
                         currBonus.pets.forEach((bonusPet) => {
                             requiredPetsOverall.push(bonusPet);
                         });
@@ -764,7 +810,22 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
                     else {
                         requiredPetBonusMap[currBonus.bonus.id].active = false;//Only prevents enforcing the required pets pet team
                         requiredPetBonusMap[currBonus.bonus.id].tempMax = remainder;
+                        requiredPetBonusMap[currBonus.bonus.id].disabled = disabled;
                     }
+                }
+
+                else if (currBonus.bonus.placement === 'top') {
+                    let numPets = currBonus.pets.length;
+                    let requiredGroups = 0;
+                    let remainder;
+                    let disabled = false;
+                    let max = 0; // in case of min 1/team,  3 pets total among 3 groups, max is 1 - can not be 0 (is disabled)
+
+                    let maxTemp = remainingGroups * currBonus.bonus.amount;
+                    if (numPets <= maxTemp) {
+                        max = currBonus.bonus.amount;
+                    }
+                    requiredPetBonusMap[currBonus.bonus.id].tempMax = max;
                 }
             }
 
@@ -776,7 +837,7 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
                 if (!temp.active) continue;
                 let requiredNumber = 0;
                 let exactNumber = -1;
-
+                temp.hardFail = false;
                 switch (temp.bonus.equation) {
                     case 'min':
                         //If there are not enough pets to meet the min, then set the min to # of pets
@@ -784,6 +845,7 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
                         if (temp.bonus.amount > temp.pets.length) {
                             // FAILED filter
                             requiredNumber = 0;
+                            temp.hardFail = true;
                         }
                         else
                             requiredNumber = temp.bonus.amount;
@@ -797,6 +859,7 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
                         if (temp.bonus.amount > temp.pets.length) {
                             // FAILED filter
                             exactNumber = -1;
+                            temp.hardFail = true;
                         }
                         else
                             exactNumber = temp.bonus.amount;
@@ -813,12 +876,49 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
         //Get a subset of pets: the required based on bonuses, any that have dmgBonus or timeBonus, up to 4 more for max raw dungeonDamage
         let finalPetsCollection = getBestDamagePets(petsCollection, defaultRank, { requiredPets: requiredPetsOverall });
 
+        //Mark every requiredBonus as failed (to check what passed at least once)
+        for (const [key, value] of Object.entries(requiredPetBonusMap)) {
+            value.passed = 0;
+        }
+
+
         time1 = new Date();
         let combinations = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length), Object.values(requiredPetBonusMap));
         time2 = new Date();
-        console.log(`time to get combinations ${combinations.length}: ${(time2 - time1) / 1000} seconds`)
+        console.log(`time to get combinations ${combinations.length}: ${(time2 - time1) / 1000} seconds`);
+
+        let allPassed = true;
+        //Check if any of the filters failed, and explain which + why
+        for (const [key, value] of Object.entries(requiredPetBonusMap)) {
+            if (!(key in failedFiltersObj)) {
+                if (!value.passed || value.hardFail) {
+                    let tempMsg = `Filter failed on group ${g + 1}:\n`;
+
+                    switch (value.bonus.equation) {
+                        case `min`:
+                            tempMsg += `not enough pets, min ${value.bonus.amount} but ${value.pets.length} remain`;
+                            break;
+                        case `max`:
+
+                            break;
+                        case `eq`:
+                            tempMsg += `not enough pets, req. ${value.bonus.amount} but ${value.pets.length} remain`;
+                            break;
+                        default:
+                            throw new Error(`impossible case`);
+                    }
+                    failedFiltersObj[key] = tempMsg
+                    allPassed = false;
+                }
+            }
+        }
 
         if (combinations === -1) {
+            if (Object.values(requiredPetBonusMap).length > 0) {
+                if (!(`generic` in failedFiltersObj)) {
+                    failedFiltersObj[`generic`] = `Individual filters all succeeded, but the combination of all is impossible starting group ${g + 1}`;
+                }
+            }
             break;
         }
         else {
@@ -914,19 +1014,21 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
                     time1 = new Date();
                     combinations = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length), Object.values(requiredPetBonusMap));
                     console.log(`got new combinations after the rel calcs`)
-                    if (combinations === -1)
+
+
+
+
+                    if (combinations === -1) {
+                        if (!(`generic` in failedFiltersObj)) {
+                            failedFiltersObj[`generic`] = `Individual filters all succeeded, but the combination of all is impossible starting group ${g + 1}`;
+                        }
                         break;
+                    }
                 }
 
 
 
             }
-
-
-
-
-
-
 
             bestGroups.push(combinations.team);
             petsCollection = petsCollection.filter((pet) => {
@@ -946,6 +1048,7 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
     }
     time4 = new Date();
     console.log(`time to get best combo: ${(time4 - time3) / 1000} seconds`)
+    other.setFailedFilters(failedFiltersObj);
     return bestGroups;
 }
 
@@ -1370,6 +1473,7 @@ function App() {
     );
     const [activeCustomBonuses, setActiveCustomBonuses] = useState([]);
     const [selectedPets, setSelectedPets] = useState([]);
+    const [failedFilters, setFailedFilters] = useState([]);
 
 
     const handleItemSelected = (items) => {
@@ -1499,7 +1603,7 @@ function App() {
                         }
                     }
                     selectedPets={selectedPets}
-
+                    failedFilters={failedFilters}
                 />;
             case 0:
                 return <FileUpload onData={handleData} />;
@@ -1564,7 +1668,15 @@ function App() {
         if (groups && !recalculate) {
             setGroups(groups);
         } else {
-            groups = findBestGroups(localPets, defaultRank, groupRankCritera, numTeams === -1 ? data.ExpeditionLimit : numTeams, { tokenDamageBias: tokenDamageBias, activeBonuses: activeCustomBonuses });
+            groups = findBestGroups(
+                localPets, defaultRank,
+                groupRankCritera, numTeams === -1 ? data.ExpeditionLimit : numTeams,
+                {
+                    tokenDamageBias: tokenDamageBias,
+                    activeBonuses: activeCustomBonuses,
+                    setFailedFilters: setFailedFilters
+                }
+            );
             setGroupCache({ ...groupCache, [keyString]: groups })
             setGroups(groups);
         }
@@ -1577,7 +1689,7 @@ function App() {
 
     return (
         <ThemeProvider theme={theme}>
-         
+
             <Container sx={{
                 marginLeft: '0px', marginRight: '0px', maxWidth: '100000px !important',
                 // width: 'calc(100vw - 126px)',
