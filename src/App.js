@@ -1048,7 +1048,10 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
     }
     time4 = new Date();
     console.log(`time to get best combo: ${(time4 - time3) / 1000} seconds`)
-    other.setFailedFilters(failedFiltersObj);
+    if (other?.setFailedFilters) {
+        other.setFailedFilters(failedFiltersObj);
+
+    }
     return bestGroups;
 }
 

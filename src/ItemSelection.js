@@ -20,6 +20,13 @@ const ItemSelection = ({ selectedItems, onItemSelected, data, weightMap, default
         const { petId } = petData;
         const isItemSelected = isSelected(petId);
 
+        if (!petData) {
+            console.log(`hereddda`)
+        }
+        if (petId > 40) {
+            console.log(`heresa`)
+        }
+
         return (
             <PetItem
                 key={petId}
@@ -33,9 +40,26 @@ const ItemSelection = ({ selectedItems, onItemSelected, data, weightMap, default
         );
     };
 
+    console.log(petNameArray)
+    let newPetArray = [...petNameArray];
+    let lastID = newPetArray[newPetArray.length - 1].petId;
+
+    for (let i = lastID - 1; i < data.PetsCollection.length; i++) {
+        if (data.PetsCollection[i].ID > lastID) {
+            let temp = {
+                img: '/fapi_fork_personal/pets/missing.png',
+                location: '??-??',
+                name: 'Unknown',
+                petId: data.PetsCollection[i].ID
+            }
+            newPetArray.push(temp)
+        }
+    }
+
+
     return (
         <div className="item-selection">
-            {petNameArray.map(renderPet)}
+            {newPetArray.map(renderPet)}
         </div>
     );
 };

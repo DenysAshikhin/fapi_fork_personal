@@ -153,51 +153,51 @@ const PetNames = {
     },
     39: {
         "name": "Anubis",
-        "location": "E5C",
+        "location": "E6C",
     },
     40: {
         "name": "Garuda",
-        "location": "E5R",
+        "location": "E6R",
     },
     41: {
         "name": "Tsukuyomi",
-        "location": "E6C",
+        "location": "E7C",
     },
     42: {
         "name": "Nanbozo",
-        "location": "E6R",
+        "location": "E7R",
     },
     43: {
         "name": "Ra",
-        "location": "E7C",
+        "location": "E8C",
     },
     44: {
         "name": "Vishnou",
-        "location": "E7R",
+        "location": "E8R",
     },
     45: {
         "name": "Icare",
-        "location": "E8C",
+        "location": "E9C",
     },
     46: {
         "name": "Olaf",
-        "location": "E8R",
+        "location": "E9R",
     },
     47: {
         "name": "Fafnir",
-        "location": "E9C",
+        "location": "E10C",
     },
     48: {
         "name": "Quetzalcoalt",
-        "location": "E9R",
+        "location": "E10R",
     },
     49: {
         "name": "Professor Inderwind",
-        "location": "E10C",
+        "location": "E12C",
     },
     50: {
         "name": "Dangun",
-        "location": "E10R",
+        "location": "E12R",
     },
     51: {
         "name": "Wako",
@@ -241,44 +241,88 @@ const PetNames = {
     },
     61: {
         "name": "Abby",
-        "location": "E11C",
+        "location": "E13C",
     },
     62: {
         "name": "Noop",
-        "location": "E11R",
+        "location": "E13R",
     },
     63: {
         "name": "Juba",
-        "location": "E12C",
+        "location": "E14C",
     },
     64: {
         "name": "David",
-        "location": "E12R",
+        "location": "E14R",
     },
     65: {
         "name": "Viktor",
-        "location": "E13C",
+        "location": "E15C",
     },
     66: {
         "name": "Darko",
-        "location": "E13R",
+        "location": "E15R",
     },
     67: {
         "name": "Ubel",
-        "location": "E14C",
+        "location": "E16C",
     },
     68: {
         "name": "Than",
-        "location": "E14R",
+        "location": "E16R",
     },
     69: {
         "name": "Hirma",
-        "location": "E15C",
+        "location": "E18C",
     },
     70: {
         "name": "Boletus",
-        "location": "E14R",
+        "location": "E18R",
     },
+    71: {
+        "name": "Froz",
+        "location": "E5C",
+    },
+    72: {
+        "name": "Beelzebub",
+        "location": "E5R",
+    },
+    73: {
+        "name": "Nasr",
+        "location": "E11C",
+    },
+    74: {
+        "name": "Bump",
+        "location": "E11R",
+    },
+    75: {
+        "name": "Nyx",
+        "location": "E17C",
+    },
+    76: {
+        "name": "Neith",
+        "location": "E17R",
+    },
+    77: {
+        "name": "Leon",
+        "location": "7-5",
+    },
+    78: {
+        "name": "Puff",
+        "location": "7-6",
+    },
+    79: {
+        "name": "Apollo",
+        "location": "7-7",
+    },
+    80: {
+        "name": "BigMouth",
+        "location": "7-8",
+    },
+    81: {
+        "name": "Neptune",
+        "location": "7-9",
+    }
 }
 export default PetNames;
 

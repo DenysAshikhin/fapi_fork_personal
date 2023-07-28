@@ -226,7 +226,16 @@ const JSONDisplay = ({ data,
                     >
                         {!!group && group.map((petData, idx) => {
                             const { ID } = petData;
-                            const staticPetData = petNameArray.find(staticPetDatum => staticPetDatum.petId === ID)
+                            let staticPetData = petNameArray.find(staticPetDatum => staticPetDatum.petId === ID)
+
+                            if (!staticPetData) {
+                                staticPetData = {
+                                    img: '/fapi_fork_personal/pets/missing.png',
+                                    location: '??-??',
+                                    name: 'Unknown',
+                                    petId: ID
+                                }
+                            }
 
                             return (
                                 <Grid2 xs={3} key={idx}>
@@ -1106,7 +1115,7 @@ const JSONDisplay = ({ data,
 
             </div>
             <div className="grid-right">
-                <Typography variant={"h5"}>Highlighted: {'>'}0 rank pets (clickable)</Typography>
+                <Typography variant={"h5"}>Highlighted: Unlocked Pets (clickable)</Typography>
                 <ItemSelection
                     weightMap={weightMap}
                     data={data}
