@@ -511,7 +511,7 @@ const JSONDisplay = ({ data,
                                 value={''}
                             >
                                 {[<option value='' selected>Select Bonus</option>, ...availableCustomBonuses.map((e) => {
-                                    return <option value={e.id}> {e.label}</option>
+                                    return <option value={e.id} key={e.id}> {e.label}</option>
                                 })]
                                 }
                                 {/* <option
@@ -617,6 +617,7 @@ const JSONDisplay = ({ data,
                             }
 
                             return <div
+                                key={e.id}
                                 style={{
                                     display: 'flex',
                                     borderBottom: '1px solid black'
@@ -976,6 +977,7 @@ const JSONDisplay = ({ data,
 
                                 return (
                                     <div
+                                        key={e.bonus}
                                         style={{
                                             display: 'flex'
                                         }}
@@ -1002,9 +1004,13 @@ const JSONDisplay = ({ data,
                                                 <div>
                                                     <div style={{ display: 'flex' }}>
                                                         <div>{`Enable highlight`}</div>
-                                                        <input type="checkbox" onChange={(e_inner) => {
-                                                            setEnabledBonusHighlight({ ...enabledBonusHighlight, [e.bonus]: e_inner.target.checked ? 1 : 0 })
-                                                        }} />
+                                                        <input
+                                                            type="checkbox"
+                                                            onChange={(e_inner) => {
+                                                                setEnabledBonusHighlight({ ...enabledBonusHighlight, [e.bonus]: e_inner.target.checked ? 1 : 0 })
+                                                            }}
+                                                            checked={enabledBonusHighlight[e.bonus]}
+                                                        />
                                                         <div
                                                             style={{
                                                                 width: '24px',
@@ -1048,6 +1054,7 @@ const JSONDisplay = ({ data,
                                         </div>
                                         {(index + 1 < totalMessages.length) && (
                                             <div
+                                                key={totalMessages[index + 1].bonus}
                                                 style={{
                                                     width: '50%'
                                                 }}
@@ -1067,9 +1074,13 @@ const JSONDisplay = ({ data,
                                                     <div>
                                                         <div style={{ display: 'flex' }}>
                                                             <div>{`Enable highlight`}</div>
-                                                            <input type="checkbox" onChange={(e_inner) => {
-                                                                setEnabledBonusHighlight({ ...enabledBonusHighlight, [totalMessages[index + 1].bonus]: e_inner.target.checked ? 1 : 0 })
-                                                            }} />
+                                                            <input
+                                                                type="checkbox"
+                                                                onChange={(e_inner) => {
+                                                                    setEnabledBonusHighlight({ ...enabledBonusHighlight, [totalMessages[index + 1].bonus]: e_inner.target.checked ? 1 : 0 })
+                                                                }}
+                                                                checked={enabledBonusHighlight[totalMessages[index + 1].bonus]}
+                                                            />
                                                             <div
                                                                 style={{
                                                                     width: '24px',

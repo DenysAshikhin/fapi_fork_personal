@@ -20,13 +20,6 @@ const ItemSelection = ({ selectedItems, onItemSelected, data, weightMap, default
         const { petId } = petData;
         const isItemSelected = isSelected(petId);
 
-        if (!petData) {
-            console.log(`hereddda`)
-        }
-        if (petId > 40) {
-            console.log(`heresa`)
-        }
-
         return (
             <PetItem
                 key={petId}
@@ -40,7 +33,6 @@ const ItemSelection = ({ selectedItems, onItemSelected, data, weightMap, default
         );
     };
 
-    console.log(petNameArray)
     let newPetArray = [...petNameArray];
     let lastID = newPetArray[newPetArray.length - 1].petId;
 
