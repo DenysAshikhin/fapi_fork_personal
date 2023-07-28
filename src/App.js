@@ -194,7 +194,7 @@ function getCombinations(array, k) {
 
 const calcBestDamageGroupOLD = (petsCollection, defaultRank, numGroups) => {
     const k = 4; // Size of each group
-    numGroups = numGroups ? numGroups : 6;
+    numGroups = numGroups ? numGroups : 7;
     const memo = {};
 
     const memoizedGroupScore = (group) => {
@@ -506,7 +506,7 @@ const getBestDamagePets = (petsCollection, defaultRank, other) => {
 
 const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
     const k = 4; // Size of each group
-    numGroups = numGroups ? numGroups : 6;
+    numGroups = numGroups ? numGroups : 7;
     const memo = {};
     let failedFiltersObj = {};
 
@@ -1015,9 +1015,6 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
                     combinations = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length), Object.values(requiredPetBonusMap));
                     console.log(`got new combinations after the rel calcs`)
 
-
-
-
                     if (combinations === -1) {
                         if (!(`generic` in failedFiltersObj)) {
                             failedFiltersObj[`generic`] = `Individual filters all succeeded, but the combination of all is impossible starting group ${g + 1}`;
@@ -1025,9 +1022,6 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
                         break;
                     }
                 }
-
-
-
             }
 
             bestGroups.push(combinations.team);
@@ -1058,7 +1052,7 @@ const calcBestDamageGroup = (petsCollection, defaultRank, numGroups, other) => {
 const calcBestTokenGroupOLD = (petsCollection, defaultRank, numGroups) => {
     const k = 4; // Size of each group
 
-    numGroups = numGroups ? numGroups : 6;
+    numGroups = numGroups ? numGroups : 7;
 
     const memo = {};
 
@@ -1151,7 +1145,7 @@ const calcBestTokenGroupOLD = (petsCollection, defaultRank, numGroups) => {
 const calcBestTokenGroup = (petsCollection, defaultRank, numGroups, other) => {
     const k = 4; // Size of each group
 
-    numGroups = numGroups ? numGroups : 6;
+    numGroups = numGroups ? numGroups : 7;
     let damageMode = 1;//1 = max damage, 2 = min
 
     const memo = {};

@@ -66,7 +66,7 @@ const JSONDisplay = ({ data,
     failedFilters
 }) => {
 
-    const [tokenSelections, setTokenSelections] = useState({ 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 });
+    const [tokenSelections, setTokenSelections] = useState({ 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 });
     const [hoveredBonus, setHoveredBonus] = useState(0);
     const [enabledBonusHighlight, setEnabledBonusHighlight] = useState({});
     const [showAllBonusTally, setShowAllBonusTally] = useState(false);
@@ -379,7 +379,7 @@ const JSONDisplay = ({ data,
                                 try {
                                     let x = Number(e.target.value);
                                     x = Math.floor(x);
-                                    if (x < 1 || x > 6) {
+                                    if (x < 1 || x > 7) {
                                         return;
                                     }
                                     setNumTeams(e.target.value);
@@ -392,7 +392,7 @@ const JSONDisplay = ({ data,
                             }}
                         placeholder={numTeams + ''}
                         min="1"
-                        max="6"
+                        max="7"
 
                     />
                 </div>
