@@ -17,6 +17,8 @@ import WeightedPetList from "./weightedPetList/WeightedPetList";
 import PetComboList from "./comboList/comboList";
 import helper from './util/helper.js';
 
+import FarmingLanding from './FarmingLanding';
+
 const theme = createTheme({
     palette: {
         primary: {
@@ -1495,14 +1497,16 @@ function App() {
 
     const selectComponent = () => {
         switch (tabSwitch) {
+            case 2:
+                return <FarmingLanding data={data} />;
             case 4:
                 return <Weights weightMap={weightMap} setWeightsProp={setWeights} />;
             case 3:
                 return <PetComboList data={data} weightMap={weightMap} />;
             // case 3:
             //     return <ExpeditionCardComponent data={data} weightMap={weightMap} defaultRank={defaultRank} />;
-            case 2:
-                return <CardComponent data={data} weightMap={weightMap} />;
+            // case 2:
+            //     return <CardComponent data={data} weightMap={weightMap} />;
             case 1:
                 return <JSONDisplay
                     weightMap={weightMap}
@@ -1707,6 +1711,7 @@ function App() {
                     >
                         <BottomNavigationAction label="Upload" icon={<InfoIcon />} />
                         {!!data && <BottomNavigationAction label="Expedition" icon={<InfoIcon />} />}
+                        {!!data && <BottomNavigationAction label="Farming" icon={<InfoIcon />} />}
                         {!!data && <BottomNavigationAction label="Charges" icon={<BadgeIcon />} />}
                         {/*{!!data && <BottomNavigationAction label="Exp. Rewards" icon={<BadgeIcon />} />}*/}
                         {!!data && <BottomNavigationAction label="Pet Combo List" icon={<BadgeIcon />} />}

@@ -9,8 +9,9 @@ import MouseOverPopover from "./tooltip";
 import Typography from "@mui/material/Typography";
 import { calculateGroupScore, calculatePetBaseDamage, SOUL_CLOVER_STEP, calculateBestHours, EXP_DMG_MOD, EXP_TIME_MOD } from "./App";
 import helper from './util/helper.js'
-
 import xIcon from "./assets/images/x_icon.svg"
+
+import ReactGA from "react-ga4";
 
 
 function ScoreSection({ data, group, totalScore, defaultRank }) {
@@ -71,6 +72,10 @@ const JSONDisplay = ({ data,
     const [enabledBonusHighlight, setEnabledBonusHighlight] = useState({});
     const [showAllBonusTally, setShowAllBonusTally] = useState(false);
 
+    useEffect(() => {
+        ReactGA.send({ hitType: "pageview", page: "/expeditions", title: "Exepdition Calculator Page" });
+
+    }, [])
 
     if (!!data === false || !!data.PetsCollection === false) {
         return <div>Loading...</div>; // You can replace this with null or another element if you prefer
@@ -288,15 +293,41 @@ const JSONDisplay = ({ data,
                         <select
                             style={{ maxWidth: '144px' }}
                             disabled={refreshGroups}
-                            onChange={(e) => {
+                            onChange={async (e) => {
+
+
+                                ReactGA.event({
+                                    category: "expedition_filter",
+                                    action: 'changed_filter',
+                                    label: 'expedition'
+                                })
+
                                 switch (e.target.value) {
                                     case 'damage':
+
+                                        ReactGA.event({
+                                            category: "expedition_filter",
+                                            action: 'filter_damage',
+                                            label: 'expedition'
+                                        })
                                         setGroupRankCriteria(1);
                                         break;
                                     case 'token':
+
+                                        ReactGA.event({
+                                            category: "expedition_filter",
+                                            action: 'filter_token',
+                                            label: 'expedition'
+                                        })
                                         setGroupRankCriteria(2);
                                         break;
                                     case 'advanced':
+
+                                        ReactGA.event({
+                                            category: "expedition_filter",
+                                            action: 'filter_advanced',
+                                            label: 'expedition'
+                                        })
                                         setGroupRankCriteria(3);
                                         break;
                                     default:
@@ -393,7 +424,6 @@ const JSONDisplay = ({ data,
                         placeholder={numTeams + ''}
                         min="1"
                         max="7"
-
                     />
                 </div>
 
