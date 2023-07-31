@@ -3,12 +3,14 @@ import MouseOverPopover from "./tooltip";
 import FarmingPlant from './FarmPlant';
 import helper from "./util/helper.js"
 
+import ReactGA from "react-ga4";
 
 const FarmingLanding = ({ data }) => {
 
     const [customMultipliers, setCustomMultipliers] = useState([1, 2, 3, 4, 5, 6, 7, 8]);
     const [futureTime, setFutureTime] = useState(2);
     const [numAuto, setNumAuto] = useState(1);
+    const [password, setPassword] = useState('');
     const secondsHour = 3600;
 
     useEffect(() => {
@@ -62,6 +64,10 @@ const FarmingLanding = ({ data }) => {
         setCustomMultipliers(newArr);
 
     }, [data])
+
+    useEffect(() => {
+        ReactGA.send({ hitType: "pageview", page: "/farming", title: "Farming Calculator Page" });
+    }, [])
 
     let petPlantCombo = 1;
     let contagionPlantEXP = 1;
@@ -183,6 +189,10 @@ const FarmingLanding = ({ data }) => {
         customFuturePlants.push(newFuture);
     }
 
+    // if (password !== 'cheese_needed_this')
+    //     return <div>
+    //         <input type='string' value={password} onChange={(e) => { setPassword(e.target.value) }} />
+    //     </div>
 
     return (
         <div>
@@ -192,9 +202,9 @@ const FarmingLanding = ({ data }) => {
             <div>Pet Plant Growth Combo: x{helper.roundTwoDecimal(petPlantCombo)}</div>
             <div>Contagion Rank EXP: x{helper.roundTwoDecimal(contagionPlantEXP)}</div>
             <div
-                style={{ display: 'flex', flexDirection: 'row' }}
+                style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}
             >
-                {finalPlants.map((val, index) => { return <FarmingPlant data={{ plant: val, index: index, customMultipliers: customMultipliers, setCustomMultipliers: setCustomMultipliers, allowSetMultipliers: false }} /> })}
+                {finalPlants.map((val, index) => { return <FarmingPlant data={{ plant: val, index: index, customMultipliers: customMultipliers, setCustomMultipliers: setCustomMultipliers, allowSetMultipliers: false, allowSetMultipliers: true }} /> })}
 
             </div>
             <div>
@@ -203,7 +213,7 @@ const FarmingLanding = ({ data }) => {
             <div>
                 {`Time till fastest level ${helper.roundTwoDecimal(timeTillNextLevel / 60)} minutes`}
             </div>
-            <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                 {futurePlants.map((plant, index) => {
 
                     return (
@@ -325,7 +335,7 @@ const FarmingLanding = ({ data }) => {
                         max="8"
                     />
                 </div>
-                <div style={{ display: 'flex' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                     {customFuturePlants.map((plant, index) => {
                         return <FarmingPlant data={
                             {
