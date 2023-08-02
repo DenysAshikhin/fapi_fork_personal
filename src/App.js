@@ -1710,11 +1710,11 @@ function App() {
                         onChange={(event, newValue) => setTabSwitch(newValue)}
                     >
                         <BottomNavigationAction label="Upload" icon={<InfoIcon />} />
-                        {!!data && <BottomNavigationAction label="Expedition" icon={<InfoIcon />} />}
-                        {!!data && <BottomNavigationAction label="Farming" icon={<InfoIcon />} />}
+                        {!!data && <BottomNavigationAction label="Expedition" icon={<img style={{ height: '24px' }} src={`/fapi_fork_personal/paw_icon.svg`} />} />}
+                        {!!data && <BottomNavigationAction label="Farming" icon={<img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/farming.svg`} />} />}
                         {!!data && <BottomNavigationAction label="Charges" icon={<BadgeIcon />} />}
                         {/*{!!data && <BottomNavigationAction label="Exp. Rewards" icon={<BadgeIcon />} />}*/}
-                        {!!data && <BottomNavigationAction label="Pet Combo List" icon={<BadgeIcon />} />}
+                        {!!data && <BottomNavigationAction label="Pet Combo List" icon={<img style={{ height: '24px' }} src={`/fapi_fork_personal/paw_plus.svg`} />} />}
                         {/*{!!data && <BottomNavigationAction label="Weighted Pets" icon={<ScaleIcon />} />}*/}
                         {<BottomNavigationAction label="Weights" icon={<ScaleIcon />} />}
                         <RepoLink />

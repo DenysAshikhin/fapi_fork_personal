@@ -15,7 +15,13 @@ import reportWebVitals from './reportWebVitals';
 
 import ReactGA from "react-ga4";
 
-ReactGA.initialize("G-QT1B9TZS0P");
+ReactGA.initialize([{
+  trackingId: "G-QT1B9TZS0P",
+  // gaOptions: {...}, // optional
+  gtagOptions: {
+    send_page_view: false
+  },
+}]);
 
 
 
