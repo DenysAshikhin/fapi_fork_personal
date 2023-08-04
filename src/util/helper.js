@@ -133,6 +133,9 @@ var helper = {
         if (numSeconds > 0) {
             string = string + `${numSeconds < 10 ? `0` + numSeconds : numSeconds}s`
         }
+        else {
+            string = string + '0s';
+        }
 
         return string;
     },
@@ -151,7 +154,7 @@ var helper = {
             string = string + `${numMinutes < 10 ? `0` + numMinutes : numMinutes}m`
         }
         else {
-            string = `0s`
+            string = string + `0s`;
         }
 
         return string;
