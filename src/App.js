@@ -1753,7 +1753,7 @@ function App() {
                         </div>
                     )}
                 </div>
-                <div style={{ overflow: 'auto' }}>
+                <div style={{ overflow: 'auto', width: '100%' }}>
                     {selectComponent()}
                 </div>
 

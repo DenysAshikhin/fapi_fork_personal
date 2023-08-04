@@ -150,6 +150,9 @@ var helper = {
         if (numMinutes > 0) {
             string = string + `${numMinutes < 10 ? `0` + numMinutes : numMinutes}m`
         }
+        else {
+            string = `0s`
+        }
 
         return string;
     },

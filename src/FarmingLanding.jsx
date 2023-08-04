@@ -466,7 +466,7 @@ const FarmingLanding = ({ data }) => {
                     {futurePlants.map((plant, index) => {
 
                         return (
-                            <div style={{ border: '1px solid black', margin: '6px', padding: '0 6px 0 0', width: '360px' }}>
+                            <div style={{ border: '1px solid black', margin: '6px', padding: '0 6px 0 0', width: '305px' }}>
                                 <div style={{ display: 'flex' }}>
                                     <div>{`P${index + 1} mult after ${helper.roundTwoDecimal(futureTime)} hours:`}</div>
                                     <div style={{ margin: '0 6px 0 6px' }}>  {`x${helper.roundTwoDecimal(plant.futureMult)}`}</div>

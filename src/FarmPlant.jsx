@@ -109,6 +109,7 @@ const FarmingPlant = ({ data }) => {
             </div>
 
 
+            {/* Rank */}
             <div style={{ fontSize: '12px', padding: '0 1px 0 1px', color: 'white', bottom: '18%', left: '25%', display: 'flex', position: 'absolute' }}>
                 <div style={{ display: 'flex' }}>
                     <div style={{ background: 'black', borderRadius: '6px', padding: '0 3px 0 3px' }}>
@@ -124,6 +125,7 @@ const FarmingPlant = ({ data }) => {
                 </div>
             </div>
 
+            {/* PIC */}
             <div style={{ fontSize: '12px', padding: '0 1px 0 1px', color: 'white', bottom: '30%', left: fake ? '10%' : '14.9%', display: 'flex', position: 'absolute' }}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     <MouseOverPopover tooltip={
@@ -167,6 +169,7 @@ const FarmingPlant = ({ data }) => {
                 </div>
             </div>
 
+            {/* Weight */}
             <div style={{ fontSize: '12px', marginTop: '0px', height: '12px', padding: '0 1px 0 1px', color: 'black', bottom: fake ? '7%' : '7%', left: '1%', display: 'flex', position: 'absolute' }}>
                 <div style={{
                     display: 'flex',
