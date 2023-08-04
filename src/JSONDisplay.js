@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Grid2 from '@mui/material/Unstable_Grid2';
 
 import './JSONDisplay.css'; // Add this line to import the CSS file
-import { BonusMap, petNameArray } from './itemMapping';
+import { BonusMap, petNameArray, petNames } from './itemMapping';
 import PetItem from './PetItem';
 import ItemSelection from "./ItemSelection";
 import MouseOverPopover from "./tooltip";
@@ -12,6 +12,9 @@ import helper from './util/helper.js'
 import xIcon from "./assets/images/x_icon.svg"
 
 import ReactGA from "react-ga4";
+import SearchBox from './util/search.jsx';
+
+
 
 
 function ScoreSection({ data, group, totalScore, defaultRank }) {
@@ -42,7 +45,9 @@ function ScoreSection({ data, group, totalScore, defaultRank }) {
     );
 }
 
-const JSONDisplay = ({ data,
+const JSONDisplay = ({
+    data,
+    originalPets,
     refreshGroups,
     comboSelector,
     setComboSelector,
@@ -504,7 +509,8 @@ const JSONDisplay = ({ data,
                             display: 'flex',
                             flexDirection: 'column',
                             flex: '1',
-                            border: 'black 1px solid'
+                            border: 'black 1px solid',
+                            // padding:'6px 6px 0 6px'
                         }}
                     >
                         <div
@@ -512,8 +518,6 @@ const JSONDisplay = ({ data,
                                 display: 'flex'
                             }}
                         >
-
-
                             <div>
                                 Custom Bonuses
                             </div>
@@ -555,14 +559,17 @@ const JSONDisplay = ({ data,
                         {/* Bonus headers */}
                         <div
                             style={{
-                                display: 'flex'
+                                display: 'flex',
+                                boxShadow: `0 0 0 1px #ecf0f5`,
+                                margin: '6px 1px 0 1px'
                             }}
                         >
                             <div
                                 style={{
-                                    background: 'red',
+                                    // background: 'red',
                                     width: '20%',
                                     display: 'flex',
+                                    boxShadow: `0 0 0 1px #ecf0f5`,
                                     justifyContent: 'center'
                                 }}
                             >
@@ -570,9 +577,10 @@ const JSONDisplay = ({ data,
                             </div>
                             <div
                                 style={{
-                                    background: 'blue',
+                                    // background: 'blue',
                                     width: '20%',
                                     display: 'flex',
+                                    boxShadow: `0 0 0 1px #ecf0f5`,
                                     justifyContent: 'center'
                                 }}
                             >
@@ -580,9 +588,10 @@ const JSONDisplay = ({ data,
                             </div>
                             <div
                                 style={{
-                                    background: 'green',
+                                    // background: 'green',
                                     width: '20%',
                                     display: 'flex',
+                                    boxShadow: `0 0 0 1px #ecf0f5`,
                                     justifyContent: 'center'
                                 }}
                             >
@@ -591,9 +600,10 @@ const JSONDisplay = ({ data,
 
                             <div
                                 style={{
-                                    background: 'yellow',
+                                    // background: 'yellow',
                                     width: '20%',
                                     display: 'flex',
+                                    boxShadow: `0 0 0 1px #ecf0f5`,
                                     justifyContent: 'center'
                                 }}
                             >
@@ -624,9 +634,10 @@ const JSONDisplay = ({ data,
 
                             <div
                                 style={{
-                                    background: 'gray',
+                                    // background: 'gray',
                                     width: '20%',
                                     display: 'flex',
+                                    boxShadow: `0 0 0 1px #ecf0f5`,
                                     justifyContent: 'center'
                                 }}
                             >
@@ -827,69 +838,7 @@ const JSONDisplay = ({ data,
                             </div>
                         })}
 
-                        {/* Rel bonus damage bias */}
-                        {/* <div
-                            style={{
-                                margin: '6px 0 6px 0'
-                            }} >
-                            {activeCustomBonuses.map((e) => {
 
-
-                                let bonusName = e.label;
-                                // let currentBonus = activeCustomBonuses.find((a) => a.id === e.id);
-                                let currentBonus = e;
-                                if (currentBonus.placement !== 'rel') return null;
-                                switch (currentBonus.id) {
-                                    case 1016:
-                                        bonusName = 'Token Gain'
-                                }
-
-                                return (
-                                    <div
-                                        style={{
-                                            // margin: '6px 0 6px 0',
-                                            display: 'flex'
-                                        }}
-                                    >
-                                        <div
-                                            style={{
-                                                marginRight: '12px'
-                                            }}
-                                        >
-                                            {`${bonusName} damage bias`}
-                                        </div>
-                                        <input
-                                            type='number'
-                                            className='prepNumber'
-                                            value={currentBonus.relThresh}
-                                            onChange={
-                                                (num) => {
-                                                    try {
-                                                        let x = Number(num.target.value);
-                                                        x = Math.floor(x);
-                                                        if (x < 0 || x > 100) {
-                                                            return;
-                                                        };
-
-                                                        setActiveCustomBonuses((bonuses) => {
-                                                            let newBonuses = [...bonuses];
-                                                            let bonus = newBonuses.find((a) => a.id === e.id);
-                                                            bonus.relThresh = x;
-                                                            return newBonuses;
-                                                        })
-                                                    }
-                                                    catch (err) {
-                                                        console.log(err);
-                                                    }
-                                                }}
-                                            placeholder={1 + ''}
-                                            min="0"
-                                            max="100"
-                                        />
-                                    </div>
-                                )
-                            })}
-                        </div> */}
 
                         {/* Total bonuses pet amounts */}
                         <div
@@ -1137,6 +1086,83 @@ const JSONDisplay = ({ data,
 
                             })}
                         </div>
+
+                        <div style={{margin: '24px 0 6px 0'}}>
+                            <SearchBox data={{ list: selectedPets.map((pet) => { return { id: pet.ID, name: petNames[pet.ID].name } }) }} />
+                        </div>
+                        {/* Pet white/black list */}
+                        <div
+                            style={{
+                                display: 'flex',
+                                boxShadow: `0 0 0 1px #ecf0f5`,
+                                margin: '6px 1px 0 1px'
+                            }}
+                        >
+                            <div
+                                style={{
+                                    // background: 'red',
+                                    width: '60%',
+                                    display: 'flex',
+                                    boxShadow: `0 0 0 1px #ecf0f5`,
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                Pet
+                            </div>
+
+                            <div
+                                style={{
+                                    // background: 'yellow',
+                                    width: '20%',
+                                    display: 'flex',
+                                    boxShadow: `0 0 0 1px #ecf0f5`,
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                <MouseOverPopover tooltip={
+                                    <div style={{ padding: '6px' }}>
+                                        <div>
+
+                                            Determines the order in which the pets are slotted in:
+                                        </div>
+                                        <div>
+                                            Exact: Tries to place pet in the exact team
+                                        </div>
+                                        <div>
+                                            Bottom: Tries to place pet on the bottom most teams
+                                        </div>
+                                    </div>
+                                }>
+                                    <div>
+                                        Placement
+                                    </div>
+                                </MouseOverPopover>
+
+                            </div>
+                            <div
+                                style={{
+                                    // background: 'blue',
+                                    width: '20%',
+                                    display: 'flex',
+                                    boxShadow: `0 0 0 1px #ecf0f5`,
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                <MouseOverPopover tooltip={
+                                    <div style={{ padding: '6px' }}>
+                                        <div>
+                                            Placeholder
+                                        </div>
+                                    </div>
+                                }>
+                                    <div>
+                                        Parameters
+                                    </div>
+                                </MouseOverPopover>
+                            </div>
+                        </div>
+
+
                         {/* Alerting overall impossible filters combinations */}
                         {failedFilters['generic'] && (
                             <div
@@ -1155,7 +1181,58 @@ const JSONDisplay = ({ data,
 
             </div>
             <div className="grid-right">
-                <Typography variant={"h5"}>Highlighted: Unlocked Pets (clickable)</Typography>
+                <div style={{ display: 'flex' }}>
+                    <Typography variant={"h5"} style={{ marginRight: '12px' }}>Click a pet to enable/disable</Typography>
+                    <div style={{ display: 'flex' }}>
+                        <button
+                            onClick={(e) => {
+                                ReactGA.event({
+                                    category: "expedition_pets",
+                                    action: 'enabled_all',
+                                    label: 'expedition'
+                                })
+                                if (data.PetsCollection) {
+                                    let petArr = [];
+                                    for (let i = 0; i < data.PetsCollection.length; i++) {
+                                        petArr.push(data.PetsCollection[i].ID)
+                                    }
+                                    handleItemSelected(petArr);
+                                }
+
+                            }}
+                        >Enable All</button>
+                        <button
+                            onClick={(e) => {
+                                ReactGA.event({
+                                    category: "expedition_pets",
+                                    action: 'disabled_all',
+                                    label: 'expedition'
+                                })
+                                if (data.PetsCollection) {
+                                    handleItemSelected([]);
+                                }
+
+                            }}
+                        >Disable All</button>
+                        <button
+                            onClick={(e) => {
+                                ReactGA.event({
+                                    category: "expedition_pets",
+                                    action: 'reset_all',
+                                    label: 'expedition'
+                                })
+                                if (data.PetsCollection) {
+                                    let petArr = [];
+                                    for (let i = 0; i < originalPets.length; i++) {
+                                        petArr.push(originalPets[i].ID)
+                                    }
+                                    handleItemSelected(petArr);
+                                }
+
+                            }}
+                        >Reset</button>
+                    </div>
+                </div>
                 <ItemSelection
                     weightMap={weightMap}
                     data={data}

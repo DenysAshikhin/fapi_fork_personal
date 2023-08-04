@@ -1473,18 +1473,18 @@ function App() {
     const [activeCustomBonuses, setActiveCustomBonuses] = useState([]);
     const [selectedPets, setSelectedPets] = useState([]);
     const [failedFilters, setFailedFilters] = useState([]);
+    const [originalPets, setOriginalPets] = useState([]);
 
 
     const handleItemSelected = (items) => {
         setSelectedItems(items);
 
         const petData = data?.PetsCollection || [];
-        const selectedItemsById = petData.reduce((accum, item) => {
-            accum[parseInt(item.ID, 10)] = item;
-            return accum;
-        }, {})
+        let localPets = [];
+        for (let i = 0; i < items.length; i++) {
+            localPets.push(petData[items[i]])
+        }
 
-        const localPets = selectedItems.map(petId => selectedItemsById[petId])
         setSelectedPets(localPets);
 
         if (items) handleGroups(data, items);
@@ -1509,6 +1509,7 @@ function App() {
             //     return <ExpeditionCardComponent data={data} weightMap={weightMap} defaultRank={defaultRank} />;
             case 1:
                 return <JSONDisplay
+                    originalPets={originalPets}
                     weightMap={weightMap}
                     data={data}
                     groups={groups}
@@ -1648,6 +1649,7 @@ function App() {
             }
         ).map((pet) => pet.ID);
         setSelectedItems(positiveRankedPets);
+        setOriginalPets(tempPets);
         setSelectedPets(tempPets);
 
         handleGroups(uploadedData, positiveRankedPets);
@@ -1704,7 +1706,11 @@ function App() {
             }}>
 
 
-                <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', boxShadow: `2px 0px 2px 0px gray`, margin: '0 6px 0 0' }}>
+                <div style={{
+                    height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', backgroundColor: '#fbfafc',
+                    boxShadow: `0 0 0 1px #ecf0f5`,
+                  margin: '0 6px 0 0'
+                }}>
 
                     <div class="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
                         onClick={() => setTabSwitch(0)}

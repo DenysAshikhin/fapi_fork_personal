@@ -324,7 +324,8 @@ const PetNames = {
         "location": "7-9",
     }
 }
-export default PetNames;
+// export default PetNames;
+export const petNames = PetNames;
 
 export function getImageUrl(itemName) {
     return `/fapi_fork_personal/pets/${itemName}.png`;

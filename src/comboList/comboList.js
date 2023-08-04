@@ -25,7 +25,7 @@ const comboBonuses = {
     5013: 'BREEDINGANDMILKTIMER',
     5014: 'FASTERCHARGETICK',
     5015: 'Plant Growth Rate +10%',
-    5016: 'Grasshopper Damage + 10%',
+    5016: 'Grasshopper Damage +25%',
 };
 
 function PetComboDisplay({petCombos}) {
