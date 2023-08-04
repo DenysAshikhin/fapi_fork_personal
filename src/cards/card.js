@@ -1,13 +1,13 @@
 import './card.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Grid2 from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
 import Box from '@mui/material/Box';
 import { makeStyles } from '@material-ui/core/styles';
 import {calculateGroupScore} from "../App";
+import ReactGA from "react-ga4";
 const Decimal = require('decimal.js');
-
 
 const useStyles = makeStyles({
     card: {
@@ -178,6 +178,11 @@ export function ExpeditionCardComponent({ data, weightMap, applyWeights, default
     // data.ExpeditionsCollection: {ID: 0, Room: 1, BaseHP: 0, CardFound:[...], ...}
     // data.PetsSpecial (?combos)
     // data.ExpeditionTeam
+
+    useEffect(() => {
+        ReactGA.send({ hitType: "pageview", page: "/cards", title: "Card Calculator Page" });
+    }, [])
+
     if (!data.ExpeditionTeam) return <div></div>;
 
     const activeTeams = data.ExpeditionTeam

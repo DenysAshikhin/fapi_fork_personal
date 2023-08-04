@@ -87,6 +87,8 @@ const FarmingLanding = ({ data }) => {
     }
 
 
+    let soulPlantEXP = 1 + (0.25 * data.SoulLeafTreatment);
+
     let shopGrowingSpeed = data.FarmingShopPlantGrowingSpeed;
     let manualHarvestFormula = data.FarmingShopPlantManualHarvestFormula;
     let shopRankEXP = 1 + data.FarmingShopPlantRankExpEarned * 0.1;
@@ -118,7 +120,8 @@ const FarmingLanding = ({ data }) => {
         shopRankEXP: shopRankEXP, picPlants: picPlants,
         petPlantCombo: Number(petPlantCombo),
         contagionPlantEXP: contagionPlantEXP,
-        contagionPlantGrowth: contagionPlantGrowth
+        contagionPlantGrowth: contagionPlantGrowth,
+        soulPlantEXP: soulPlantEXP
     }
 
     for (let i = 0; i < plants.length; i++) {
@@ -137,7 +140,7 @@ const FarmingLanding = ({ data }) => {
         plant.curExp = plant.CurrentExp.mantissa * (Math.pow(10, plant.CurrentExp.exponent));
         plant.reqExp = plant.ExpNeeded.mantissa * (Math.pow(10, plant.ExpNeeded.exponent));
         //plant.timeToLevel = (plant.reqExp - plant.curExp) / plant.perHarvest * plant.growthTime;
-        plant.timeToLevel = (plant.reqExp - plant.curExp) / (plant.prestigeBonus * shopRankEXP * modifiers.contagionPlantEXP) * plant.growthTime;
+        plant.timeToLevel = (plant.reqExp - plant.curExp) / (plant.prestigeBonus * shopRankEXP * modifiers.contagionPlantEXP * soulPlantEXP) * plant.growthTime;
         plant.currMult = Math.pow((1 + 0.05 * (1 + manualHarvestFormula * 0.02)), helper.calculateLogarithm(1.25, plant.created));
         finalPlants.push(plant);
 
@@ -208,6 +211,7 @@ const FarmingLanding = ({ data }) => {
                 <div style={{ minWidth: '256px' }}>
                     <div>Shop Growing Speed: x{helper.roundTwoDecimal(Math.pow(1.05, shopGrowingSpeed))}</div>
                     <div>Shop Rank EXP: x{helper.roundTwoDecimal(shopRankEXP)}</div>
+                    <div>Soul Shop Rank EXP: x{helper.roundTwoDecimal(soulPlantEXP)}</div>
                     <div>Improve Harvest Formula: x{helper.roundTwoDecimal(1 + manualHarvestFormula * 0.02)}</div>
                     <div>Pet Plant Growth Combo: x{helper.roundTwoDecimal(petPlantCombo)}</div>
 
@@ -274,7 +278,8 @@ const FarmingLanding = ({ data }) => {
                                         ReactGA.event({
                                             category: "farming_interaction",
                                             action: `changed_grassHopper_${x}`,
-                                            label: `${x}`
+                                            label: `${x}`,
+                                            value: x
                                         })
 
                                         setFutureGrasshopper(x);
@@ -302,6 +307,7 @@ const FarmingLanding = ({ data }) => {
                     {/* <div>Grasshopper Amount: +{helper.roundTwoDecimal(grassHopperAmount - currFries)} ({helper.roundTwoDecimal(grassHopperAmount)})</div> */}
                 </div>
 
+                {/* Explanation */}
                 <div style={{ marginLeft: '24px' }}>
                     <h3 style={{ margin: '0' }}>How to use</h3>
                     <div>
@@ -373,7 +379,8 @@ const FarmingLanding = ({ data }) => {
                                     ReactGA.event({
                                         category: "farming_interaction",
                                         action: `changed_futureHours_${x}`,
-                                        label: `${x}`
+                                        label: `${x}`,
+                                        value: x
                                     })
 
                                 }
@@ -398,8 +405,6 @@ const FarmingLanding = ({ data }) => {
 
                     </MouseOverPopover>
 
-
-
                     <input
                         style={{
                             // width: '48px'
@@ -420,7 +425,8 @@ const FarmingLanding = ({ data }) => {
                                     ReactGA.event({
                                         category: "farming_interaction",
                                         action: `changed_numAuto_${x}`,
-                                        label: `${x}`
+                                        label: `${x}`,
+                                        value: x
                                     })
                                 }
                                 catch (err) {
@@ -462,7 +468,7 @@ const FarmingLanding = ({ data }) => {
                         return (
                             <div style={{ border: '1px solid black', margin: '6px', padding: '0 6px 0 0', width: '360px' }}>
                                 <div style={{ display: 'flex' }}>
-                                    <div>{`T${index + 1} mult after ${helper.roundTwoDecimal(timeTillNextLevel / 60)} minutes:`}</div>
+                                    <div>{`P${index + 1} mult after ${helper.roundTwoDecimal(futureTime)} hours:`}</div>
                                     <div style={{ margin: '0 6px 0 6px' }}>  {`x${helper.roundTwoDecimal(plant.futureMult)}`}</div>
                                     <div>  {`(${helper.roundTwoDecimal(plant.futureMultMine)})`}</div>
 
@@ -473,7 +479,7 @@ const FarmingLanding = ({ data }) => {
                                     <MouseOverPopover tooltip={
                                         <div>
                                             <div>The multiplicative total of all plants' multipliers</div>
-                                            <div>Calculated as THIS plants future value {`(${helper.roundTwoDecimal(plant.futureMult)})`} * all the others plant current multiplier</div>
+                                            <div>Calculated as THIS plants future Mult. {`(${helper.roundTwoDecimal(plant.futureMult)})`} * all the others plant current multiplier</div>
                                         </div>
                                     }>
                                         <div>
@@ -485,7 +491,7 @@ const FarmingLanding = ({ data }) => {
                                     <MouseOverPopover tooltip={
                                         <div>
                                             <div>The additive total of all plants' multipliers</div>
-                                            <div>Calculated as THIS plants future value {`(${helper.roundTwoDecimal(plant.futureMult)})`} * `Weight` THEN + all the others plant current multiplier * their `Weight`</div>
+                                            <div>Calculated as THIS plants future Mult. {`(${helper.roundTwoDecimal(plant.futureMult)})`} * `Weight` THEN + all the others plant current multiplier * their `Weight`</div>
                                         </div>
                                     }>
                                         <div>
@@ -503,7 +509,7 @@ const FarmingLanding = ({ data }) => {
                                     <MouseOverPopover tooltip={
                                         <div>
                                             <div>The increase in multiplier TIMES the `Weight`</div>
-                                            <div>Calculated as THIS plants future value {`(${helper.roundTwoDecimal(plant.futureMult - plant.currMult)})`} * {helper.roundTwoDecimal(customMultipliers[index])}</div>
+                                            <div>Calculated as THIS plants future mult. - THIS plants current mult. {`(${helper.roundTwoDecimal(plant.futureMult - plant.currMult)})`} * {helper.roundTwoDecimal(customMultipliers[index])}</div>
                                         </div>
                                     }>
                                         <div style={{ color: plant.weightedMultIncreaseMine === highestWeightedMultIncreaseMine ? 'purple' : '', margin: '0 6px 0 6px' }}> {`${helper.roundTwoDecimal(plant.weightedMultIncreaseMine).toExponential(3)} `}</div>
@@ -516,6 +522,47 @@ const FarmingLanding = ({ data }) => {
                         )
                     })}
                 </div>
+            </div>
+
+
+            {/* Explanation */}
+            <div style={{ display: 'flex' }}>
+                <div>
+                    <FarmingPlant data={{ fake: true }} />
+                </div>
+                <div style={{ marginLeft: '24px' }}>
+                    <h3 style={{ margin: '0' }}>How to use</h3>
+                    <div>
+                        <div>
+                            Time to prestige: The red/orange arrow displays time until the plant hits its next PIC level (affected by Num Autos + future hours)
+                        </div>
+                        <div style={{ display: 'flex' }}>
+                            <div style={{ color: 'red', marginRight: '6px' }}>
+                                Total Mult:
+                            </div>
+                            <div>
+                                Your best `short-term` multiplier gain (calculated as all plants final multipler x each other)
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex' }}>
+                            <div style={{ color: 'blue', marginRight: '6px' }}>
+                                Total Mult:
+                            </div>
+                            <div>
+                                Your best `long-term` multiplier gain (calculated as a plants' final multipler x their weight + other plants final multipler * their weight)
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex' }}>
+                            <div style={{ color: 'Purple', marginRight: '6px' }}>
+                                Weighted Mult Increase:
+                            </div>
+                            <div>
+                                Your best single-plant (sort-of long term) multiplier gain (calculated as a plants' final multipler gain x their weight)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div >
     );

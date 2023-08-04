@@ -1497,16 +1497,16 @@ function App() {
 
     const selectComponent = () => {
         switch (tabSwitch) {
-            case 2:
-                return <FarmingLanding data={data} />;
-            case 4:
-                return <Weights weightMap={weightMap} setWeightsProp={setWeights} />;
             case 3:
+                return <FarmingLanding data={data} />;
+            case 5:
+                return <Weights weightMap={weightMap} setWeightsProp={setWeights} />;
+            case 4:
+                return <CardComponent data={data} weightMap={weightMap} />;
+            case 2:
                 return <PetComboList data={data} weightMap={weightMap} />;
             // case 3:
             //     return <ExpeditionCardComponent data={data} weightMap={weightMap} defaultRank={defaultRank} />;
-            // case 2:
-            //     return <CardComponent data={data} weightMap={weightMap} />;
             case 1:
                 return <JSONDisplay
                     weightMap={weightMap}
@@ -1688,6 +1688,80 @@ function App() {
         handleGroups(data, selectedItems, true);
     }
 
+
+
+    return (
+        <ThemeProvider theme={theme}>
+
+            <div style={{
+                marginLeft: '0px', marginRight: '0px', maxWidth: '100000px !important',
+                // width: 'calc(100vw - 126px)',
+                width: '100%',
+                // maxHeight: `calc(100vh - 56px)`,
+                height: `100vh`,
+                padding: '0px',
+                display: 'flex'
+            }}>
+
+
+                <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', boxShadow: `2px 0px 2px 0px gray`, margin: '0 6px 0 0' }}>
+
+                    <div class="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
+                        onClick={() => setTabSwitch(0)}
+                    >
+                        <img style={{ width: '30px' }} src={`/fapi_fork_personal/file_upload.svg`} />
+                        <div style={{ textAlign: 'center' }}>Upload</div>
+                    </div>
+                    {!!data && (
+                        <div class="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
+                            onClick={() => setTabSwitch(1)}
+                        >
+                            <img style={{ width: '30px' }} src={`/fapi_fork_personal/signpost.svg`} />
+                            <div style={{ textAlign: 'center' }}>Expedit.</div>
+                        </div>
+                    )}
+                    {!!data && (
+                        <div class="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
+                            onClick={() => setTabSwitch(2)}
+                        >
+                            <img style={{ width: '30px' }} src={`/fapi_fork_personal/paw_plus.svg`} />
+                            <div style={{ textAlign: 'center' }}>Pet Combo</div>
+                        </div>
+                    )}
+                    {!!data && (
+                        <div class="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
+                            onClick={() => setTabSwitch(3)}
+                        >
+                            <img style={{ width: '30px' }} src={`/fapi_fork_personal/farming/farming.svg`} />
+                            <div style={{ textAlign: 'center' }}>Farm</div>
+                        </div>
+                    )}
+                    {!!data && (
+                        <div class="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
+                            onClick={() => setTabSwitch(4)}
+                        >
+                            <img style={{ width: '30px' }} src={`/fapi_fork_personal/badge.svg`} />
+                            <div style={{ textAlign: 'center' }}>Cards</div>
+                        </div>
+                    )}
+                    {!!data && (
+                        <div class="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
+                            onClick={() => setTabSwitch(5)}
+                        >
+                            <img style={{ width: '30px' }} src={`/fapi_fork_personal/scale.svg`} />
+                            <div style={{ textAlign: 'center' }}>Weight</div>
+                        </div>
+                    )}
+                </div>
+                <div style={{ overflow: 'auto' }}>
+                    {selectComponent()}
+                </div>
+
+
+            </div>
+        </ThemeProvider>
+    );
+
     return (
         <ThemeProvider theme={theme}>
 
@@ -1711,13 +1785,13 @@ function App() {
                     >
                         <BottomNavigationAction label="Upload" icon={<InfoIcon />} />
                         {!!data && <BottomNavigationAction label="Expedition" icon={<img style={{ height: '24px' }} src={`/fapi_fork_personal/paw_icon.svg`} />} />}
+                        {!!data && <BottomNavigationAction label="Pet Combo List" icon={<img style={{ height: '24px' }} src={`/fapi_fork_personal/paw_plus.svg`} />} />}
                         {!!data && <BottomNavigationAction label="Farming" icon={<img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/farming.svg`} />} />}
                         {!!data && <BottomNavigationAction label="Charges" icon={<BadgeIcon />} />}
-                        {/*{!!data && <BottomNavigationAction label="Exp. Rewards" icon={<BadgeIcon />} />}*/}
-                        {!!data && <BottomNavigationAction label="Pet Combo List" icon={<img style={{ height: '24px' }} src={`/fapi_fork_personal/paw_plus.svg`} />} />}
-                        {/*{!!data && <BottomNavigationAction label="Weighted Pets" icon={<ScaleIcon />} />}*/}
                         {<BottomNavigationAction label="Weights" icon={<ScaleIcon />} />}
-                        <RepoLink />
+                        {/*{!!data && <BottomNavigationAction label="Exp. Rewards" icon={<BadgeIcon />} />}*/}
+                        {/*{!!data && <BottomNavigationAction label="Weighted Pets" icon={<ScaleIcon />} />}*/}
+                        {/* <RepoLink /> */}
                     </BottomNavigation>
                 </Box>
             </Container>

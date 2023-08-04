@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Grid2 from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import Accordion from '@mui/material/Accordion';
@@ -6,6 +6,8 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {petNamesById} from "../itemMapping";
+import ReactGA from "react-ga4";
+
 
 const comboBonuses = {
     5001: 'SPAWNMOREPOTATOES',
@@ -57,6 +59,12 @@ function PetComboDisplay({petCombos}) {
     );
 }
 export default function PetComboList({data}) {
+
+    useEffect(() => {
+        ReactGA.send({ hitType: "pageview", page: "/pet_combos", title: "Pet Combos Page" });
+    }, [])
+
+
     const comboList = data.PetsSpecial;
     const comboByBonusId = comboList.reduce((accum, combo, i) => {
         if (i === 0) return accum;
@@ -66,7 +74,7 @@ export default function PetComboList({data}) {
     return (
         <Grid2 container spacing={1}>
             <Grid2 xs={12}>
-                <Typography variant={"h2"}>Card Combo List</Typography>
+                <Typography variant={"h2"}>Pet Combo List</Typography>
             </Grid2>
             <Grid2 xs={12}>
             {comboByBonusId && Object.values(comboByBonusId).map((comboArray, i) => {

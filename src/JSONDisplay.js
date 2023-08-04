@@ -73,8 +73,7 @@ const JSONDisplay = ({ data,
     const [showAllBonusTally, setShowAllBonusTally] = useState(false);
 
     useEffect(() => {
-        ReactGA.send({ hitType: "pageview", page: "/expeditions", title: "Exepdition Calculator Page" });
-
+        ReactGA.send({ hitType: "pageview", page: "/expeditions", title: "Expedition Calculator Page" });
     }, [])
 
     if (!!data === false || !!data.PetsCollection === false) {

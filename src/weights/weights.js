@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Grid2 from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField'
 import { makeStyles } from '@material-ui/core/styles';
+import ReactGA from "react-ga4";
+
+
 
 const Weight = function WeightComponent({id, label, value, setValue}) {
     const displayValue = value;
@@ -17,6 +20,13 @@ const Weight = function WeightComponent({id, label, value, setValue}) {
 }
 
 export default function Weights({weightMap, setWeightsProp}) {
+
+
+
+    useEffect(() => {
+        ReactGA.send({ hitType: "pageview", page: "/cards_weights", title: "Card_Weight Page" });
+    }, [])
+
     // generate me in APP to manage save/load lifecycle? or keep that here
     const weightList = Object.values(weightMap);
     const updateWeights = (id, newValue) => {

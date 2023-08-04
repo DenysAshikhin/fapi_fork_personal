@@ -20,3 +20,8 @@
 .item:hover {
   opacity: 1;
 }
+
+
+.navItem:hover {
+  cursor: pointer;
+}
