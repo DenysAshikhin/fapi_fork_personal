@@ -69,7 +69,9 @@ const JSONDisplay = ({
     setActiveCustomBonuses,
     deleteActiveCustomBonuses,
     selectedPets,
-    failedFilters
+    failedFilters,
+    petWhiteList,
+    setPetWhiteList
 }) => {
 
     const [tokenSelections, setTokenSelections] = useState({ 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 });
@@ -104,7 +106,7 @@ const JSONDisplay = ({
             })
 
 
-            const groupBests = calculateBestHours(group, null, data.SoulGoldenClover, comboSelector)[tokenSelections[index]];
+            const groupBests = calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken }, comboSelector)[tokenSelections[index]];
             totalTokensHR += groupBests.floored / groupBests.hours;
         })
 
@@ -123,6 +125,26 @@ const JSONDisplay = ({
     for (const [key, value] of Object.entries(bonusTotals)) {
         if (activeCustomBonuses.find((a) => a.id === Number(key)) || showAllBonusTally)
             totalMessages.push({ text: `${BonusMap[key].label}: ${value}/${bonusPets[key] ? bonusPets[key].total : 0} pets`, bonus: key })
+    }
+
+
+    let filterablePets = [];
+    if (groupRankCritera === 3) {
+        selectedPets.map((pet) => {
+            let found;
+            try {
+
+                //Awful way to do it, but need to check we haven't already added pet to table
+                found = petWhiteList.find((a) => a.id === pet.ID);
+            }
+            catch (err) {
+                console.log(err);
+            }
+
+            if (found) return;
+
+            filterablePets.push({ id: pet.ID, label: petNames[pet.ID].name })
+        })
     }
 
     return (
@@ -149,7 +171,7 @@ const JSONDisplay = ({
                     let groupLabel = ``;
 
                     const groupTotal = calculateGroupScore(group, defaultRank);
-                    let tokenScore = groupTotal.tokenMult * (Math.pow(1 + SOUL_CLOVER_STEP, data.SoulGoldenClover));
+                    let tokenScore = groupTotal.tokenMult * (Math.pow(1 + SOUL_CLOVER_STEP, data.SoulGoldenClover)) * (1 + 0.05 * data.SoulGoldenClover) * comboSelector;
                     tokenScore = tokenScore.toExponential(3);
                     const score = groupTotal.groupScore;
                     const displayedDamage = (score * 5 * data.PetDamageBonuses).toExponential(3);
@@ -159,15 +181,15 @@ const JSONDisplay = ({
                     switch (groupRankCritera) {
                         case 1://damage
                             groupLabel = `Group ${index + 1} Damage: ${displayedDamage} || Token: ${tokenScore}`;
-                            tokenInfo = calculateBestHours(group, null, data.SoulGoldenClover, comboSelector);
+                            tokenInfo = calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken }, comboSelector);
                             break;
                         case 2://token
                             groupLabel = `Group ${index + 1} Token: ${tokenScore} || Damage: ${displayedDamage}`;
-                            tokenInfo = calculateBestHours(group, null, data.SoulGoldenClover, comboSelector);
+                            tokenInfo = calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken }, comboSelector);
                             break;
                         case 3://Advanced
                             groupLabel = `Group ${index + 1} Damage: ${displayedDamage}`;
-                            tokenInfo = calculateBestHours(group, null, data.SoulGoldenClover, comboSelector);
+                            tokenInfo = calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken }, comboSelector);
                             break;
                         default:
                             break;
@@ -357,8 +379,15 @@ const JSONDisplay = ({
                             value={!!defaultRank}
                         />
                     </div>
-                    <div>
-                        {`Golden Clover Level: ${data.SoulGoldenClover}`}
+                    <div style={{ display: 'flex' }}>
+                        <div style={{ marginRight: '12px' }}>
+
+                            {`Golden Clover Level: ${data.SoulGoldenClover}`}
+                        </div>
+                        <div>
+
+                            {`Residue Token Bonus: ${1 + 0.05 * data.CowShopExpeditionToken}`}
+                        </div>
                     </div>
                     <div style={{ display: 'flex', }}>
 
@@ -561,6 +590,7 @@ const JSONDisplay = ({
                             style={{
                                 display: 'flex',
                                 boxShadow: `0 0 0 1px #ecf0f5`,
+                                backgroundColor: '#fbfafc',
                                 margin: '6px 1px 0 1px'
                             }}
                         >
@@ -570,6 +600,7 @@ const JSONDisplay = ({
                                     width: '20%',
                                     display: 'flex',
                                     boxShadow: `0 0 0 1px #ecf0f5`,
+                                    backgroundColor: '#fbfafc',
                                     justifyContent: 'center'
                                 }}
                             >
@@ -581,6 +612,7 @@ const JSONDisplay = ({
                                     width: '20%',
                                     display: 'flex',
                                     boxShadow: `0 0 0 1px #ecf0f5`,
+                                    backgroundColor: '#fbfafc',
                                     justifyContent: 'center'
                                 }}
                             >
@@ -592,6 +624,7 @@ const JSONDisplay = ({
                                     width: '20%',
                                     display: 'flex',
                                     boxShadow: `0 0 0 1px #ecf0f5`,
+                                    backgroundColor: '#fbfafc',
                                     justifyContent: 'center'
                                 }}
                             >
@@ -604,6 +637,7 @@ const JSONDisplay = ({
                                     width: '20%',
                                     display: 'flex',
                                     boxShadow: `0 0 0 1px #ecf0f5`,
+                                    backgroundColor: '#fbfafc',
                                     justifyContent: 'center'
                                 }}
                             >
@@ -638,6 +672,7 @@ const JSONDisplay = ({
                                     width: '20%',
                                     display: 'flex',
                                     boxShadow: `0 0 0 1px #ecf0f5`,
+                                    backgroundColor: '#fbfafc',
                                     justifyContent: 'center'
                                 }}
                             >
@@ -1087,23 +1122,36 @@ const JSONDisplay = ({
                             })}
                         </div>
 
-                        <div style={{margin: '24px 0 6px 0'}}>
-                            <SearchBox data={{ list: selectedPets.map((pet) => { return { id: pet.ID, name: petNames[pet.ID].name } }) }} />
+                        <div style={{ margin: '24px 0 6px 0' }}>
+                            <SearchBox data={{
+                                list: filterablePets
+                            }}
+                                onSelect={(e) => {
+                                    setPetWhiteList((curr) => {
+                                        let temp = [...curr];
+                                        temp.push(e);
+                                        return temp;
+                                    })
+                                }}
+                            />
                         </div>
                         {/* Pet white/black list */}
                         <div
                             style={{
                                 display: 'flex',
                                 boxShadow: `0 0 0 1px #ecf0f5`,
-                                margin: '6px 1px 0 1px'
+                                backgroundColor: '#fbfafc',
+                                margin: '12px 1px 0 1px'
                             }}
                         >
                             <div
                                 style={{
                                     // background: 'red',
-                                    width: '60%',
+                                    width: '40%',
                                     display: 'flex',
-                                    boxShadow: `0 0 0 1px #ecf0f5`,
+                                    // boxShadow: `0 2px 1px -1px #ecf0f5`,
+                                    // boxShadow: `0 0 0 1px #ecf0f5`,
+                                    backgroundColor: '#fbfafc',
                                     justifyContent: 'center'
                                 }}
                             >
@@ -1113,16 +1161,16 @@ const JSONDisplay = ({
                             <div
                                 style={{
                                     // background: 'yellow',
-                                    width: '20%',
+                                    width: '30%',
                                     display: 'flex',
                                     boxShadow: `0 0 0 1px #ecf0f5`,
+                                    backgroundColor: '#fbfafc',
                                     justifyContent: 'center'
                                 }}
                             >
                                 <MouseOverPopover tooltip={
                                     <div style={{ padding: '6px' }}>
                                         <div>
-
                                             Determines the order in which the pets are slotted in:
                                         </div>
                                         <div>
@@ -1142,9 +1190,9 @@ const JSONDisplay = ({
                             <div
                                 style={{
                                     // background: 'blue',
-                                    width: '20%',
+                                    width: '30%',
                                     display: 'flex',
-                                    boxShadow: `0 0 0 1px #ecf0f5`,
+                                    // boxShadow: `0 0 0 1px #ecf0f5`,
                                     justifyContent: 'center'
                                 }}
                             >
@@ -1160,6 +1208,27 @@ const JSONDisplay = ({
                                     </div>
                                 </MouseOverPopover>
                             </div>
+                        </div>
+                        <div style={{ margin: '0 1px 0 1px', boxShadow: `0 0 0 1px #ecf0f5`, }}>
+                            {petWhiteList.map((pet, index) => {
+                                return (<div
+                                    style={{
+                                        boxShadow: `0 2px 1px -1px #ecf0f5`,
+                                        display: 'flex',
+                                        width: '100%'
+                                    }}
+                                >
+                                    <div style={{ width: '40%', }}>
+                                        {pet.label}
+                                    </div>
+                                    <div style={{ width: '30%', boxShadow: `2px 0 2px -1px #ecf0f5`, }}>
+                                        Temp
+                                    </div>
+                                    <div style={{ width: '30%' }}>
+                                        Temp
+                                    </div>
+                                </div>)
+                            })}
                         </div>
 
 

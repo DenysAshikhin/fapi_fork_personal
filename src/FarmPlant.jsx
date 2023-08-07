@@ -11,6 +11,12 @@ const FarmingPlant = ({ data }) => {
     let useFutureValues = data.useFutureValues;
     let modifiers = data.modifiers;
     let fake = data.fake;
+    let plantAutos = data.plantAutos;
+    let setPlantAutos = data.setPlantAutos
+
+    if (plantAutos && modifiers?.numAuto) {
+        modifiers.numAuto = plantAutos[index]
+    }
 
     if (fake) {
         plant = { created: 1 };
@@ -51,7 +57,7 @@ const FarmingPlant = ({ data }) => {
         border: '1px solid black', margin: '6px',
         padding: '0 0 0 0',
         display: 'flex',
-        height: fake ? '234px' : '200px',
+        height: fake ? '234px' : useFutureValues ? '224px' : '200px',
         width: fake ? '264px' : ''
         // maxHeight:'128px' 
     }}>
@@ -210,7 +216,7 @@ const FarmingPlant = ({ data }) => {
 
                                     ReactGA.event({
                                         category: "farming_interaction",
-                                        action: `changed_plantWeight_${x}`,
+                                        action: `changed_plant_${index}_weight`,
                                         label: `${x}`,
                                         value: x
                                     })
@@ -241,6 +247,69 @@ const FarmingPlant = ({ data }) => {
 
                 </div>
             </div>
+
+            {/* Num Auto */}
+            {!fake && useFutureValues && (
+                <div style={{ fontSize: '12px', marginTop: '0px', height: '12px', padding: '0 1px 0 1px', color: 'black', bottom: fake ? '7%' : '-2%', left: '1%', display: 'flex', position: 'absolute' }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: fake ? '' : 'center',
+                        fontSize: '12px', fontFamily: 'sans-serif'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <MouseOverPopover tooltip={
+                                <div>
+                                    How many autos will be running for this plant for `Hours to calculate` duration
+                                </div>
+                            }>
+                                <div>Num Autos</div>
+
+                            </MouseOverPopover>
+
+                            <input
+                                style={{
+                                    // width: '48px'
+                                    // , WebkitAppearance: 'none' 
+                                    height: '12px'
+                                }}
+                                type='number'
+                                className='prepNumber'
+                                value={plantAutos[index]}
+                                onChange={
+                                    (e) => {
+                                        try {
+                                            let x = Number(e.target.value);
+                                            x = Math.floor(x);
+                                            if (x < 0 || x > 8) {
+                                                return;
+                                            }
+
+                                            let newArr = [...plantAutos];
+                                            newArr[index] = x;
+
+                                            ReactGA.event({
+                                                category: "farming_interaction",
+                                                action: `changed_plant_${index}_auto`,
+                                                label: `${x}`,
+                                                value: x
+                                            })
+                                            setPlantAutos(newArr);
+                                        }
+                                        catch (err) {
+                                            console.log(err);
+                                        }
+                                    }}
+                                placeholder={plantAutos[index] + ''}
+                                min="0"
+                                max="8"
+                            />
+                        </div>
+
+                    </div>
+                </div>
+            )}
+
+
         </div>
     </div >
 }

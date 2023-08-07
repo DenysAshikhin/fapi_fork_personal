@@ -12,5 +12,19 @@
 
 .grid-row {
     /* Add any additional styles for the grid-row, if needed */
-    
+
+}
+
+.MuiInputBase-root {
+    height: 36px;
+    padding: 0 0 0 6px !important;
+}
+
+.MuiInputBase-root {
+    height: 36px;
+    padding: 0 9px 0 0;
+}
+
+.MuiInputBase-root input {
+    padding: 0;
 }

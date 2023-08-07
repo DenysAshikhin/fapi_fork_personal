@@ -44,19 +44,22 @@ export const SYNERGY_MOD_STEP = .25;
 export const EXP_TOKEN_MOD = 0.05;
 export const SOUL_CLOVER_STEP = 0.25;
 
-export function calculateBestHours(group, hours, clover, combo) {
+export function calculateBestHours(group, hours, tokenModifiers, combo) {
+
+    let clover;
+    let residueToken = tokenModifiers?.residueToken ? tokenModifiers.residueToken : 0;
 
     if (!hours) {
         hours = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
     }
     if (!clover) {
-        clover = 0;
+        clover = tokenModifiers?.clover ? tokenModifiers.clover : 0;
     }
     if (!combo) {
         combo = 1.0
     }
     const overall = calculateGroupScore(group);
-    const tokenHR = overall.tokenMult * (Math.pow(1 + SOUL_CLOVER_STEP, clover)) * combo;
+    const tokenHR = overall.tokenMult * (Math.pow(1 + SOUL_CLOVER_STEP, clover)) * (1 + 0.05 * residueToken) * combo;
     let best = { hours: -1, totalTokens: -1, floored: -1, effeciency: -1 };
     let bestArr = [];
 
@@ -1474,7 +1477,7 @@ function App() {
     const [selectedPets, setSelectedPets] = useState([]);
     const [failedFilters, setFailedFilters] = useState([]);
     const [originalPets, setOriginalPets] = useState([]);
-
+    const [petWhiteList, setPetWhiteList] = useState([]);
 
     const handleItemSelected = (items) => {
         setSelectedItems(items);
@@ -1509,6 +1512,8 @@ function App() {
             //     return <ExpeditionCardComponent data={data} weightMap={weightMap} defaultRank={defaultRank} />;
             case 1:
                 return <JSONDisplay
+                    petWhiteList={petWhiteList}
+                    setPetWhiteList={setPetWhiteList}
                     originalPets={originalPets}
                     weightMap={weightMap}
                     data={data}
@@ -1709,7 +1714,7 @@ function App() {
                 <div style={{
                     height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', backgroundColor: '#fbfafc',
                     boxShadow: `0 0 0 1px #ecf0f5`,
-                  margin: '0 6px 0 0'
+                    margin: '0 6px 0 0'
                 }}>
 
                     <div class="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}

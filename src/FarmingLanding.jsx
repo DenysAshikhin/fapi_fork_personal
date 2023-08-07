@@ -7,11 +7,12 @@ import ReactGA from "react-ga4";
 
 const FarmingLanding = ({ data }) => {
 
-    const [customMultipliers, setCustomMultipliers] = useState([1, 2, 3, 4, 5, 6, 7, 8]);
+    const [customMultipliers, setCustomMultipliers] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]);
     const [futureTime, setFutureTime] = useState(0.0001);
     const [numAuto, setNumAuto] = useState(1);
     const [password, setPassword] = useState('');
     const [futureGrasshopper, setFutureGrasshopper] = useState(1);
+    const [plantAutos, setPlantAutos] = useState([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
     const secondsHour = 3600;
 
     useEffect(() => {
@@ -161,7 +162,7 @@ const FarmingLanding = ({ data }) => {
     let customFuturePlants = [];
     let futurePlants = [];
     for (let i = 0; i < finalPlants.length; i++) {
-        let newPlant = helper.calcFutureMult(finalPlants[i], { ...modifiers, time: secondsHour * futureTime });
+        let newPlant = helper.calcFutureMult(finalPlants[i], { ...modifiers, time: secondsHour * futureTime, numAuto: plantAutos[i] });
         newPlant.futureMultMine = newPlant.futureMult * (customMultipliers[i]);
         newPlant.multIncrease = newPlant.futureMult - newPlant.currMult;
         newPlant.multIncreaseMine = newPlant.futureMultMine - newPlant.currMult * (customMultipliers[i]);
@@ -277,7 +278,7 @@ const FarmingLanding = ({ data }) => {
 
                                         ReactGA.event({
                                             category: "farming_interaction",
-                                            action: `changed_grassHopper_${x}`,
+                                            action: `changed_grassHopper`,
                                             label: `${x}`,
                                             value: x
                                         })
@@ -343,7 +344,7 @@ const FarmingLanding = ({ data }) => {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}  >
-                {finalPlants.map((val, index) => { return <FarmingPlant data={{ plant: val, index: index, customMultipliers: customMultipliers, setCustomMultipliers: setCustomMultipliers, allowSetMultipliers: false, allowSetMultipliers: true }} /> })}
+                {finalPlants.map((val, index) => { return <FarmingPlant data={{ setPlantAutos: setPlantAutos, plantAutos: plantAutos, plant: val, index: index, customMultipliers: customMultipliers, setCustomMultipliers: setCustomMultipliers, allowSetMultipliers: false, allowSetMultipliers: true }} /> })}
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -378,7 +379,7 @@ const FarmingLanding = ({ data }) => {
 
                                     ReactGA.event({
                                         category: "farming_interaction",
-                                        action: `changed_futureHours_${x}`,
+                                        action: `changed_futureHours`,
                                         label: `${x}`,
                                         value: x
                                     })
@@ -393,55 +394,13 @@ const FarmingLanding = ({ data }) => {
                         max="99999999"
                     />
                 </div>
-                <div style={{ display: 'flex' }}>
 
 
-                    <MouseOverPopover tooltip={
-                        <div>
-                            How many autos will be running each plant for above hours
-                        </div>
-                    }>
-                        <div>Num Autos</div>
-
-                    </MouseOverPopover>
-
-                    <input
-                        style={{
-                            // width: '48px'
-                            // , WebkitAppearance: 'none' 
-                        }}
-                        type='number'
-                        className='prepNumber'
-                        value={numAuto}
-                        onChange={
-                            (e) => {
-                                try {
-                                    let x = Number(e.target.value);
-                                    x = Math.floor(x);
-                                    if (x < 1 || x > 8) {
-                                        return;
-                                    }
-                                    setNumAuto(x);
-                                    ReactGA.event({
-                                        category: "farming_interaction",
-                                        action: `changed_numAuto_${x}`,
-                                        label: `${x}`,
-                                        value: x
-                                    })
-                                }
-                                catch (err) {
-                                    console.log(err);
-                                }
-                            }}
-                        placeholder={numAuto + ''}
-                        min="1"
-                        max="8"
-                    />
-                </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                     {customFuturePlants.map((plant, index) => {
                         return <FarmingPlant data={
                             {
+                                setPlantAutos: setPlantAutos, plantAutos: plantAutos,
                                 plant: plant,
                                 index: index,
                                 customMultipliers: customMultipliers,
