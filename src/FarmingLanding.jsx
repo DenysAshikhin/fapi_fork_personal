@@ -9,7 +9,7 @@ const FarmingLanding = ({ data }) => {
 
     const [customMultipliers, setCustomMultipliers] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]);
     const [futureTime, setFutureTime] = useState(0.0001);
-    const [numAuto, setNumAuto] = useState(1);
+    // const [numAuto, setNumAuto] = useState(1);
     const [password, setPassword] = useState('');
     const [futureGrasshopper, setFutureGrasshopper] = useState(1);
     const [plantAutos, setPlantAutos] = useState([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
@@ -115,7 +115,7 @@ const FarmingLanding = ({ data }) => {
 
     const modifiers = {
         time: 0,
-        numAuto: numAuto,
+        // numAuto: numAuto,
         shopGrowingSpeed: shopGrowingSpeed,
         manualHarvestFormula: manualHarvestFormula,
         shopRankEXP: shopRankEXP, picPlants: picPlants,

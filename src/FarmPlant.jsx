@@ -14,8 +14,11 @@ const FarmingPlant = ({ data }) => {
     let plantAutos = data.plantAutos;
     let setPlantAutos = data.setPlantAutos
 
-    if (plantAutos && modifiers?.numAuto) {
+    if (plantAutos && modifiers) {
         modifiers.numAuto = plantAutos[index]
+    }
+    else {
+        let z = 0;
     }
 
     if (fake) {
@@ -57,7 +60,7 @@ const FarmingPlant = ({ data }) => {
         border: '1px solid black', margin: '6px',
         padding: '0 0 0 0',
         display: 'flex',
-        height: fake ? '234px' : useFutureValues ? '224px' : '200px',
+        height: fake ? '234px' : useFutureValues ? '224px' : '205px',
         width: fake ? '264px' : ''
         // maxHeight:'128px' 
     }}>
@@ -270,7 +273,8 @@ const FarmingPlant = ({ data }) => {
                                 style={{
                                     // width: '48px'
                                     // , WebkitAppearance: 'none' 
-                                    height: '12px'
+                                    height: '12px',
+                                    width: '36px'
                                 }}
                                 type='number'
                                 className='prepNumber'

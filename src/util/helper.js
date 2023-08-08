@@ -21,8 +21,9 @@ var helper = {
         let plant = JSON.parse(JSON.stringify(plant_input));
         let modifiers = JSON.parse(JSON.stringify(modifiers_input));
         let remainingTime = modifiers.time;
-        let numAutos = modifiers.numAuto ? modifiers.numAuto : 1;
+        let numAutos = modifiers.numAuto || modifiers?.numAuto === 0 ? modifiers.numAuto : 1;
 
+        let x = 0;
         while (remainingTime > 0) {
             plant.growthTime = Math.floor(plant.TimeNeeded / plant.prestigeBonus / (1 + 0.05 * modifiers.shopGrowingSpeed) / modifiers.petPlantCombo / modifiers.contagionPlantGrowth);
             if (plant.growthTime < 10) {
@@ -68,7 +69,10 @@ var helper = {
 
         let plant = JSON.parse(JSON.stringify(plant_input));
         let modifiers = JSON.parse(JSON.stringify(modifiers_input));
-        let numAutos = modifiers.numAuto ? modifiers.numAuto : 1;
+        let numAutos = modifiers.numAuto || modifiers?.numAuto === 0 ? modifiers.numAuto : 1;
+        if (plant.ID === 5) {
+            let x = 0;
+        }
 
         plant.growthTime = Math.floor(plant.TimeNeeded / plant.prestigeBonus / (1 + 0.05 * modifiers.shopGrowingSpeed) / modifiers.petPlantCombo / modifiers.contagionPlantGrowth);
         if (plant.growthTime < 10) {
@@ -78,7 +82,7 @@ var helper = {
         let remExp = plant.reqExp - plant.curExp;
         let expBonus = plant.prestigeBonus * modifiers.shopRankEXP * modifiers.soulPlantEXP * modifiers.contagionPlantEXP * numAutos;
 
-        plant.timeToLevel = remExp / expBonus * plant.growthTime;
+        plant.timeToLevel = (remExp / expBonus) * plant.growthTime;
         return plant;
     },
     calcPerHarvest: function (plant) {
@@ -87,7 +91,7 @@ var helper = {
     calcTimeTillPrestige: function (plant_input, modifiers_input) {
         let plant = JSON.parse(JSON.stringify(plant_input));
         let modifiers = JSON.parse(JSON.stringify(modifiers_input));
-        let numAutos = modifiers.numAuto ? modifiers.numAuto : 1;
+        let numAutos = modifiers.numAuto || modifiers?.numAuto === 0 ? modifiers.numAuto : 1;
         let prestiged = false;
         let totalTime = 0;
 
