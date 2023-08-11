@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import Grid2 from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {petNamesById} from "../itemMapping";
+import { petNameArray } from "../itemMapping";
+import { StaticPetItem } from '../PetItem';
 import ReactGA from "react-ga4";
 
 
@@ -43,11 +44,12 @@ function PetComboDisplay({petCombos}) {
                 {petCombos && petCombos.map((petCombo, i) => {
                     const PetIDArray = petCombo.PetID;
                     return (
-                        <Grid2 container key={i}>
+                        <Grid2 container rowSpacing={10} key={i}>
                             {PetIDArray.map((petId, j) => {
+                                let staticPetData = petNameArray.find(staticPetDatum => staticPetDatum.petId === petId)
                                 return (
-                                    <Grid2 xs={3}>
-                                        <img src={petNamesById[petId].img} alt={petNamesById[petId]?.name} key={j} />
+                                    <Grid2 key={j} xs={1} display="flex" justifyContent="center" alignItems="center">
+                                        <StaticPetItem petData={staticPetData}/>
                                     </Grid2>
                                 );
                             })}

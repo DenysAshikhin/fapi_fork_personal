@@ -1,12 +1,21 @@
-/*.item-tile {*/
-/*    position: relative;*/
-/*    width: 100%;*/
-/*}*/
+.item-tile {
+   margin: auto;
+}
+
+.static-item-tile .item-image-container {
+    max-width: 150px;
+    max-height: 150px;
+}
+
+.static-item-tile .item-image {
+    max-width: 150px;
+    max-height: 150px;
+}
+
 .item-image-container {
     position: relative;
     max-width: 75px;
     max-height: 75px;
-    /*width: 100%;*/
 }
 .item-image {
     max-width: 75px;

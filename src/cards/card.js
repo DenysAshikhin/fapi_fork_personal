@@ -1,32 +1,39 @@
 import './card.css';
+import { styled } from '@mui/material/styles';
 import React, { useState, useEffect } from 'react';
 import Grid2 from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
 import Box from '@mui/material/Box';
-import { makeStyles } from '@material-ui/core/styles';
 import {calculateGroupScore} from "../App";
 import ReactGA from "react-ga4";
-const Decimal = require('decimal.js');
 
-const useStyles = makeStyles({
-    card: {
-        // width: 150,
-        // height: 150,
+const PREFIX = 'card';
+
+const classes = {
+    card: `${PREFIX}-card`,
+    content: `${PREFIX}-content`,
+    positiveChargeResult: `${PREFIX}-positiveChargeResult`,
+    negativeChargeResult: `${PREFIX}-negativeChargeResult`
+};
+
+const StyledGrid2 = styled(Grid2)({
+    [`& .${classes.card}`]: {
         position: 'relative',
         overflow: 'hidden',
     },
-    content: {
+    [`& .${classes.content}`]: {
         position: 'relative'
     },
-    positiveChargeResult: {
+    [`& .${classes.positiveChargeResult}`]: {
         textColor: 'green'
     },
-    negativeChargeResult: {
+    [`& .${classes.negativeChargeResult}`]: {
         textColor: 'red'
     }
 });
 
+const Decimal = require('decimal.js');
 
 const POTATO = 1;
 const CLASSEXP = 2;
@@ -125,7 +132,7 @@ const CARD_DISPLAY_IDS = [
     6,5,19,18,20
 ];
 
-const CardCard = ({data, card, weightMap, i, classes, applyWeights}) => {
+const CardCard = ({data, card, weightMap, i,  applyWeights}) => {
     const {
         CurrentExp,
         ExpNeeded,
@@ -159,7 +166,7 @@ const CardCard = ({data, card, weightMap, i, classes, applyWeights}) => {
 
     // TODO tooltip the scalars
     return (
-        <Grid2 xs={1} key={i}>
+        <StyledGrid2 xs={1} key={i}>
             <Box sx={{ minWidth: 20 }}>
                 <Card variant="outlined" className={classes.card}>
                     <img src={`/fapi_fork_personal/cards/card${ID}.png`} />
@@ -170,7 +177,7 @@ const CardCard = ({data, card, weightMap, i, classes, applyWeights}) => {
                     </Typography>
                 </Card>
             </Box>
-        </Grid2>
+        </StyledGrid2>
     );
 }
 
@@ -284,7 +291,7 @@ export function ExpeditionCardComponent({ data, weightMap, applyWeights, default
 }
 
 export default function CardComponent({ data, weightMap, applyWeights }) {
-    const classes = useStyles();
+
     if (!!data === false) return <div></div>;
     const {
         CardsCollection, CardExpBonuses, CardPowerBonuses, ChargeTransfertPowerPerma, ChargeTransfertPowerTemp,

@@ -86,7 +86,9 @@ const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, de
             onClick={onClick}
             className={`item-tile ${isSelected ? '' : 'unselected'}`}
         >
-            <div className="item-image-container" style={{
+            <div 
+                className="item-image-container"
+                style={{
                 border: borderActive ? 'black 1px solid' : '',
                 position: 'relative'
             }}>
@@ -125,5 +127,22 @@ const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, de
         </div>
     );
 };
+
+const StaticPetItem = ({ petData }) => {
+    const { petId, img, name } = petData;
+    return (
+        <div key={petId} className={`static-item-tile`}>
+            <div 
+                className="item-image-container"
+                style={{
+                position: 'relative'
+            }}>
+                <img src={img} alt={name} className="item-image" />
+            </div>
+        </div>
+    );
+};
+
+export { StaticPetItem };
 
 export default PetItem;

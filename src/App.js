@@ -2,18 +2,11 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import FileUpload from './FileUpload';
 import JSONDisplay from './JSONDisplay';
-import RepoLink from './RepoLink';
-import CardComponent, { ExpeditionCardComponent } from './cards/card';
-import { DefaultWeightMap, petNameArray, standardBonusesWeightList, BonusMap } from './itemMapping';
+import CardComponent from './cards/card';
+import { DefaultWeightMap, petNameArray, BonusMap } from './itemMapping';
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { BottomNavigation, BottomNavigationAction } from '@mui/material';
-import BadgeIcon from '@mui/icons-material/Badge';
-import InfoIcon from '@mui/icons-material/Info';
-import ScaleIcon from '@mui/icons-material/Scale';
-import { Container, Box } from '@mui/material';
 import Weights from "./weights/weights";
-import WeightedPetList from "./weightedPetList/WeightedPetList";
 import PetComboList from "./comboList/comboList";
 import helper from './util/helper.js';
 
@@ -1717,14 +1710,14 @@ function App() {
                     margin: '0 6px 0 0'
                 }}>
 
-                    <div class="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
+                    <div className="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
                         onClick={() => setTabSwitch(0)}
                     >
                         <img style={{ width: '30px' }} src={`/fapi_fork_personal/file_upload.svg`} />
                         <div style={{ textAlign: 'center' }}>Upload</div>
                     </div>
                     {!!data && (
-                        <div class="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
+                        <div className="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
                             onClick={() => setTabSwitch(1)}
                         >
                             <img style={{ width: '30px' }} src={`/fapi_fork_personal/signpost.svg`} />
@@ -1732,7 +1725,7 @@ function App() {
                         </div>
                     )}
                     {!!data && (
-                        <div class="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
+                        <div className="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
                             onClick={() => setTabSwitch(2)}
                         >
                             <img style={{ width: '30px' }} src={`/fapi_fork_personal/paw_plus.svg`} />
@@ -1740,7 +1733,7 @@ function App() {
                         </div>
                     )}
                     {!!data && (
-                        <div class="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
+                        <div className="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
                             onClick={() => setTabSwitch(3)}
                         >
                             <img style={{ width: '30px' }} src={`/fapi_fork_personal/farming/farming.svg`} />
@@ -1748,7 +1741,7 @@ function App() {
                         </div>
                     )}
                     {!!data && (
-                        <div class="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
+                        <div className="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
                             onClick={() => setTabSwitch(4)}
                         >
                             <img style={{ width: '30px' }} src={`/fapi_fork_personal/badge.svg`} />
@@ -1756,7 +1749,7 @@ function App() {
                         </div>
                     )}
                     {!!data && (
-                        <div class="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
+                        <div className="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
                             onClick={() => setTabSwitch(5)}
                         >
                             <img style={{ width: '30px' }} src={`/fapi_fork_personal/scale.svg`} />
@@ -1770,42 +1763,6 @@ function App() {
 
 
             </div>
-        </ThemeProvider>
-    );
-
-    return (
-        <ThemeProvider theme={theme}>
-
-            <Container sx={{
-                marginLeft: '0px', marginRight: '0px', maxWidth: '100000px !important',
-                // width: 'calc(100vw - 126px)',
-                width: '100%',
-                maxHeight: `calc(100vh - 56px)`,
-                height: `calc(100vh - 56px)`,
-            }}>
-                <Box sx={{ width: '100%', height: '100%', overFlowX: 'hidden' }} className={"main-content"}>
-                    {selectComponent()}
-                </Box>
-                {/* Add extra space at the bottom */}
-                {/* <Box sx={{ height: '64px' }} />  */}
-                <Box sx={{ width: '100%', position: 'fixed', bottom: 0 }}>
-                    <BottomNavigation
-                        showLabels
-                        value={tabSwitch}
-                        onChange={(event, newValue) => setTabSwitch(newValue)}
-                    >
-                        <BottomNavigationAction label="Upload" icon={<InfoIcon />} />
-                        {!!data && <BottomNavigationAction label="Expedition" icon={<img style={{ height: '24px' }} src={`/fapi_fork_personal/paw_icon.svg`} />} />}
-                        {!!data && <BottomNavigationAction label="Pet Combo List" icon={<img style={{ height: '24px' }} src={`/fapi_fork_personal/paw_plus.svg`} />} />}
-                        {!!data && <BottomNavigationAction label="Farming" icon={<img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/farming.svg`} />} />}
-                        {!!data && <BottomNavigationAction label="Charges" icon={<BadgeIcon />} />}
-                        {<BottomNavigationAction label="Weights" icon={<ScaleIcon />} />}
-                        {/*{!!data && <BottomNavigationAction label="Exp. Rewards" icon={<BadgeIcon />} />}*/}
-                        {/*{!!data && <BottomNavigationAction label="Weighted Pets" icon={<ScaleIcon />} />}*/}
-                        {/* <RepoLink /> */}
-                    </BottomNavigation>
-                </Box>
-            </Container>
         </ThemeProvider>
     );
 }
