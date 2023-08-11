@@ -95,6 +95,7 @@ const FarmingLanding = ({ data }) => {
     const secondsHour = 3600;
     const farmCalcStarted = useRef({});
     const farmTotals = useRef([]);
+    const [numThreads, setNumThreads] = useState(6);
 
     useEffect(() => {
 
@@ -359,6 +360,8 @@ const FarmingLanding = ({ data }) => {
                 }
             }
             if (finished) {
+
+                console.log(`Time end: ` + (new Date()).getTime())
                 setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
                     newAmount.current = 100;
@@ -779,11 +782,42 @@ const FarmingLanding = ({ data }) => {
                             <div style={{ display: 'flex' }}>
 
                                 <div>
-                                    WIP - Calculate best auto placements
+                                    <div>
+
+                                        WIP - Calculate best auto placements
+                                    </div>
+                                    <div style={{ display: 'flex' }}>
+                                        <div>
+                                            Num threads to use for calculating
+                                        </div>
+                                        <select
+                                            style={{ maxWidth: '144px' }}
+                                            onChange={
+                                                (e) => {
+                                                    setNumThreads(Number(e.target.value))
+                                                }
+                                            }
+                                            defaultValue={numThreads + ''}
+                                        >
+                                            <option
+                                                value="1">1</option>
+                                            <option
+                                                value="2">2</option>
+                                            <option
+                                                value="3">3</option>
+                                            <option
+                                                value="4">4</option>
+                                            <option
+                                                value="5">5</option>
+                                            <option
+                                                value="6">6</option>
+                                        </select>
+                                    </div>
                                 </div>
+
                                 <div>
                                     <button onClick={(e) => {
-
+                                        console.log(`Time start: ` + (new Date()).getTime())
                                         ReactGA.event({
                                             category: "farming_interaction",
                                             action: `clicked_optomise_auto`,
@@ -793,7 +827,7 @@ const FarmingLanding = ({ data }) => {
 
                                         const combinations = generateCombinations(data.FarmingShopAutoPlotBought, finalPlants.length);
                                         // const combinations = generateCombinations(3, finalPlants.length);
-                                        const splitArraysIndicies = splitArrayIndices(combinations, 6);
+                                        const splitArraysIndicies = splitArrayIndices(combinations, numThreads);
                                         farmTotals.current = [];
                                         setFarmCalcProgress((cur) => {
                                             let temp = { ...cur };
@@ -801,7 +835,7 @@ const FarmingLanding = ({ data }) => {
                                             temp.current = 0;
                                             return temp;
                                         })
-                                        for (let i = 0; i < 6; i++) {
+                                        for (let i = 0; i < numThreads; i++) {
                                             if (farmCalcStarted.current[i]) {
                                                 continue;
                                             }

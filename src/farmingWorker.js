@@ -156,8 +156,8 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
         let bestProd = 0;
         let bestProdCombo = {};
 
-        for (let i = data.start; i < data.end; i++) {
-            // console.log(`calculating loop: ${i + 1} / ${combinations.length}`);
+        for (let i = data.start; i <= data.end; i++) {
+            // console.log(`calculating loop: ${i} / ${combinations.length} <------> ${data.start}  == ${data.end}`);
             let combo = combinations[i];
             let tempPlants = [];
 
