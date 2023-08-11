@@ -50,19 +50,14 @@ var helper = {
 
         let x = 0;
         let numLoops = 0;
-        while (remainingTime > 0) {
-            numLoops++;
-            if (numLoops % 10 === 0) {
-                let xsdf = 0;
-                console.log('hit breakpoint')
-            }
-            // console.log(`loop remaining`)
-            plant.growthTime = Math.floor(plant.TimeNeeded / plant.prestigeBonus / (1 + 0.05 * modifiers.shopGrowingSpeed) / modifiers.petPlantCombo / modifiers.contagionPlantGrowth);
-            if (plant.growthTime < 10) {
-                plant.growthTime = 10;
-            }
+        let expTick = plant.prestigeBonus * modifiers.expBonus * numAutos;
+        // plant.growthTime = Math.floor(plant.TimeNeeded / plant.prestigeBonus / (1 + 0.05 * modifiers.shopGrowingSpeed) / modifiers.petPlantCombo / modifiers.contagionPlantGrowth);
+        // if (plant.growthTime < 10) {
+        //     plant.growthTime = 10;
+        // }
 
-            let expTick = plant.prestigeBonus * modifiers.expBonus * numAutos;
+        while (remainingTime > 0) {
+            
             plant.timeToLevel = Math.ceil((plant.reqExp - plant.curExp) / expTick) * plant.growthTime;
 
             let elapsedTime = 0;
@@ -76,14 +71,8 @@ var helper = {
                 rankIncrease = true;
             }
 
-            if (elapsedTime <= 0) {
-                elapsedTime = 1;
-            }
-
             remainingTime -= elapsedTime;
             plant.elapsedTime += elapsedTime;
-
-            // plant.created = this.calcPOW(plant.ManuallyCreated);
 
             let numHarvests = 0;
             if (plant.elapsedTime >= plant.growthTime) {

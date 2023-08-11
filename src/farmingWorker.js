@@ -155,13 +155,14 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
         let totalPotCombo = {};
         let bestProd = 0;
         let bestProdCombo = {};
+        let dataObj = { ...modifiers, time: secondsHour * futureTime };
 
         for (let i = data.start; i <= data.end; i++) {
             // console.log(`calculating loop: ${i} / ${combinations.length} <------> ${data.start}  == ${data.end}`);
             let combo = combinations[i];
-            let tempPlants = [];
+            dataObj.numAutos = combo;
 
-            let result = helper.calcHPProd(finalPlants, { ...modifiers, numAutos: combo, time: secondsHour * futureTime })
+            let result = helper.calcHPProd(finalPlants, dataObj);
 
 
             if (result.totalPotatoes > totalPot) {
