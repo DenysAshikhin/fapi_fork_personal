@@ -360,8 +360,8 @@ const FarmingLanding = ({ data }) => {
                 }
             }
             if (finished) {
-                
-console.log(`Time end: `+ (new Date()).getTime())
+
+                console.log(`Time end: ` + (new Date()).getTime())
                 setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
                     newAmount.current = 100;
@@ -817,7 +817,7 @@ console.log(`Time end: `+ (new Date()).getTime())
 
                                 <div>
                                     <button onClick={(e) => {
-console.log(`Time start: `+(new Date()).getTime())
+                                        console.log(`Time start: ` + (new Date()).getTime())
                                         ReactGA.event({
                                             category: "farming_interaction",
                                             action: `clicked_optomise_auto`,
