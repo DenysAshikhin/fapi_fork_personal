@@ -2,6 +2,20 @@ import helper from "./util/helper.js"
 import MouseOverPopover from "./tooltip";
 import ReactGA from "react-ga4";
 
+
+
+
+// const x = 3; // Number of objects
+// const y = 3; // Number of people
+
+// const combinations = generateCombinations(x, y);
+
+// console.log(combinations);
+
+
+
+
+
 const FarmingPlant = ({ data }) => {
     let plant = data.plant;
     let index = data.index;
@@ -17,9 +31,8 @@ const FarmingPlant = ({ data }) => {
     if (plantAutos && modifiers) {
         modifiers.numAuto = plantAutos[index]
     }
-    else {
-        let z = 0;
-    }
+
+
 
     if (fake) {
         plant = { created: 1 };
@@ -40,6 +53,11 @@ const FarmingPlant = ({ data }) => {
         helper.secondsToString(helper.calcTimeTillLevel(plant, modifiers).timeToLevel) :
         helper.secondsToString(plant.timeToLevel)}`;
     let futureMult = `(${helper.roundTwoDecimal(useFutureValues ? plant.futureMult * (customMultipliers[index]) : plant.currMult * (customMultipliers[index]))})`;
+    let totalProd = !fake ? `${plant.production.toExponential(2)}` : ``;
+
+    if (useFutureValues) {
+        futureMult = `${customMultipliers[index]}` + futureMult;
+    }
 
     if (fake) {
         plantTitle = `Plant`;
@@ -54,14 +72,17 @@ const FarmingPlant = ({ data }) => {
         futureMult = `'Custom Weight' (Base Mult. * 'Custom Weight')`;
     }
 
+    if (fake) {
+        let x = 0;
+    }
 
 
     return <div style={{
         border: '1px solid black', margin: '6px',
         padding: '0 0 0 0',
         display: 'flex',
-        height: fake ? '234px' : useFutureValues ? '224px' : '205px',
-        width: fake ? '264px' : ''
+        height: fake ? '179px' : useFutureValues ? '204px' : '179px',
+        // width: fake ? '390px' : ''
         // maxHeight:'128px' 
     }}>
         <div style={{ height: '214px', width: '214px', position: 'relative' }}>
@@ -112,7 +133,7 @@ const FarmingPlant = ({ data }) => {
                     </div>
                 }>
                     <div style={{ fontSize: '12px', fontFamily: 'sans-serif' }}>
-                        {outMult}
+                        {totalProd + ` ` + outMult}
                     </div>
                 </MouseOverPopover>
             </div>
@@ -179,7 +200,7 @@ const FarmingPlant = ({ data }) => {
             </div>
 
             {/* Weight */}
-            <div style={{ fontSize: '12px', marginTop: '0px', height: '12px', padding: '0 1px 0 1px', color: 'black', bottom: fake ? '7%' : '7%', left: '1%', display: 'flex', position: 'absolute' }}>
+            {/* <div style={{ fontSize: '12px', marginTop: '0px', height: '12px', padding: '0 1px 0 1px', color: 'black', bottom: fake ? '7%' : '7%', left: '1%', display: 'flex', position: 'absolute' }}>
                 <div style={{
                     display: 'flex',
                     alignItems: fake ? '' : 'center',
@@ -243,17 +264,30 @@ const FarmingPlant = ({ data }) => {
                             <div>Used to give more weight to this plant for the (Total Mult Additive) and `Weighted Mult Increase`</div>
                         </div>
                     }>
-                        <div style={{ width: fake ? '164px' : '' }}>
-                            {futureMult}
-                        </div>
+                        {!fake && (
+                            <div style={{ width: fake ? '164px' : '' }}>
+                                {futureMult}
+                            </div>
+                        )}
+                        {fake && (
+                            <div style={{ display: 'flex', width: '390px' }}>
+
+                                <div style={{ border: '1px solid black', marginRight: '6px' }}>
+                                    Custom Weight
+                                </div>
+                                <div>
+                                    (Base Mult. * 'Custom Weight')
+                                </div>
+                            </div>
+                        )}
                     </MouseOverPopover>
 
                 </div>
-            </div>
+            </div> */}
 
             {/* Num Auto */}
             {!fake && useFutureValues && (
-                <div style={{ fontSize: '12px', marginTop: '0px', height: '12px', padding: '0 1px 0 1px', color: 'black', bottom: fake ? '7%' : '-2%', left: '1%', display: 'flex', position: 'absolute' }}>
+                <div style={{ fontSize: '12px', marginTop: '0px', height: '12px', padding: '0 1px 0 1px', color: 'black', bottom: fake ? '7%' : '7%', left: '1%', display: 'flex', position: 'absolute' }}>
                     <div style={{
                         display: 'flex',
                         alignItems: fake ? '' : 'center',
