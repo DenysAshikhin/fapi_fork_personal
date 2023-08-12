@@ -22,22 +22,22 @@ function ScoreSection({ data, group, totalScore, defaultRank }) {
     return (
         <React.Fragment>
             <ul>
-                <li>
+                <li key="totalScore">
                     {Number(totalScore).toExponential(2)}&nbsp;~=&nbsp; 5 *
                 </li>
-                <li>
+                <li key="baseGroupScore">
                     Group Base: {Number(baseGroupScore).toExponential(2)}
                 </li>
-                <li>
+                <li key="damageBonus">
                     Dmg Bonus: {Number(1 + dmgCount * EXP_DMG_MOD).toFixed(2)}x
                 </li>
-                <li>
+                <li key="timeBonus">
                     Time Bonus: {Number(1 + timeCount * EXP_TIME_MOD).toFixed(2)}x
                 </li>
-                <li>
+                <li key="synergyBonus">
                     Synergy: {Number(synergyBonus).toFixed(2)}x
                 </li>
-                <li>
+                <li key="petDamageBonus">
                     PetDmgMod: {Number(data?.PetDamageBonuses).toExponential(2)}
                 </li>
             </ul>
@@ -152,7 +152,7 @@ const JSONDisplay = ({
             className="grid-container"
             style={{
                 gridTemplateColumns: '4fr 4fr 4fr',
-                gridColumnGap: '12px'
+                columnGap: '12px'
             }}
         >
             <div
@@ -216,11 +216,9 @@ const JSONDisplay = ({
                         }}
                     >
                         <MouseOverPopover tooltip={groupTooltip}>
-                            <div>
-                                {groupLabel}
-                            </div>
-
+                            {groupLabel}
                         </MouseOverPopover>
+
                         {/* {groupRankCritera === 2 && ( */}
                         <div style={{ display: "flex" }}>
                             <div style={{ marginRight: '12px' }}>Best hours:</div>
@@ -250,7 +248,6 @@ const JSONDisplay = ({
                     let GroupIcons = <Grid2
                         container
                         spacing={1}
-                        key={index}
                         style={{
                             // height: '1px'
                         }}
@@ -269,24 +266,23 @@ const JSONDisplay = ({
                             }
 
                             return (
-                                <Grid2 xs={3} key={idx}>
-                                    <PetItem
-                                        key={ID}
-                                        petData={staticPetData}
-                                        fullPetData={petData}
-                                        data={data}
-                                        isSelected={true}
-                                        onClick={() => { }}
-                                        weightMap={weightMap}
-                                        defaultRank={defaultRank}
-                                        borderActive={petData.BonusList.find((a) => a.ID === hoveredBonus)}
-                                        enabledBonusHighlight={enabledBonusHighlight}
-                                    />
-                                </Grid2>
+                                <PetItem
+                                    key={ID}
+                                    petData={staticPetData}
+                                    fullPetData={petData}
+                                    data={data}
+                                    isSelected={true}
+                                    onClick={() => { }}
+                                    weightMap={weightMap}
+                                    defaultRank={defaultRank}
+                                    borderActive={petData.BonusList.find((a) => a.ID === hoveredBonus)}
+                                    enabledBonusHighlight={enabledBonusHighlight}
+                                />
                             );
                         })}
                     </Grid2>
                     let finalRow = <div
+                        key={'group' + index}
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
@@ -1212,6 +1208,7 @@ const JSONDisplay = ({
                         <div style={{ margin: '0 1px 0 1px', boxShadow: `0 0 0 1px #ecf0f5`, }}>
                             {petWhiteList.map((pet, index) => {
                                 return (<div
+                                    key={pet.label}
                                     style={{
                                         boxShadow: `0 2px 1px -1px #ecf0f5`,
                                         display: 'flex',

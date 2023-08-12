@@ -19,6 +19,7 @@ function MouseOverPopover({ tooltip, children }) {
         <div>
             <Typography
                 // aria-owns={open ? 'mouse-over-popover' : undefined}
+                component={'span'}
                 aria-haspopup="true"
                 onMouseEnter={handlePopoverOpen}
                 onMouseLeave={handlePopoverClose}
