@@ -127,8 +127,9 @@ var helper = {
         plant.reqExp = 10 + 5 * plant.Rank * Math.pow(1.05, plant.Rank);
         let remExp = plant.reqExp - plant.curExp;
         let expBonus = plant.prestigeBonus * modifiers.expBonus * numAutos;
+        let ticksTillLevel = Math.ceil((remExp) / expBonus);
 
-        plant.timeToLevel = Math.ceil((remExp) / expBonus) * plant.growthTime;
+        plant.timeToLevel = ticksTillLevel * plant.growthTime;
 
 
 
@@ -207,7 +208,7 @@ var helper = {
 
         numHours = Math.floor(seconds / 3600);
         numMinutes = Math.floor((seconds % 3600) / 60);
-        numSeconds = (seconds % 3600) % 60;
+        numSeconds = this.roundInt((seconds % 3600) % 60);
         if (numHours > 0) {
             string = string + `${numHours < 10 ? `0` + numHours : numHours}h:`
         }
