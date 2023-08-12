@@ -47,11 +47,11 @@ const FarmingPlant = ({ data }) => {
     let totalHarvest = `${plant.created.toExponential(3)}`;
     let outMult = `x ${helper.roundTwoDecimal(useFutureValues ? plant.futureMult : plant.currMult)}`;
     let pic = `${plant.prestige}`;
-    let picTime = useFutureValues && !fake ? `${helper.secondsToString(helper.calcTimeTillPrestige(plant, modifiers))}` : ``;
+    let picTime = useFutureValues && !fake ? `${helper.secondsToStringWithS(helper.calcTimeTillPrestige(plant, modifiers))}` : ``;
     let rank = `${plant.Rank}`;
     let rankTime = `${useFutureValues && !fake ?
-        helper.secondsToString(helper.calcTimeTillLevel(plant, modifiers).timeToLevel) :
-        helper.secondsToString(plant.timeToLevel)}`;
+        helper.secondsToStringWithS(helper.calcTimeTillLevel(plant, modifiers).timeToLevel) :
+        helper.secondsToStringWithS(plant.timeToLevel)}`;
     let futureMult = `(${helper.roundTwoDecimal(useFutureValues ? plant.futureMult * (customMultipliers[index]) : plant.currMult * (customMultipliers[index]))})`;
     let totalProd = !fake ? `${plant.production.toExponential(2)}` : ``;
 
@@ -70,10 +70,6 @@ const FarmingPlant = ({ data }) => {
         rank = `Rank`;
         rankTime = `Time to Rank`;
         futureMult = `'Custom Weight' (Base Mult. * 'Custom Weight')`;
-    }
-
-    if (fake) {
-        let x = 0;
     }
 
 
