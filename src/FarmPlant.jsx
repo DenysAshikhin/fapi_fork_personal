@@ -2,20 +2,6 @@ import helper from "./util/helper.js"
 import MouseOverPopover from "./tooltip";
 import ReactGA from "react-ga4";
 
-
-
-
-// const x = 3; // Number of objects
-// const y = 3; // Number of people
-
-// const combinations = generateCombinations(x, y);
-
-// console.log(combinations);
-
-
-
-
-
 const FarmingPlant = ({ data }) => {
     let plant = data.plant;
     let index = data.index;
@@ -49,9 +35,7 @@ const FarmingPlant = ({ data }) => {
     let pic = `${plant.prestige}`;
     let picTime = useFutureValues && !fake ? `${helper.secondsToStringWithS(helper.calcTimeTillPrestige(plant, modifiers))}` : ``;
     let rank = `${plant.Rank}`;
-    let rankTime = `${useFutureValues && !fake ?
-        helper.secondsToStringWithS(helper.calcTimeTillLevel(plant, modifiers).timeToLevel) :
-        helper.secondsToStringWithS(plant.timeToLevel)}`;
+    let rankTime = `${helper.secondsToStringWithS(plant.timeToLevel)}`;
     let futureMult = `(${helper.roundTwoDecimal(useFutureValues ? plant.futureMult * (customMultipliers[index]) : plant.currMult * (customMultipliers[index]))})`;
     let totalProd = !fake ? `${plant.production.toExponential(2)}` : ``;
 
