@@ -13,7 +13,13 @@ const FarmerWorker2 = new Worker(new URL('./farmingWorker.js', import.meta.url))
 const FarmerWorker3 = new Worker(new URL('./farmingWorker.js', import.meta.url))
 const FarmerWorker4 = new Worker(new URL('./farmingWorker.js', import.meta.url))
 const FarmerWorker5 = new Worker(new URL('./farmingWorker.js', import.meta.url))
-const workers = [FarmerWorker, FarmerWorker1, FarmerWorker2, FarmerWorker3, FarmerWorker4, FarmerWorker5];
+const FarmerWorker6 = new Worker(new URL('./farmingWorker.js', import.meta.url))
+const FarmerWorker7 = new Worker(new URL('./farmingWorker.js', import.meta.url))
+const FarmerWorker8 = new Worker(new URL('./farmingWorker.js', import.meta.url))
+const FarmerWorker9 = new Worker(new URL('./farmingWorker.js', import.meta.url))
+const FarmerWorker10 = new Worker(new URL('./farmingWorker.js', import.meta.url))
+const FarmerWorker11 = new Worker(new URL('./farmingWorker.js', import.meta.url))
+const workers = [FarmerWorker, FarmerWorker1, FarmerWorker2, FarmerWorker3, FarmerWorker4, FarmerWorker5, FarmerWorker6, FarmerWorker7, FarmerWorker8, FarmerWorker9, FarmerWorker10, FarmerWorker11];
 
 function generateCombinations(objects, people) {
     const result = [];
@@ -97,6 +103,12 @@ const FarmingLanding = ({ data }) => {
     const farmCalcStarted = useRef({});
     const farmTotals = useRef([]);
     const [numThreads, setNumThreads] = useState(6);
+
+
+    const [farmCalcProgress, setFarmCalcProgress] = useState({ current: 0, max: 0 })
+    const [bestPlantCombo, setBestPlantCombo] = useState([])
+    const [autoBuyPBC, setAutoBuyPBC] = useState(data.ASCFarmingShopAutoPage1 === 1);
+    const [lockCustomAuto, setLockCustomAuto] = useState(false);
 
     useEffect(() => {
 
@@ -197,6 +209,7 @@ const FarmingLanding = ({ data }) => {
     let contagionPlantEXP = 1;
     let contagionPlantGrowth = 1;
     let contagionPlantProd = 1;
+    let contagionHarvest = 1;
 
     if (data.GrasshopperCollection[2].Locked > 0) {
         let base = helper.calcPOW(data.GrasshopperCollection[2].BaseBonus);
@@ -212,6 +225,11 @@ const FarmingLanding = ({ data }) => {
         let base = helper.calcPOW(data.GrasshopperCollection[4].BaseBonus);
         let level = helper.calcPOW(data.GrasshopperCollection[4].Level);
         contagionPlantGrowth = Math.pow(1 + base * 0.01, level);
+    }
+    if (data.GrasshopperCollection[6].Locked > 0) {
+        let base = helper.calcPOW(data.GrasshopperCollection[6].BaseBonus);
+        let level = helper.calcPOW(data.GrasshopperCollection[6].Level);
+        contagionHarvest = Math.pow(1 + base * 0.01, level);
     }
 
     //data.FarmingShopUniqueHealthy -> each index is a multiplier of x(1 + arr[i])
@@ -247,9 +265,6 @@ const FarmingLanding = ({ data }) => {
 
     let highestOverallMult = 0;
     let highestOverallMultMine = 0;
-    let highestWeightedMultIncrease = 0;
-    let highestWeightedMultIncreaseMine = 0;
-
 
     for (let i = 0; i < data.PetsSpecial.length; i++) {
         let t = data.PetsSpecial[i];
@@ -263,6 +278,7 @@ const FarmingLanding = ({ data }) => {
         // numAuto: numAuto,
         shopGrowingSpeed: shopGrowingSpeed,
         manualHarvestFormula: manualHarvestFormula,
+        contagionHarvest: contagionHarvest,
         shopRankEXP: shopRankEXP,
         shopRankLevel: shopRankLevel,
         picPlants: picPlants,
@@ -278,7 +294,8 @@ const FarmingLanding = ({ data }) => {
         nextCosts: nextCosts,
         curPotatoes: currHP,
         totalPotatoes: totalHP,
-        expBonus: shopRankEXP * soulPlantEXP * contagionPlantEXP * assemblyPlantExp
+        expBonus: shopRankEXP * soulPlantEXP * contagionPlantEXP * assemblyPlantExp,
+        autoBuyPBC: autoBuyPBC
     }
 
     for (let i = 0; i < plants.length; i++) {
@@ -295,6 +312,7 @@ const FarmingLanding = ({ data }) => {
         plant.totalMade = plant.TotalCreated.mantissa * (Math.pow(10, plant.TotalCreated.exponent));
 
         plant.perHarvest = helper.roundInt((1 + plant.Rank) * Math.pow(1.05, plant.Rank)) * Math.pow(1.02, plant.prestige);
+        plant.perHarvest = farmingHelper.calcPlantHarvest(plant, modifiers);
         plant.curExp = plant.CurrentExp.mantissa * (Math.pow(10, plant.CurrentExp.exponent));
         plant.reqExp = plant.ExpNeeded.mantissa * (Math.pow(10, plant.ExpNeeded.exponent));
         //plant.timeToLevel = (plant.reqExp - plant.curExp) / plant.perHarvest * plant.growthTime;
@@ -312,18 +330,6 @@ const FarmingLanding = ({ data }) => {
         finalPlants.push(plant);
     }
 
-
-    // for (let i = 0; i < finalPlants.length; i++) {
-    //     let newPlant = helper.calcFutureMult(finalPlants[i], { ...modifiers, time: timeTillNextLevel })
-    //     futurePlants.push(newPlant);
-    // }
-
-    // let futureT0 = helper.calcFutureMult(finalPlants[0], { ...modifiers, time: secondsHour * 1.2 })
-    // let futureT1 = helper.calcFutureMult(finalPlants[0], { ...modifiers, time: secondsHour * 2 })
-
-    let bestAddPlant;
-    let bestMultPlant;
-
     let customFuturePlants = [];
     let futurePlants = [];
 
@@ -332,44 +338,12 @@ const FarmingLanding = ({ data }) => {
         let toAdd = i === finalPlants.length - 1 ? 0 : futurePlants[0].production * secondsHour * futureTime
         curr.totalMade += toAdd;
         let newPlant = farmingHelper.calcFutureMult(curr, { ...modifiers, time: secondsHour * futureTime, numAuto: plantAutos[i] });
-        newPlant.futureMultMine = newPlant.futureMult * (customMultipliers[i]);
-        newPlant.multIncrease = newPlant.futureMult - newPlant.currMult;
-        newPlant.multIncreaseMine = newPlant.futureMultMine - newPlant.currMult * (customMultipliers[i]);
-        newPlant.weightedMultIncrease = newPlant.multIncrease * (customMultipliers[i]);
-        newPlant.weightedMultIncreaseMine = newPlant.multIncreaseMine;
-
-        newPlant.overalMult = 1;
-        newPlant.overalMultMine = 1;
-
-
-        for (let j = 0; j < finalPlants.length; j++) {
-            if (i !== j) {
-                newPlant.overalMult *= finalPlants[j].currMult;
-                newPlant.overalMultMine += finalPlants[j].currMult * customMultipliers[j];
-            }
-            else {
-                newPlant.overalMult *= newPlant.futureMult;
-                newPlant.overalMultMine += newPlant.futureMult * customMultipliers[j];
-            }
-        }
-
-        if (newPlant.overalMult > highestOverallMult) {
-            highestOverallMult = newPlant.overalMult;
-            bestMultPlant = newPlant;
-        }
-        if (newPlant.overalMultMine > highestOverallMultMine) {
-            highestOverallMultMine = newPlant.overalMultMine;
-            bestAddPlant = newPlant;
-        }
 
         customFuturePlants.unshift(newPlant);
         futurePlants.unshift(newPlant);
     }
 
-    const [farmCalcProgress, setFarmCalcProgress] = useState({ current: 0, max: 0 })
-    const [bestPlantCombo, setBestPlantCombo] = useState([])
-    const [autoBuyP1, setAutoBuyP1] = useState(true);
-    
+
     useEffect(() => {
 
         const findBest = () => {
@@ -497,7 +471,96 @@ const FarmingLanding = ({ data }) => {
             farmTotals.current.push(response);
             findBest();
         })
+        FarmerWorker6.addEventListener('message', (event) => {
+            let response = event.data;
+            if (response.update) {
+                return setFarmCalcProgress((curr) => {
+                    let newAmount = { ...curr };
+                    newAmount.current++;
+                    return newAmount;
+                })
+            }
 
+            console.log(`get sm6 back`)
+            farmCalcStarted.current[6] = false;
+            farmTotals.current.push(response);
+            findBest();
+        })
+        FarmerWorker7.addEventListener('message', (event) => {
+            let response = event.data;
+            if (response.update) {
+                return setFarmCalcProgress((curr) => {
+                    let newAmount = { ...curr };
+                    newAmount.current++;
+                    return newAmount;
+                })
+            }
+
+            console.log(`get sm7 back`)
+            farmCalcStarted.current[7] = false;
+            farmTotals.current.push(response);
+            findBest();
+        })
+        FarmerWorker8.addEventListener('message', (event) => {
+            let response = event.data;
+            if (response.update) {
+                return setFarmCalcProgress((curr) => {
+                    let newAmount = { ...curr };
+                    newAmount.current++;
+                    return newAmount;
+                })
+            }
+
+            console.log(`get sm8 back`)
+            farmCalcStarted.current[8] = false;
+            farmTotals.current.push(response);
+            findBest();
+        })
+        FarmerWorker9.addEventListener('message', (event) => {
+            let response = event.data;
+            if (response.update) {
+                return setFarmCalcProgress((curr) => {
+                    let newAmount = { ...curr };
+                    newAmount.current++;
+                    return newAmount;
+                })
+            }
+
+            console.log(`get sm9 back`)
+            farmCalcStarted.current[9] = false;
+            farmTotals.current.push(response);
+            findBest();
+        })
+        FarmerWorker10.addEventListener('message', (event) => {
+            let response = event.data;
+            if (response.update) {
+                return setFarmCalcProgress((curr) => {
+                    let newAmount = { ...curr };
+                    newAmount.current++;
+                    return newAmount;
+                })
+            }
+
+            console.log(`get sm10 back`)
+            farmCalcStarted.current[10] = false;
+            farmTotals.current.push(response);
+            findBest();
+        })
+        FarmerWorker11.addEventListener('message', (event) => {
+            let response = event.data;
+            if (response.update) {
+                return setFarmCalcProgress((curr) => {
+                    let newAmount = { ...curr };
+                    newAmount.current++;
+                    return newAmount;
+                })
+            }
+
+            console.log(`get sm11 back`)
+            farmCalcStarted.current[11] = false;
+            farmTotals.current.push(response);
+            findBest();
+        })
 
     }, [])
 
@@ -510,6 +573,25 @@ const FarmingLanding = ({ data }) => {
     const dataGrassHopper = helper.calcPOW(data.GrasshopperTotal);
     const level = dataGrassHopper + (futureGrasshopper - 1);
     let grassHopperAmount = helper.roundInt(2250 + (level + 1) * (level + 2) / 2 * 250 * Math.pow(1.025, level));
+    let numSimulatedAutos = data.FarmingShopAutoPlotBought;
+
+    let notEnoughAuto = false;
+
+    if (lockCustomAuto) {
+        let tempTotal = 0
+        for (let i = 0; i < finalPlants.length; i++) {
+            tempTotal += plantAutos[i];
+        }
+        if (tempTotal > numSimulatedAutos) {
+            ReactGA.event({
+                category: "farming_interaction",
+                action: `not_enough_autos`,
+                label: `${tempTotal - numSimulatedAutos}`,
+                value: tempTotal - numSimulatedAutos
+            });
+            notEnoughAuto = true;
+        }
+    }
 
     return (
         <div>
@@ -586,10 +668,14 @@ const FarmingLanding = ({ data }) => {
                     <div style={{ position: 'relative', display: 'flex', width: '160px' }}>
                         <img style={{ height: '95%', position: 'absolute' }} src={`/fapi_fork_personal/farming/contagion.png`} />
 
+                        {/* Rank EXP */}
                         <div style={{ position: 'absolute', height: '40%', width: '100%' }}>
                             <img style={{ position: 'absolute', height: '60%', left: '3%', top: '9%' }} src={`/fapi_fork_personal/farming/rank3.png`} />
-                            <div style={{ position: 'absolute', color: 'white', background: 'black', borderRadius: '6px', height: '12px', fontSize: '12px', top: '60%', left: '5.5%', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0 3px 0 3px' }}>x{helper.roundTwoDecimal(contagionPlantEXP)} </div>
+                            <div style={{ position: 'absolute', color: 'white', background: 'black', borderRadius: '6px', height: '12px', fontSize: '12px', top: '60%', left: '4%', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0 3px 0 3px' }}>
+                                x{helper.roundTwoDecimal(contagionPlantEXP)}
+                            </div>
                         </div>
+                        {/* Growth  */}
                         <div style={{ position: 'absolute', height: '40%', width: '70%', bottom: '1px' }}>
                             <img style={{ position: 'absolute', height: '70%', bottom: '15%' }} src={`/fapi_fork_personal/farming/growth.png`} />
                             <div style={{
@@ -605,13 +691,19 @@ const FarmingLanding = ({ data }) => {
                                 justifyContent: 'center', alignItems: 'center', width: 'calc(40% - 10px)'
                             }}>x{helper.roundTwoDecimal(contagionPlantGrowth)} </div>
                         </div>
+
+                        {/* Shovel */}
+                        <div style={{ position: 'absolute', height: '40%', width: '100%' }}>
+                            <img style={{ position: 'absolute', height: '60%', right: '3%', top: '9%' }} src={`/fapi_fork_personal/farming/shovel.png`} />
+                            <div style={{ position: 'absolute', color: 'white', background: 'black', borderRadius: '6px', height: '12px', fontSize: '12px', top: '60%', right: '4.75%', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0 3px 0 3px' }}>
+                                x{helper.roundTwoDecimal(contagionHarvest)}
+                            </div>
+                        </div>
                     </div>
                     <div>
                     </div>
 
                 </div>
-
-
                 {/* Assembly */}
                 <div style={{ width: '340px', background: '#c9c9c9', zIndex: '-2', borderRadius: '6px' }}>
 
@@ -729,87 +821,41 @@ const FarmingLanding = ({ data }) => {
                     )}
                 </div>
 
-                {/* Best Plants */}
                 <div
                     style={{ display: 'flex', width: '1800px' }}
                 >
-                    {/* Best plant Multiplicative */}
-                    {/* <MouseOverPopover tooltip={
-                        <div>
-                            <div>The multiplicative total of all plants' multipliers</div>
-                            <div>Calculated as THIS plants future Mult. {`(${helper.roundTwoDecimal(bestMultPlant.futureMult)})`} * all the others plant current multiplier</div>
-                        </div>
-                    }>
-                        <div style={{ border: '1px solid black', margin: '6px', padding: '0 6px 0 0', width: '365px', height: '48px' }}>
-                            <div
-                                style={{ display: 'flex' }}
-                            >
-                                <div>
-                                    {`Best Multiplicative (short-term) Total Mutliplier:`}
-                                </div>
-                                <div style={{ marginLeft: '6px', color: 'purple', fontWeight: 'bold' }}>
-                                    {` P${bestMultPlant.ID}`}
-                                </div>
-                            </div>
-                            <div style={{ display: 'flex' }}>
-                                <div style={{ marginRight: '6px' }}>
-                                    {`Additive Multiplier Total:`}
-                                </div>
-
-
-                                <div>
-                                    <div style={{ color: bestMultPlant.overalMult === highestOverallMult ? 'red' : '', margin: '0 6px 0 6px' }}> {`${helper.roundTwoDecimal(bestMultPlant.overalMult).toExponential(3)} `}</div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </MouseOverPopover> */}
-
-                    {/* Best plant Additive */}
-                    {/* <MouseOverPopover tooltip={
-                        <div>
-                            <div>The additive total of all plants' multipliers</div>
-                            <div>Calculated as THIS plants future Mult. {`(${helper.roundTwoDecimal(bestAddPlant.futureMult)})`} * `Weight` THEN + all the others plant current multiplier * their `Weight`</div>
-                        </div>
-                    }>
-                        <div style={{ border: '1px solid black', margin: '6px', padding: '0 6px 0 0', width: '325px', height: '48px' }}>
-                            <div
-                                style={{ display: 'flex' }}
-                            >
-                                <div>
-                                    {`Best Additive (long-term) Total Mutliplier:`}
-                                </div>
-                                <div style={{ marginLeft: '6px', color: 'purple', fontWeight: 'bold' }}>
-                                    {` P${bestAddPlant.ID}`}
-                                </div>
-                            </div>
-                            <div style={{ display: 'flex' }}>
-                                <div style={{ marginRight: '6px' }}>
-                                    {`Additive Multiplier Total:`}
-                                </div>
-
-
-                                <div>
-                                    <div style={{ color: bestAddPlant.overalMultMine === highestOverallMultMine ? 'blue' : '' }}> {`(${helper.roundTwoDecimal(bestAddPlant.overalMultMine).toExponential(3)}) `}</div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </MouseOverPopover> */}
 
                     <div style={{ display: 'flex' }}>
                         <div style={{ color: 'black' }}>
                             <div style={{ display: 'flex' }}>
 
                                 <div>
-                                    <div>
-
-                                        WIP - Calculate best auto placements
-                                    </div>
-                                    <div style={{ display: 'flex' }}>
-                                        <div>
-                                            Num threads to use for calculating
+                                    <MouseOverPopover tooltip={
+                                        <div style={{ padding: '6px' }}>
+                                            Calculates the best auto distribution for desired time into the future
                                         </div>
+                                    }>
+                                        <div>
+                                            WIP - Calculate best auto placements
+                                        </div>
+                                    </MouseOverPopover>
+
+
+
+                                    <div style={{ display: 'flex' }}>
+
+                                        <MouseOverPopover tooltip={
+                                            <div style={{ padding: '6px' }}>
+                                                How many parallel simulations to run, higher number means more CPU usage but quicker result (diminishing returns with more threads)
+                                            </div>
+                                        }>
+                                            <div>
+                                                Num threads to use for calculating
+                                            </div>
+                                        </MouseOverPopover>
+
+
+
                                         <select
                                             style={{ maxWidth: '144px' }}
                                             onChange={
@@ -819,112 +865,173 @@ const FarmingLanding = ({ data }) => {
                                             }
                                             defaultValue={numThreads + ''}
                                         >
-                                            <option
-                                                value="1">1</option>
-                                            <option
-                                                value="2">2</option>
-                                            <option
-                                                value="3">3</option>
-                                            <option
-                                                value="4">4</option>
-                                            <option
-                                                value="5">5</option>
-                                            <option
-                                                value="6">6</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="10">10</option>
+                                            <option value="11">11</option>
+                                            <option value="12">12</option>
                                         </select>
                                     </div>
-                                    <div>
-                                        sample
+                                    <div style={{ display: 'flex' }}>
+
+                                        <MouseOverPopover tooltip={
+                                            <div style={{ padding: '6px' }}>
+                                                Whether the simulation should automatically buy Farming Shop page 1 (Plant Boost Corner) upgrades. (This is an ascencion perk)
+                                            </div>
+                                        }>
+                                            <div>
+                                                Auto purchase Page 1 Upgrades (PBC)
+                                            </div>
+                                        </MouseOverPopover>
+
+
+                                        <input
+                                            type="checkbox"
+                                            onChange={(e) => {
+                                                setAutoBuyPBC(e.target.checked ? 1 : 0)
+                                            }}
+                                            checked={!!autoBuyPBC}
+                                            value={!!autoBuyPBC}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex' }}>
+
+                                        <MouseOverPopover tooltip={
+                                            <div style={{ padding: '6px' }}>
+                                                If checked, generates only possible auto distributions from your `Num Autos` selected above. If there are more autos assigned than you have purchased, then it will be disabled
+                                            </div>
+                                        }>
+                                            <div>
+                                                Lock in above `Num Autos`
+                                            </div>
+                                        </MouseOverPopover>
+
+
+                                        <input
+                                            type="checkbox"
+                                            onChange={(e) => {
+                                                setLockCustomAuto(e.target.checked ? 1 : 0)
+                                            }}
+                                            checked={!!lockCustomAuto}
+                                            value={!!lockCustomAuto}
+                                        />
                                     </div>
                                 </div>
 
-                                <div>
-                                    <button onClick={(e) => {
-                                        console.log(`Time start: ` + (new Date()).getTime())
-                                        ReactGA.event({
-                                            category: "farming_interaction",
-                                            action: `clicked_optomise_auto`,
-                                            label: `${futureTime}`,
-                                            value: futureTime
-                                        })
 
-                                        const combinations = generateCombinations(data.FarmingShopAutoPlotBought, finalPlants.length);
-                                        // const combinations = generateCombinations(3, finalPlants.length);
-                                        const splitArraysIndicies = splitArrayIndices(combinations, numThreads);
-                                        farmTotals.current = [];
-                                        setFarmCalcProgress((cur) => {
-                                            let temp = { ...cur };
-                                            temp.max = combinations.length;
-                                            temp.current = 0;
-                                            return temp;
-                                        })
-                                        for (let i = 0; i < numThreads; i++) {
-                                            if (farmCalcStarted.current[i]) {
-                                                continue;
-                                            }
-                                            let worker = workers[i];
-                                            worker.postMessage({
-                                                data: {
-                                                    combinations: combinations,
-                                                    start: splitArraysIndicies[i][0],
-                                                    end: splitArraysIndicies[i][1],
-                                                    time: futureTime,
-                                                    modifiers: { ...modifiers, },
-                                                    finalPlants: finalPlants,
-                                                },
-                                                id: i
+                                <div style={{ display: 'flex', height: '100%' }}>
+                                    <button
+                                        style={{ margin: '0 12px 0 0' }}
+                                        disabled={notEnoughAuto}
+                                        onClick={(e) => {
+
+                                            console.log(`Time start: ` + (new Date()).getTime())
+                                            ReactGA.event({
+                                                category: "farming_interaction",
+                                                action: `clicked_optomise_auto`,
+                                                label: `${futureTime}`,
+                                                value: futureTime
                                             })
-                                            farmCalcStarted.current[i] = true;
-                                        }
-                                    }}>Click</button>
+
+                                            let combinations = generateCombinations(numSimulatedAutos, finalPlants.length);
+
+                                            if (lockCustomAuto) {
+                                                let finalCombo = [];
+                                                for (let i = 0; i < combinations.length; i++) {
+                                                    let curr = combinations[i];
+                                                    let matches = true;
+                                                    for (let j = 0; j < finalPlants.length; j++) {
+                                                        //Meaning there is not enough assigned to match user's preference
+                                                        if (plantAutos[j] > curr[j]) {
+                                                            matches = false;
+                                                            break;
+                                                        }
+                                                    }
+                                                    if (matches) {
+                                                        finalCombo.push(curr);
+                                                    }
+                                                }
+                                                combinations = finalCombo;
+                                            }
+
+                                            // const combinations = generateCombinations(3, finalPlants.length);
+                                            let splitArraysIndicies = splitArrayIndices(combinations, numThreads);
+                                            if (combinations.length < numThreads) {
+                                                splitArraysIndicies = [[0, combinations.length - 1], [], [], [], [], []];
+                                            }
+                                            farmTotals.current = [];
+                                            setFarmCalcProgress((cur) => {
+                                                let temp = { ...cur };
+                                                temp.max = combinations.length;
+                                                temp.current = 0;
+                                                return temp;
+                                            })
+                                            for (let i = 0; i < numThreads; i++) {
+                                                if (farmCalcStarted.current[i]) {
+                                                    continue;
+                                                }
+                                                if (splitArraysIndicies[i].length === 0) continue;
+                                                let worker = workers[i];
+                                                worker.postMessage({
+                                                    data: {
+                                                        combinations: combinations,
+                                                        start: splitArraysIndicies[i][0],
+                                                        end: splitArraysIndicies[i][1],
+                                                        time: futureTime,
+                                                        modifiers: { ...modifiers, },
+                                                        finalPlants: finalPlants,
+                                                    },
+                                                    id: i
+                                                })
+                                                farmCalcStarted.current[i] = true;
+                                            }
+                                        }}>Calculate</button>
+                                    {notEnoughAuto && (
+                                        <div>
+                                            Not enough autos remaining!
+                                        </div>
+                                    )}
                                 </div>
                             </div>
-                            <div>
-                                {`${helper.roundTwoDecimal(farmCalcProgress.current / farmCalcProgress.max * 100)}%`}
-                            </div>
+
+                        </div>
+                        <div>
+                            {(farmCalcProgress.current > 0) && (
+                                <div>
+                                    {`${helper.roundTwoDecimal(farmCalcProgress.current / farmCalcProgress.max * 100)}%`}
+                                </div>
+                            )}
                             {(farmCalcProgress.current === farmCalcProgress.max && farmCalcProgress.current !== 0 && bestPlantCombo.prod) && (
-                                <div style={{ display: 'flex' }}>
-                                    <div style={{ marginRight: '24px' }}>
-                                        <div>
-                                            Most Potatoe/s
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <div style={{ marginRight: '24px', display: 'flex', }}>
+                                        <div style={{ minWidth: '181px' }}>
+                                            Most Potatoe/s:
                                         </div>
                                         {bestPlantCombo.prod.map((val, index) => {
-                                            // if (val === 0) {
-                                            //     return;
-                                            // }
-                                            return <div>{`P${index + 1}: ${val} autos`} </div>
+                                            return <div style={{ marginLeft: '12px', border: '1px solid black', padding: '0 6px 0 6px' }}>{`P${index + 1}: ${val} autos`} </div>
                                         })}
                                     </div>
-                                    <div>
+                                    <div style={{ display: 'flex', marginTop: '1px' }}>
                                         <div>
-                                            Most Potatoe Total Made
+                                            Most Potatoe Total Made:
                                         </div>
                                         {bestPlantCombo.pot.map((val, index) => {
-                                            // if (val === 0) {
-                                            //     return;
-                                            // }
-                                            return <div>{`P${index + 1}: ${val} autos`} </div>
+                                            return <div style={{ marginLeft: '12px', border: '1px solid black', padding: '0 6px 0 6px' }}>{`P${index + 1}: ${val} autos`} </div>
                                         })}
                                     </div>
                                 </div>
                             )}
-
-                            {/* <div>
-                                {`mult (short)` + bestUptomisedMult.toString()}
-                            </div>
-                            <div>
-                                {`add (long): ` + bestUptomisedAdd.toString()}
-                            </div> */}
-
                         </div>
-
                     </div>
-
-
                 </div>
-
             </div >
-
 
             {/* Explanation */}
             < div style={{ display: 'flex' }}>
@@ -934,33 +1041,64 @@ const FarmingLanding = ({ data }) => {
                 <div style={{ marginLeft: '24px' }}>
                     <h3 style={{ margin: '0' }}>How to use</h3>
                     <div>
-                        <div>
-                            Time to prestige: The red/orange arrow displays time until the plant hits its next PIC level (affected by Num Autos + future hours)
-                        </div>
-                        <div style={{ display: 'flex' }}>
-                            <div style={{ color: 'red', marginRight: '6px' }}>
-                                Multiplicative Total:
-                            </div>
-                            <div>
-                                Your best `short-term` multiplier gain (calculated as all plants final multipler x each other)
-                            </div>
-                        </div>
-                        <div style={{ display: 'flex' }}>
-                            <div style={{ color: 'blue', marginRight: '6px' }}>
-                                Additive Total:
-                            </div>
-                            <div>
-                                Your best `long-term` multiplier gain (calculated as a plants' final multipler x their weight + other plants final multipler * their weight)
+                        <div >
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <div style={{ width: '6px', height: '6px', borderRadius: '3px', backgroundColor: 'black', }}></div>
+                                <div style={{ fontWeight: 'bold', margin: '0 6px 0 12px' }}>
+                                    Hours to calculate:
+                                </div>
+                                <div>
+                                    how far into the future to calculate best auto distributions, as well as future PIC/Levels for plants
+                                </div>
                             </div>
                         </div>
-                        {/* <div style={{ display: 'flex' }}>
-                            <div style={{ color: 'Purple', marginRight: '6px' }}>
-                                Weighted Mult Increase:
+
+                        <div >
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <div style={{ width: '6px', height: '6px', borderRadius: '3px', backgroundColor: 'black', }}></div>
+                                <div style={{ fontWeight: 'bold', margin: '0 6px 0 12px' }}>
+                                    WIP - Calculate best auto placements:
+                                </div>
+                                <div>
+                                    Calculates the best auto distribution for desired time into the future
+                                </div>
                             </div>
-                            <div>
-                                Your best single-plant (sort-of long term) multiplier gain (calculated as a plants' final multipler gain x their weight)
+                        </div>
+                        <div >
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <div style={{ width: '6px', height: '6px', borderRadius: '3px', backgroundColor: 'black', }}></div>
+                                <div style={{ fontWeight: 'bold', margin: '0 6px 0 12px' }}>
+                                    Num threads to use for calculating:
+                                </div>
+                                <div>
+                                    How many parallel simulations to run, higher number means more CPU usage but quicker result (diminishing returns with more threads)
+                                </div>
                             </div>
-                        </div> */}
+                        </div>
+                        <div >
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <div style={{ width: '6px', height: '6px', borderRadius: '3px', backgroundColor: 'black', }}></div>
+                                <div style={{ fontWeight: 'bold', margin: '0 6px 0 12px' }}>
+                                    Auto purchase Page 1 Upgrades (PBC):
+                                </div>
+                                <div>
+                                    Whether the simulation should automatically buy Farming Shop page 1 (Plant Boost Corner) upgrades. (This is an ascencion perk)
+                                </div>
+                            </div>
+                        </div>
+                        <div >
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <div style={{ width: '6px', height: '6px', borderRadius: '3px', backgroundColor: 'black', }}></div>
+                                <div style={{ fontWeight: 'bold', margin: '0 6px 0 12px' }}>
+                                    Lock in above `Num Autos`:
+                                </div>
+                                <div>
+                                    If checked, generates only possible auto distributions from your `Num Autos` selected above. If there are more autos assigned than you have purchased, then it will be disabled
+                                </div>
+                            </div>
+                        </div>
+
+
                     </div>
                 </div>
 

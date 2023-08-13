@@ -1,3 +1,7 @@
+* {
+  font-family: sans-serif !important;
+}
+
 .main-content {
   overflow: auto;
 }

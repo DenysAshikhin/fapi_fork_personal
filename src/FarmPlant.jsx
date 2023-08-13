@@ -32,7 +32,7 @@ const FarmingPlant = ({ data }) => {
     let harvestTime = `${helper.secondsToStringWithS(plant.growthTime)}`;
     let harvestAmount = `${helper.roundTwoDecimal(plant.perHarvest)}`;
     let totalHarvest = `${plant.created.toExponential(3)}`;
-    let outMult = `x ${helper.roundTwoDecimal(useFutureValues ? plant.futureMult : plant.currMult)}`;
+    let outMult = ` (x${helper.roundTwoDecimal(useFutureValues ? plant.futureMult : plant.currMult)})`;
     let pic = `${plant.prestige}`;
     let picTime = useFutureValues && !fake ? `${helper.secondsToStringWithS(farmingHelper.calcTimeTillPrestige(plant, modifiers))}` : ``;
     let rank = `${plant.Rank}`;

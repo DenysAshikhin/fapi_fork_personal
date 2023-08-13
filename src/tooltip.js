@@ -29,7 +29,7 @@ function MouseOverPopover({ tooltip, children }) {
             <Popover
                 id="mouse-over-popover"
                 sx={{
-                    pointerEvents: 'none',
+                    pointerEvents: 'none'
                 }}
                 open={open}
                 anchorEl={anchorEl}
@@ -44,7 +44,7 @@ function MouseOverPopover({ tooltip, children }) {
                 onClose={handlePopoverClose}
                 disableRestoreFocus
             >
-               {tooltip}
+                {tooltip}
             </Popover>
         </div>
     );

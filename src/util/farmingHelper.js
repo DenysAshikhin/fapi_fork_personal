@@ -1,6 +1,10 @@
 import helper from './helper.js';
 
 var farmingHelper = {
+
+    calcPlantHarvest: function (plant, modifiers) {
+        return helper.roundInt((1 + plant.Rank) * Math.pow(1.05, plant.Rank)) * Math.pow(1.02, plant.prestige) * modifiers.contagionHarvest;
+    },
     calcProdOutput: function (plant_input, modifiers_input) {
 
 
@@ -78,7 +82,8 @@ var farmingHelper = {
                 if (rankIncrease) {
                     plant.Rank++;
                     plant.curExp = 0;
-                    plant.perHarvest = helper.roundInt((1 + plant.Rank) * Math.pow(1.05, plant.Rank)) * Math.pow(1.02, plant.prestige);
+                    // plant.perHarvest = helper.roundInt((1 + plant.Rank) * Math.pow(1.05, plant.Rank)) * Math.pow(1.02, plant.prestige);
+                    plant.perHarvest = this.calcPlantHarvest(plant, modifiers);
                     plant.reqExp = 10 + 5 * plant.Rank * Math.pow(1.05, plant.Rank);
                 }
                 else {
@@ -88,7 +93,8 @@ var farmingHelper = {
                     if (plant.curExp > plant.reqExp) {
                         plant.Rank++;
                         plant.curExp = 0;
-                        plant.perHarvest = helper.roundInt((1 + plant.Rank) * Math.pow(1.05, plant.Rank)) * Math.pow(1.02, plant.prestige);
+                        // plant.perHarvest = helper.roundInt((1 + plant.Rank) * Math.pow(1.05, plant.Rank)) * Math.pow(1.02, plant.prestige);
+                        plant.perHarvest = this.calcPlantHarvest(plant, modifiers);
                         plant.reqExp = 10 + 5 * plant.Rank * Math.pow(1.05, plant.Rank);
                     }
                 }
@@ -138,9 +144,6 @@ var farmingHelper = {
         expCost = 1000000000000000 * Math.pow(250, expLevel);
         return { prodCost, growthCost, expCost };
     },
-    calcPerHarvest: function (plant) {
-        return helper.roundInt((1 + plant.Rank) * Math.pow(1.05, plant.Rank)) * Math.pow(1.02, plant.prestige)
-    },
     calcTimeTillPrestige: function (plant_input, modifiers_input) {
         let plant = JSON.parse(JSON.stringify(plant_input));
         let modifiers = JSON.parse(JSON.stringify(modifiers_input));
@@ -165,7 +168,7 @@ var farmingHelper = {
                 plant.totalMade += ((ticks) * plant.perHarvest) * numAutos;
                 plant.Rank++;
                 plant.curExp = 0;
-                plant.perHarvest = this.calcPerHarvest(plant);
+                plant.perHarvest = this.calcPlantHarvest(plant, modifiers);
                 totalTime += timeToLevel;
                 plant.elapsedTime = plant.elapsedTime % plant.growthTime;
             }
@@ -203,28 +206,30 @@ var farmingHelper = {
             totalPotatoes += plants[0].production;
             currPotatoes += plants[0].production;
 
-            let updateCosts = false;
-            if (currPotatoes >= modifiers.nextCosts.prodCost) {
-                currPotatoes -= modifiers.nextCosts.prodCost;
-                modifiers.shopProdLevel++;
-                modifiers.shopProdBonus = Math.pow(1.25, modifiers.shopProdLevel);
-                updateCosts = true;
-            }
-            if (currPotatoes >= modifiers.nextCosts.growthCost) {
-                currPotatoes -= modifiers.nextCosts.growthCost;
-                modifiers.shopGrowingSpeed++;
-                updateCosts = true;
-            }
-            if (currPotatoes >= modifiers.nextCosts.expCost) {
-                currPotatoes -= modifiers.nextCosts.expCost;
-                modifiers.shopRankLevel++;
-                modifiers.shopRankEXP = 1 + modifiers.shopRankLevel * 0.1;
-                updateCosts = true;
-            }
-            if (updateCosts) {
+            if (modifiers.autoBuyPBC) {
+                let updateCosts = false;
+                if (currPotatoes >= modifiers.nextCosts.prodCost) {
+                    currPotatoes -= modifiers.nextCosts.prodCost;
+                    modifiers.shopProdLevel++;
+                    modifiers.shopProdBonus = Math.pow(1.25, modifiers.shopProdLevel);
+                    updateCosts = true;
+                }
+                if (currPotatoes >= modifiers.nextCosts.growthCost) {
+                    currPotatoes -= modifiers.nextCosts.growthCost;
+                    modifiers.shopGrowingSpeed++;
+                    updateCosts = true;
+                }
+                if (currPotatoes >= modifiers.nextCosts.expCost) {
+                    currPotatoes -= modifiers.nextCosts.expCost;
+                    modifiers.shopRankLevel++;
+                    modifiers.shopRankEXP = 1 + modifiers.shopRankLevel * 0.1;
+                    updateCosts = true;
+                }
+                if (updateCosts) {
 
-                let nextCosts = this.getNextShopCosts(modifiers);
-                modifiers.nextCosts = nextCosts
+                    let nextCosts = this.getNextShopCosts(modifiers);
+                    modifiers.nextCosts = nextCosts
+                }
             }
 
         }
@@ -366,7 +371,7 @@ var farmingHelper = {
         bonus *= petHPBonus;
 
         return bonus;
-    },
+    }
 }
 
 export default farmingHelper;

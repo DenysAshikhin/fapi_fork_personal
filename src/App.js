@@ -1613,6 +1613,9 @@ function App() {
     };
 
     const handleData = (uploadedData) => {
+
+        uploadedData.PetDamageBonuses = uploadedData.PetDamageBonuses > 0 ? uploadedData.PetDamageBonuses : 1;
+
         setData(uploadedData);
 
         let specialPetCombo = 1;
