@@ -860,7 +860,13 @@ const FarmingLanding = ({ data }) => {
                                             style={{ maxWidth: '144px' }}
                                             onChange={
                                                 (e) => {
-                                                    setNumThreads(Number(e.target.value))
+                                                    setNumThreads(Number(e.target.value));
+                                                    ReactGA.event({
+                                                        category: "farming_interaction",
+                                                        action: `changed_num_threads`,
+                                                        label: `${e.target.value}`,
+                                                        value: e.target.value
+                                                    })
                                                 }
                                             }
                                             defaultValue={numThreads + ''}
@@ -895,7 +901,13 @@ const FarmingLanding = ({ data }) => {
                                         <input
                                             type="checkbox"
                                             onChange={(e) => {
-                                                setAutoBuyPBC(e.target.checked ? 1 : 0)
+                                                setAutoBuyPBC(e.target.checked ? 1 : 0);
+                                                ReactGA.event({
+                                                    category: "farming_interaction",
+                                                    action: `changed_auto_pbc`,
+                                                    label: `${e.target.checked}`,
+                                                    value: e.target.checked
+                                                })
                                             }}
                                             checked={!!autoBuyPBC}
                                             value={!!autoBuyPBC}
@@ -917,7 +929,13 @@ const FarmingLanding = ({ data }) => {
                                         <input
                                             type="checkbox"
                                             onChange={(e) => {
-                                                setLockCustomAuto(e.target.checked ? 1 : 0)
+                                                setLockCustomAuto(e.target.checked ? 1 : 0);
+                                                ReactGA.event({
+                                                    category: "farming_interaction",
+                                                    action: `changed_lock_auto`,
+                                                    label: `${e.target.checked}`,
+                                                    value: e.target.checked
+                                                })
                                             }}
                                             checked={!!lockCustomAuto}
                                             value={!!lockCustomAuto}
