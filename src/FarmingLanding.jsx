@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import MouseOverPopover from "./tooltip";
 import FarmingPlant from './FarmPlant';
-import helper from "./util/helper.js"
+import helper from "./util/helper.js";
+import farmingHelper from "./util/farmingHelper.js";
 import './FarmingLanding.css';
 import ReactGA from "react-ga4";
 
@@ -213,20 +214,31 @@ const FarmingLanding = ({ data }) => {
         contagionPlantGrowth = Math.pow(1 + base * 0.01, level);
     }
 
+    //data.FarmingShopUniqueHealthy -> each index is a multiplier of x(1 + arr[i])
+
+    let currentHPBonus = helper.calcPOW(data.HealthyPotatoBonus);
+    let calcedBonus = farmingHelper.calcHPBonus(data);
+    let currHP = helper.calcPOW(data.HealthyPotatoCurrent);
+    let totalHP = helper.calcPOW(data.HealthyPotatoTotal);
+
+    let nextCosts = farmingHelper.getNextShopCosts(data);
+
 
     let soulPlantEXP = 1 + (0.25 * data.SoulLeafTreatment);
 
     let shopGrowingSpeed = data.FarmingShopPlantGrowingSpeed;
     let manualHarvestFormula = data.FarmingShopPlantManualHarvestFormula;
-    let shopProdBonus = Math.pow(1.25, data.FarmingShopPlantTotalProduction)
+    let shopProdBonus = Math.pow(1.25, data.FarmingShopPlantTotalProduction);
+    let shopProdLevel = data.FarmingShopPlantTotalProduction;
     let shopRankEXP = 1 + data.FarmingShopPlantRankExpEarned * 0.1;
+    let shopRankLevel = data.FarmingShopPlantRankExpEarned;
     let picPlants = data.FarmingShopPlantImprovement;
     let plants = data.PlantCollection;
     let finalPlants = [];
     let assemblyPlantExp = 1;
 
     if (data?.AssemblerCollection[0].BonusList[1].StartingLevel <= data?.AssemblerCollection[0].Level) {
-        assemblyPlantExp += data?.AssemblerCollection[0].BonusList[1].Gain * (data?.AssemblerCollection[0].Level - data?.AssemblerCollection[0].BonusList[1].StartingLevel);
+        assemblyPlantExp = Math.pow(1 + data?.AssemblerCollection[0].BonusList[1].Gain, data?.AssemblerCollection[0].Level - data?.AssemblerCollection[0].BonusList[1].StartingLevel);
     }
 
     const currFries = helper.calcPOW(data.FrenchFriesTotal);
@@ -251,14 +263,21 @@ const FarmingLanding = ({ data }) => {
         // numAuto: numAuto,
         shopGrowingSpeed: shopGrowingSpeed,
         manualHarvestFormula: manualHarvestFormula,
-        shopRankEXP: shopRankEXP, picPlants: picPlants,
+        shopRankEXP: shopRankEXP,
+        shopRankLevel: shopRankLevel,
+        picPlants: picPlants,
         petPlantCombo: Number(petPlantCombo),
         contagionPlantEXP: contagionPlantEXP,
         contagionPlantGrowth: contagionPlantGrowth,
         soulPlantEXP: soulPlantEXP,
         assemblyPlantExp: assemblyPlantExp,
         shopProdBonus: shopProdBonus,
+        shopProdLevel: shopProdLevel,
         contagionPlantProd: contagionPlantProd,
+        hpBonus: calcedBonus,
+        nextCosts: nextCosts,
+        curPotatoes: currHP,
+        totalPotatoes: totalHP,
         expBonus: shopRankEXP * soulPlantEXP * contagionPlantEXP * assemblyPlantExp
     }
 
@@ -279,14 +298,14 @@ const FarmingLanding = ({ data }) => {
         plant.curExp = plant.CurrentExp.mantissa * (Math.pow(10, plant.CurrentExp.exponent));
         plant.reqExp = plant.ExpNeeded.mantissa * (Math.pow(10, plant.ExpNeeded.exponent));
         //plant.timeToLevel = (plant.reqExp - plant.curExp) / plant.perHarvest * plant.growthTime;
-        plant.timeToLevel = helper.calcTimeTillLevel(plant, { ...modifiers, numAuto: plantAutos[i] }).timeToLevel;
+        plant.timeToLevel = farmingHelper.calcTimeTillLevel(plant, { ...modifiers, numAuto: plantAutos[i] }).timeToLevel;
         plant.currMult = Math.pow((1 + 0.05 * (1 + manualHarvestFormula * 0.02)), helper.calculateLogarithm(1.25, plant.created));
 
 
         if (plant.timeToLevel <= timeTillNextLevel) {
             timeTillNextLevel = plant.timeToLevel;
         }
-        let prod = helper.calcProdOutput(plant, modifiers);
+        let prod = farmingHelper.calcProdOutput(plant, modifiers);
         plant.production = prod;
         plant.elapsedTime = 0;
 
@@ -312,7 +331,7 @@ const FarmingLanding = ({ data }) => {
         let curr = JSON.parse(JSON.stringify(finalPlants[i]));
         let toAdd = i === finalPlants.length - 1 ? 0 : futurePlants[0].production * secondsHour * futureTime
         curr.totalMade += toAdd;
-        let newPlant = helper.calcFutureMult(curr, { ...modifiers, time: secondsHour * futureTime, numAuto: plantAutos[i] });
+        let newPlant = farmingHelper.calcFutureMult(curr, { ...modifiers, time: secondsHour * futureTime, numAuto: plantAutos[i] });
         newPlant.futureMultMine = newPlant.futureMult * (customMultipliers[i]);
         newPlant.multIncrease = newPlant.futureMult - newPlant.currMult;
         newPlant.multIncreaseMine = newPlant.futureMultMine - newPlant.currMult * (customMultipliers[i]);
@@ -349,7 +368,8 @@ const FarmingLanding = ({ data }) => {
 
     const [farmCalcProgress, setFarmCalcProgress] = useState({ current: 0, max: 0 })
     const [bestPlantCombo, setBestPlantCombo] = useState([])
-
+    const [autoBuyP1, setAutoBuyP1] = useState(true);
+    
     useEffect(() => {
 
         const findBest = () => {
@@ -812,6 +832,9 @@ const FarmingLanding = ({ data }) => {
                                             <option
                                                 value="6">6</option>
                                         </select>
+                                    </div>
+                                    <div>
+                                        sample
                                     </div>
                                 </div>
 

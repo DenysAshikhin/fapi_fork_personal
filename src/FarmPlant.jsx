@@ -1,4 +1,5 @@
-import helper from "./util/helper.js"
+import helper from "./util/helper.js";
+import farmingHelper from "./util/farmingHelper.js";
 import MouseOverPopover from "./tooltip";
 import ReactGA from "react-ga4";
 
@@ -33,7 +34,7 @@ const FarmingPlant = ({ data }) => {
     let totalHarvest = `${plant.created.toExponential(3)}`;
     let outMult = `x ${helper.roundTwoDecimal(useFutureValues ? plant.futureMult : plant.currMult)}`;
     let pic = `${plant.prestige}`;
-    let picTime = useFutureValues && !fake ? `${helper.secondsToStringWithS(helper.calcTimeTillPrestige(plant, modifiers))}` : ``;
+    let picTime = useFutureValues && !fake ? `${helper.secondsToStringWithS(farmingHelper.calcTimeTillPrestige(plant, modifiers))}` : ``;
     let rank = `${plant.Rank}`;
     let rankTime = `${helper.secondsToStringWithS(plant.timeToLevel)}`;
     let futureMult = `(${helper.roundTwoDecimal(useFutureValues ? plant.futureMult * (customMultipliers[index]) : plant.currMult * (customMultipliers[index]))})`;
