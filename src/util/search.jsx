@@ -84,7 +84,6 @@ const SearchBox = ({ data, onSelect }) => {
                     onSelect(value);
                     setValue({ label: '', id: -1 });
                 }}
-                oncle
             />
 
             {/* <ReactSearchAutocomplete

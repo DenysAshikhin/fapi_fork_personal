@@ -142,8 +142,14 @@ const JSONDisplay = ({
             }
 
             if (found) return;
+            try {
 
-            filterablePets.push({ id: pet.ID, label: petNames[pet.ID].name })
+                filterablePets.push({ id: pet.ID, label: petNames[pet.ID].name })
+            }
+            catch (err) {
+                console.log(err);
+                let x = 0;
+            }
         })
     }
 
@@ -1259,7 +1265,7 @@ const JSONDisplay = ({
                                 })
                                 if (data.PetsCollection) {
                                     let petArr = [];
-                                    for (let i = 0; i < data.PetsCollection.length; i++) {
+                                    for (let i = 1; i < data.PetsCollection.length; i++) {
                                         petArr.push(data.PetsCollection[i].ID)
                                     }
                                     handleItemSelected(petArr);
