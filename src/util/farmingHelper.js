@@ -157,8 +157,14 @@ var farmingHelper = {
             let remainingHarvests = requiredHarvests - plant.created;
             let timeTillPrestige = Math.ceil((remainingHarvests / (plant.perHarvest * numAutos))) * plant.growthTime;
 
-            if (timeTillPrestige < 0) {
-                prestiged = true
+            if (timeTillPrestige <= 0) {
+                prestiged = true;
+
+                if (totalTime <= 0) {
+                    plant.prestige++;
+                    prestiged = false;
+                }
+
             }
             else if (timeTillPrestige > timeToLevel) {
                 plant.elapsedTime += timeToLevel;
@@ -182,7 +188,7 @@ var farmingHelper = {
                 plant.elapsedTime = plant.elapsedTime % plant.growthTime;
             }
         }
-        return totalTime;
+        return { remainingTime: totalTime, prestige: plant.prestige, prestiged: prestiged }
     },
     calcHPProd: function (plants_input, modifiers_input) {
         let plants = JSON.parse(JSON.stringify(plants_input));
@@ -370,6 +376,13 @@ var farmingHelper = {
         let petHPBonus = this.calcPetHPBonus(data);
         bonus *= petHPBonus;
 
+        let residueHPBonus = Math.pow(1.05, data.CowShopHealthyPotato);
+        bonus *= residueHPBonus;
+
+        // let milkHPBonus = helper.calcPOW(data.BoostHealthyPotatoMilkBD);
+        // bonus *= milkHPBonus;
+
+        let legitBonus = helper.calcPOW(data.HealthyPotatoBonus);
         return bonus;
     }
 }

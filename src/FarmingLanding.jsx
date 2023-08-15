@@ -338,7 +338,9 @@ const FarmingLanding = ({ data }) => {
         let toAdd = i === finalPlants.length - 1 ? 0 : futurePlants[0].production * secondsHour * futureTime
         curr.totalMade += toAdd;
         let newPlant = farmingHelper.calcFutureMult(curr, { ...modifiers, time: secondsHour * futureTime, numAuto: plantAutos[i] });
-
+        let prestigeTimings = farmingHelper.calcTimeTillPrestige(newPlant, { ...modifiers, time: secondsHour * futureTime, numAuto: plantAutos[i] })
+        newPlant.prestige = prestigeTimings.prestige;
+        newPlant.timeToPrestige = prestigeTimings.remainingTime;
         customFuturePlants.unshift(newPlant);
         futurePlants.unshift(newPlant);
     }
