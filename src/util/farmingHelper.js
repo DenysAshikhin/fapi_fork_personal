@@ -376,7 +376,7 @@ var farmingHelper = {
         let petHPBonus = this.calcPetHPBonus(data);
         bonus *= petHPBonus;
 
-        let residueHPBonus = Math.pow(1.05, data.CowShopHealthyPotato);
+        let residueHPBonus = Math.pow(1.05, data.CowShopHealthyPotato ? data.CowShopHealthyPotato : 0);
         bonus *= residueHPBonus;
 
         // let milkHPBonus = helper.calcPOW(data.BoostHealthyPotatoMilkBD);
