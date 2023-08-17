@@ -34,9 +34,11 @@ const FarmingPlant = ({ data }) => {
     let totalHarvest = `${plant.created.toExponential(3)}`;
     let outMult = ` (x${helper.roundTwoDecimal(useFutureValues ? plant.futureMult : plant.currMult)})`;
     let pic = `${plant.prestige}`;
-    let picTime = useFutureValues && !fake ? `${helper.secondsToStringWithS(plant.timeToPrestige)}` : ``;
+    let futurePic = `${plant.nextPrestige}`
+    let picTime = useFutureValues && !fake ? `${plant.timeToPrestige > 3600 ? helper.secondsToString(plant.timeToPrestige) : helper.secondsToStringWithS(plant.timeToPrestige)}` : ``;
     let rank = `${plant.Rank}`;
-    let rankTime = `${helper.secondsToStringWithS(plant.timeToLevel)}`;
+    let originalRank = `${plant.originalRank}`
+    let rankTime = `${plant.timeToLevel > 3600 ? helper.secondsToString(plant.timeToLevel) : helper.secondsToStringWithS(plant.timeToLevel)}`;
     let futureMult = `(${helper.roundTwoDecimal(useFutureValues ? plant.futureMult * (customMultipliers[index]) : plant.currMult * (customMultipliers[index]))})`;
     let totalProd = !fake ? `${plant.production.toExponential(2)}` : ``;
 
@@ -50,8 +52,10 @@ const FarmingPlant = ({ data }) => {
         harvestAmount = `Harvest Amount`;
         totalHarvest = `Total Harvested`;
         outMult = `Output Multiplier`;
-        pic = `PIC Level`;
-        picTime = useFutureValues ? `Time to hit PIC level + 'Hours to calculate'` : ``;
+        pic = `Current Pic`;
+        futurePic = `Future Pic`;
+        originalRank = `Initial Rank`;
+        picTime = useFutureValues ? `Time to next PIC + 'Hours to calculate'` : ``;
         rank = `Rank`;
         rankTime = `Time to Rank`;
         futureMult = `'Custom Weight' (Base Mult. * 'Custom Weight')`;
@@ -63,7 +67,7 @@ const FarmingPlant = ({ data }) => {
         padding: '0 0 0 0',
         display: 'flex',
         height: fake ? '179px' : useFutureValues ? '204px' : '179px',
-        // width: fake ? '390px' : ''
+        width: fake ? '490px' : ''
         // maxHeight:'128px' 
     }}>
         <div style={{ height: '214px', width: '214px', position: 'relative' }}>
@@ -91,7 +95,7 @@ const FarmingPlant = ({ data }) => {
                 </MouseOverPopover>
             </div>
 
-
+            {/* total harvest */}
             <div style={{ background: 'black', borderRadius: '6px', fontSize: '12px', padding: '0 1px 0 1px', color: 'white', top: '10%', right: '1%', display: 'flex', position: 'absolute' }}>
 
                 <MouseOverPopover tooltip={
@@ -105,7 +109,7 @@ const FarmingPlant = ({ data }) => {
                 </MouseOverPopover>
             </div>
 
-
+            {/* output mult */}
             <div style={{ background: 'black', borderRadius: '6px', fontSize: '12px', padding: '0 1px 0 1px', color: 'white', top: '20%', right: '3%', display: 'flex', position: 'absolute' }}>
 
                 <MouseOverPopover tooltip={
@@ -121,24 +125,46 @@ const FarmingPlant = ({ data }) => {
 
 
             {/* Rank */}
-            <div style={{ fontSize: '12px', padding: '0 1px 0 1px', color: 'white', bottom: '18%', left: '25%', display: 'flex', position: 'absolute' }}>
+            <div style={{ fontSize: '10px', padding: '0 1px 0 1px', color: 'white', bottom: '18%', left: '18%', display: 'flex', position: 'absolute' }}>
                 <div style={{ display: 'flex' }}>
-                    <div style={{ background: 'black', borderRadius: '6px', padding: '0 3px 0 3px' }}>
-                        {rank}
+                    <div style={{ display: 'flex' }}>
+                        <div style={{ background: 'black', borderRadius: '6px', padding: '0 3px 0 3px', display: 'flex', alignItems: 'center' }} >
+                            {originalRank}
+                        </div>
+                        <img
+                            style={{ height: '16px', width: '12px', zIndex: '-1', transform: 'rotate(90deg)', margin: '0 3px 0 3px' }}
+                            src={`/fapi_fork_personal/up_arrow.svg`}
+                        />
+                        <div style={{ background: 'black', borderRadius: '6px', padding: '0 3px 0 3px', display: 'flex', alignItems: 'center' }}>
+                            {rank}
+                        </div>
                     </div>
-                    <img
-                        style={{ height: '16px', width: '24px', zIndex: '-1' }}
-                        src={`/fapi_fork_personal/up_arrow.svg`}
-                    />
-                    <div style={{ background: 'black', borderRadius: '6px', fontSize: '12px', padding: '0 1px 0 1px', color: 'white', display: 'flex', padding: '0 3px 0 3px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '10px', margin: '0 3px' }}>
+                        <img
+                            style={{ height: '16px', width: '24px', zIndex: '-1' }}
+                            src={`/fapi_fork_personal/up_arrow.svg`}
+                        />
+                    </div>
+                    <div style={{ background: 'black', borderRadius: '6px', fontSize: '12px', padding: '0 1px 0 1px', color: 'white', display: 'flex', alignItems: 'center', padding: '0 3px 0 3px' }}>
                         {rankTime}
                     </div>
                 </div>
             </div>
 
             {/* PIC */}
-            <div style={{ fontSize: '12px', padding: '0 1px 0 1px', color: 'white', bottom: '30%', left: fake ? '10%' : '14.9%', display: 'flex', position: 'absolute' }}>
+            <div style={{
+                fontSize: '12px',
+                padding: '0 1px 0 1px',
+                color: 'white',
+                bottom: '30%',
+                left: '0%',
+                display: 'flex',
+                justifyContent: 'center',
+                width: '100%',
+                position: 'absolute'
+            }}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {/* Current PIC */}
                     <MouseOverPopover tooltip={
                         <div>
                             <div>PIC Level</div>
@@ -154,6 +180,30 @@ const FarmingPlant = ({ data }) => {
                             />
                             <div style={{ background: 'black', borderRadius: '6px', padding: '0 3px 0 3px' }}>
                                 {pic}
+                            </div>
+                            <img
+                                style={{ height: '16px', width: '16px', zIndex: '-1', transform: 'rotate(90deg)', margin: '0 3px 0 6px' }}
+                                src={`/fapi_fork_personal/up_arrow_yellow.svg`}
+                            />
+                        </div>
+                    </MouseOverPopover>
+
+                    {/* Future PIC */}
+                    <MouseOverPopover tooltip={
+                        <div>
+                            <div>Future PIC Level</div>
+                        </div>
+                    }>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+
+                            <img
+                                style={{
+                                    height: '16px', width: '16px', zIndex: '-1'
+                                }}
+                                src={`/fapi_fork_personal/farming/prestige_star.png`}
+                            />
+                            <div style={{ background: 'black', borderRadius: '6px', padding: '0 3px 0 3px' }}>
+                                {futurePic}
                             </div>
                         </div>
                     </MouseOverPopover>

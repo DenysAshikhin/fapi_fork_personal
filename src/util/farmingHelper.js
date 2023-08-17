@@ -86,6 +86,10 @@ var farmingHelper = {
 
             plant.timeToLevel = Math.ceil((plant.reqExp - plant.curExp) / expTick) * plant.growthTime;
 
+            if (plant.ID === 1) {
+                let ss = 0;
+            }
+
             let elapsedTime = 0;
 
             let rankIncrease = false;
@@ -134,6 +138,9 @@ var farmingHelper = {
                         // plant.perHarvest = helper.roundInt((1 + plant.Rank) * Math.pow(1.05, plant.Rank)) * Math.pow(1.02, plant.prestige);
                         plant.perHarvest = this.calcPlantHarvest(plant, modifiers);
                         plant.reqExp = 10 + 5 * plant.Rank * Math.pow(1.05, plant.Rank);
+                    }
+                    else{
+                        plant.curExp = totalExp;
                     }
                 }
 
