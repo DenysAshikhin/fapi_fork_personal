@@ -256,8 +256,10 @@ var farmingHelper = {
         let simulationTime = modifiers.time; //time in seconds
 
         const dataPointsMax = 100;
+
         let dataPointThreshold = helper.roundInt(simulationTime / dataPointsMax);
-        let dataPoints = [];
+        let dataPointsPotatoes = [];
+        let dataPointsFries = [];
 
         let totalPotatoes = modifiers.totalPotatoes;
         let currPotatoes = modifiers.curPotatoes;
@@ -301,13 +303,21 @@ var farmingHelper = {
                 }
             }
 
-            if (i % dataPointThreshold == 0) {
-                dataPoints.push({ "time": i, "production": totalPotatoes })
+            if(i % dataPointThreshold == 0) {
+                dataPointsPotatoes.push({ "time": i, "production": totalPotatoes})
+                dataPointsFries.push({ "time": i, "fries": farmingHelper.calcFryOutput(totalPotatoes)})
             }
 
         }
         // console.log(`plant 2 final prod: ${plants[1].production}`)
-        return { totalPotatoes: totalPotatoes, potatoeProduction: plants[0].production, plants: plants, nextCosts: modifiers.nextCosts, dataPoints: dataPoints };
+        return {
+            totalPotatoes: totalPotatoes,
+            potatoeProduction: plants[0].production,
+            plants: plants,
+            nextCosts: modifiers.nextCosts,
+            dataPointsPotatoes: dataPointsPotatoes,
+            dataPointsFries: dataPointsFries
+        };
     },
     calcAssemblyHP: function (data) {
         let bonus = 1;

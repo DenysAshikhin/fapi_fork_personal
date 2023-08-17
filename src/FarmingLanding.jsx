@@ -403,12 +403,11 @@ const FarmingLanding = ({ data }) => {
                 let bestPic = { pic: 0, prod: 0 }
                 let bestPicPerc = { pic: 0, prod: 0 }
 
-                let top10ProductionDataPoints = [];
-                let top10TotalDataPoints = [];
+                let top10DataPointsPotatoes = [];
+                let top10DataPointsFries = [];
 
                 for (let i = 0; i < farmTotals.current.length; i++) {
                     let cur = farmTotals.current[i];
-
 
                     if (cur.bestPicCombo.picGain > bestPic.pic) {
                         bestPic = { pic: cur.bestPicCombo.picGain, result: cur.bestPicCombo, prod: cur.bestPicCombo.potatoeProduction }
@@ -432,20 +431,26 @@ const FarmingLanding = ({ data }) => {
                     if (cur.bestProdCombo.result.potatoeProduction > bestProd.prod) {
                         bestProd = { prod: cur.bestProdCombo.result.potatoeProduction, result: cur.bestProdCombo }
 
-                        top10ProductionDataPoints.unshift(cur.bestProdCombo.result.dataPoints);
-                        if (top10ProductionDataPoints.length > 10) {
-                            top10ProductionDataPoints.pop();
-                        }
                     }
                     if (cur.totalPotCombo.result.totalPotatoes > bestPot.pot) {
                         bestPot = { pot: cur.totalPotCombo.result.totalPotatoes, result: cur.totalPotCombo }
-
-                        top10TotalDataPoints.unshift(cur.totalPotCombo.result.dataPoints);
-                        if (top10TotalDataPoints.length > 10) {
-                            top10TotalDataPoints.pop();
-                        }
                     }
+
+                    top10DataPointsPotatoes.push(...cur.top10DataPointsPotatoes);
+                    top10DataPointsFries.push(...cur.top10DataPointsFries);
                 }
+
+                top10DataPointsPotatoes = top10DataPointsPotatoes.sort((a, b) => {
+                    if (a.result < b.result) {
+                        return 1;
+                    }
+                }).slice(0, 10);
+
+                top10DataPointsFries = top10DataPointsFries.sort((a, b) => {
+                    if (a.result < b.result) {
+                        return 1;
+                    }
+                }).slice(0, 10);
 
                 bestProd.finalFry = farmingHelper.calcFryOutput(bestProd.result.result.totalPotatoes)
                 bestPic.finalFry = farmingHelper.calcFryOutput(bestPic.result.result.totalPotatoes)
@@ -460,8 +465,8 @@ const FarmingLanding = ({ data }) => {
                     pic: bestPic.result.combo,
                     bestPicPerc: bestPicPerc,
                     picPerc: bestPicPerc.result.combo,
-                    top10ProductionDataPoints: top10ProductionDataPoints,
-                    top10TotalDataPoints: top10TotalDataPoints
+                    top10DataPointsPotatoes: top10DataPointsPotatoes,
+                    top10DataPointsFries: top10DataPointsFries
                 }
                 console.log(`Best:`);
                 console.log(finalBests);
@@ -838,6 +843,7 @@ const FarmingLanding = ({ data }) => {
             <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}  >
                 {finalPlants.map((val, index) => {
                     return <FarmingPlant
+                        key={'top' + index}
                         data={{
                             setPlantAutos: setPlantAutos, plantAutos: plantAutos, plant: val, index: index, customMultipliers: customMultipliers, setCustomMultipliers: setCustomMultipliers, allowSetMultipliers: false, allowSetMultipliers: true,
                             modifiers: modifiers
@@ -897,7 +903,7 @@ const FarmingLanding = ({ data }) => {
                 {/* Future plants */}
                 <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                     {customFuturePlants.map((plant, index) => {
-                        return <FarmingPlant data={
+                        return <FarmingPlant key={'future' + index} data={
                             {
                                 setPlantAutos: setPlantAutos, plantAutos: plantAutos,
                                 plant: plant,
@@ -1145,7 +1151,7 @@ const FarmingLanding = ({ data }) => {
                                         {bestPlantCombo.pic.map((val, index) => {
                                             return (
 
-                                                <MouseOverPopover tooltip={
+                                                <MouseOverPopover key={'popover' + index} tooltip={
                                                     <div>
                                                         <div>
                                                             <div>
@@ -1195,7 +1201,7 @@ const FarmingLanding = ({ data }) => {
                                             </div>
                                             {bestPlantCombo.picPerc.map((val, index) => {
                                                 return (
-                                                    <MouseOverPopover tooltip={
+                                                    <MouseOverPopover key={'picPercPopover' + index} tooltip={
                                                         <div>
                                                             <div>
                                                                 <div>
@@ -1250,41 +1256,62 @@ const FarmingLanding = ({ data }) => {
                                                     left: 20,
                                                     bottom: 5,
                                                 }}
-                                            >
+                                                >
                                                 <CartesianGrid strokeDasharray="3 3" />
-                                                <XAxis dataKey="time" displayName="time in seconds" />
-                                                <YAxis />
+                                                <XAxis dataKey="time" xAxisId="mainTime" name="time in seconds"/>
+                                                <YAxis yAxisId="potatoes" />
+                                                {/*<YAxis yAxisId="fries" orientation="right" />*/}
                                                 <Tooltip
                                                     formatter={(value, name, props) => {
                                                         return [value.toExponential(3), name];
                                                     }}
                                                 />
                                                 <Legend />
-                                                {/* {bestPlantCombo.top10TotalDataPoints.map((val, index) => {
+                                                {bestPlantCombo.top10DataPointsPotatoes.map((val, index) => {
+                                                    return (<XAxis dataKey="time" hide={true} xAxisId={"potatoXAxis" + index} name="time in seconds"/>)})
+                                                }
+                                                {bestPlantCombo.top10DataPointsPotatoes.map((val, index) => {
                                                     return (
                                                         <Line
                                                             type="monotone"
-                                                            data={val}
+                                                            xAxisId={"potatoXAxis" + index}
+                                                            yAxisId="potatoes"
+                                                            data={val.data}
                                                             dataKey="production"
+                                                            name={`Top ${index + 1} production`}
                                                             stroke="#8884d8"
                                                             activeDot={{ r: 8 }}
                                                         />
-                                                    )
-                                                })
-                                                } */}
-                                                {bestPlantCombo.top10ProductionDataPoints.map((val, index) => {
+                                                    )})
+                                                }
+                                                <Line
+                                                    type="monotone"
+                                                    xAxisId="mainTime"
+                                                    yAxisId="potatoes"
+                                                    data={tempFuture.dataPointsPotatoes}
+                                                    dataKey="production"
+                                                    name="Currently selected production"
+                                                    stroke="#82ca9d"
+                                                    strokeWidth={2}
+                                                    activeDot={{ r: 8 }}
+                                                />
+                                                {/*bestPlantCombo.top10DataPointsPotatoes.map((val, index) => {
+                                                    return (<XAxis dataKey="time" hide={true} xAxisId={"fryXAxis" + index} name="time in seconds"/>)})
+                                                }
+                                                {bestPlantCombo.top10DataPointsFries.map((val, index) => {
                                                     return (
                                                         <Line
                                                             type="monotone"
-                                                            data={val}
-                                                            name={`Top ${index + 1} Production`}
-                                                            dataKey="production"
+                                                            xAxisId={"fryXAxis" + index}
+                                                            yAxisId="fries"
+                                                            data={val.data}
+                                                            dataKey="fries"
+                                                            name={`Top ${index + 1} fries`}
                                                             stroke="#82ca9d"
-                                                            activeDot={{ r: 8 }}
+                                                            activeDot={{ r: 5 }}
                                                         />
-                                                    )
-                                                })
-                                                }
+                                                    )})
+                                                */}
                                             </LineChart>
                                         </ResponsiveContainer>
                                     </div>

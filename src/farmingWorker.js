@@ -25,8 +25,8 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
         let bestPICPercCombo = { potatoeProduction: 0 }
         let dataObj = { ...modifiers, time: secondsHour * futureTime };
 
-        let totalDataPoints = {};
-        let productionDataPoints = {};
+        let top10DataPointsPotatoes = [];
+        let top10DataPointsFries = [];
 
         for (let i = data.start; i <= data.end; i++) {
             // console.log(`calculating loop: ${i} / ${combinations.length} <------> ${data.start}  == ${data.end}`);
@@ -48,14 +48,19 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
             if (result.totalPotatoes > totalPot) {
                 totalPot = result.totalPotatoes;
                 totalPotCombo = { combo: combo, result: result, plants: result.plants }
-
-                totalDataPoints = result.dataPoints;
             }
             if (result.potatoeProduction > bestProd) {
                 bestProd = result.potatoeProduction;
                 bestProdCombo = { combo: combo, result: result, plants: result.plants }
 
-                productionDataPoints = result.dataPoints;
+                top10DataPointsPotatoes.unshift({ data: result.dataPointsPotatoes, result: bestProd });
+                if(top10DataPointsPotatoes.length > 10) {
+                    top10DataPointsPotatoes.pop();
+                }
+                top10DataPointsFries.unshift({ data: result.dataPointsFries, result: bestProd });
+                if(top10DataPointsFries.length > 10) {
+                    top10DataPointsFries.pop();
+                }
             }
 
             if (picGained > bestPIC) {
@@ -99,6 +104,8 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
             bestProdCombo: bestProdCombo,
             bestPicCombo: bestPicCombo,
             bestPICPercCombo: bestPICPercCombo,
+            top10DataPointsPotatoes: top10DataPointsPotatoes,
+            top10DataPointsFries: top10DataPointsFries
         })
     }
     catch (err) {
