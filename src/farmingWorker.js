@@ -25,6 +25,9 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
         let bestPICPercCombo = { potatoeProduction: 0 }
         let dataObj = { ...modifiers, time: secondsHour * futureTime };
 
+        let totalDataPoints = {};
+        let productionDataPoints = {};
+
         for (let i = data.start; i <= data.end; i++) {
             // console.log(`calculating loop: ${i} / ${combinations.length} <------> ${data.start}  == ${data.end}`);
             let combo = combinations[i];
@@ -45,10 +48,14 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
             if (result.totalPotatoes > totalPot) {
                 totalPot = result.totalPotatoes;
                 totalPotCombo = { combo: combo, result: result, plants: result.plants }
+
+                totalDataPoints = result.dataPoints;
             }
             if (result.potatoeProduction > bestProd) {
                 bestProd = result.potatoeProduction;
                 bestProdCombo = { combo: combo, result: result, plants: result.plants }
+
+                productionDataPoints = result.dataPoints;
             }
 
             if (picGained > bestPIC) {

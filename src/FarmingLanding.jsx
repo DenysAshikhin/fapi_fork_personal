@@ -5,6 +5,7 @@ import helper from "./util/helper.js";
 import farmingHelper from "./util/farmingHelper.js";
 import './FarmingLanding.css';
 import ReactGA from "react-ga4";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const FarmerWorker = new Worker(new URL('./farmingWorker.js', import.meta.url))
 // const FarmerWorker = new Worker('./farmingWorker.js', { type: "module" })
@@ -401,6 +402,10 @@ const FarmingLanding = ({ data }) => {
                 let bestPot = { pot: 0 };
                 let bestPic = { pic: 0, prod: 0 }
                 let bestPicPerc = { pic: 0, prod: 0 }
+
+                let top10ProductionDataPoints = [];
+                let top10TotalDataPoints = [];
+
                 for (let i = 0; i < farmTotals.current.length; i++) {
                     let cur = farmTotals.current[i];
 
@@ -426,18 +431,25 @@ const FarmingLanding = ({ data }) => {
 
                     if (cur.bestProdCombo.result.potatoeProduction > bestProd.prod) {
                         bestProd = { prod: cur.bestProdCombo.result.potatoeProduction, result: cur.bestProdCombo }
+
+                        top10ProductionDataPoints.unshift(cur.bestProdCombo.result.dataPoints);
+                        if(top10ProductionDataPoints.length > 10) {
+                            top10ProductionDataPoints.pop();
+                        }
                     }
                     if (cur.totalPotCombo.result.totalPotatoes > bestPot.pot) {
                         bestPot = { pot: cur.totalPotCombo.result.totalPotatoes, result: cur.totalPotCombo }
+
+                        top10TotalDataPoints.unshift(cur.totalPotCombo.result.dataPoints);
+                        if(top10TotalDataPoints.length > 10) {
+                            top10TotalDataPoints.pop();
+                        }
                     }
                 }
-
-
 
                 bestProd.finalFry = farmingHelper.calcFryOutput(bestProd.result.result.totalPotatoes)
                 bestPic.finalFry = farmingHelper.calcFryOutput(bestPic.result.result.totalPotatoes)
                 bestPicPerc.finalFry = farmingHelper.calcFryOutput(bestPicPerc.result.result.totalPotatoes)
-
 
                 let finalBests = {
                     bestProd: bestProd,
@@ -447,7 +459,9 @@ const FarmingLanding = ({ data }) => {
                     bestPic: bestPic,
                     pic: bestPic.result.combo,
                     bestPicPerc: bestPicPerc,
-                    picPerc: bestPicPerc.result.combo
+                    picPerc: bestPicPerc.result.combo,
+                    top10ProductionDataPoints: top10ProductionDataPoints,
+                    top10TotalDataPoints: top10TotalDataPoints
                 }
                 console.log(`Best:`);
                 console.log(finalBests);
@@ -1224,7 +1238,37 @@ const FarmingLanding = ({ data }) => {
                                         </div>
                                     )}
 
-
+                                    {/* Graph stuff */}
+                                    <div style={{ display: 'flex', marginTop: '6px', alignItems: 'center', minHeight: '300px' }}>
+                                        <ResponsiveContainer width="100%" height="100%" minHeight="300px">
+                                            <LineChart
+                                                width={500}
+                                                height={300}
+                                                margin={{
+                                                    top: 5,
+                                                    right: 30,
+                                                    left: 20,
+                                                    bottom: 5,
+                                                }}
+                                                >
+                                                <CartesianGrid strokeDasharray="3 3" />
+                                                <XAxis dataKey="time" displayName="time in seconds"/>
+                                                <YAxis />
+                                                <Tooltip />
+                                                <Legend />
+                                                {bestPlantCombo.top10TotalDataPoints.map((val, index) => {
+                                                    return (
+                                                        <Line type="monotone" data={val} dataKey="production" label={"top " + index + " total potatoes"} stroke="#8884d8" activeDot={{ r: 8 }} />
+                                                    )})
+                                                }
+                                                {bestPlantCombo.top10ProductionDataPoints.map((val, index) => {
+                                                    return (
+                                                        <Line type="monotone" data={val} dataKey="production" label={"top " + index + " production /s"} stroke="#82ca9d" activeDot={{ r: 8 }} />
+                                                    )})
+                                                }
+                                            </LineChart>
+                                        </ResponsiveContainer>
+                                    </div>
                                 </div>
                             )}
                         </div>

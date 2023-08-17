@@ -253,13 +253,17 @@ var farmingHelper = {
         let plants = JSON.parse(JSON.stringify(plants_input));
         let modifiers = JSON.parse(JSON.stringify(modifiers_input));
         let numAutos = modifiers.numAutos;
-        let time = modifiers.time;//time in seconds
+        let simulationTime = modifiers.time; //time in seconds
+
+        const dataPointsMax = 100;
+        let dataPointThreshold = simulationTime / dataPointsMax;
+        let dataPoints = [];
 
         let totalPotatoes = modifiers.totalPotatoes;
         let currPotatoes = modifiers.curPotatoes;
 
         //Iterate over each second
-        for (let i = 0; i < time; i++) {
+        for (let i = 0; i < simulationTime; i++) {
             //Calculate new values for each plant
             for (let j = plants.length - 1; j >= 0; j--) {
                 let curr = plants[j];
@@ -297,9 +301,13 @@ var farmingHelper = {
                 }
             }
 
+            if(i % dataPointThreshold == 0) {
+                dataPoints.push({ "time": i, "production": totalPotatoes})
+            }
+
         }
         // console.log(`plant 2 final prod: ${plants[1].production}`)
-        return { totalPotatoes: totalPotatoes, potatoeProduction: plants[0].production, plants: plants, nextCosts: modifiers.nextCosts };
+        return { totalPotatoes: totalPotatoes, potatoeProduction: plants[0].production, plants: plants, nextCosts: modifiers.nextCosts, dataPoints: dataPoints };
     },
     calcAssemblyHP: function (data) {
         let bonus = 1;
