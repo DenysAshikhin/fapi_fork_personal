@@ -433,7 +433,7 @@ const FarmingLanding = ({ data }) => {
                         bestProd = { prod: cur.bestProdCombo.result.potatoeProduction, result: cur.bestProdCombo }
 
                         top10ProductionDataPoints.unshift(cur.bestProdCombo.result.dataPoints);
-                        if(top10ProductionDataPoints.length > 10) {
+                        if (top10ProductionDataPoints.length > 10) {
                             top10ProductionDataPoints.pop();
                         }
                     }
@@ -441,7 +441,7 @@ const FarmingLanding = ({ data }) => {
                         bestPot = { pot: cur.totalPotCombo.result.totalPotatoes, result: cur.totalPotCombo }
 
                         top10TotalDataPoints.unshift(cur.totalPotCombo.result.dataPoints);
-                        if(top10TotalDataPoints.length > 10) {
+                        if (top10TotalDataPoints.length > 10) {
                             top10TotalDataPoints.pop();
                         }
                     }
@@ -1250,21 +1250,40 @@ const FarmingLanding = ({ data }) => {
                                                     left: 20,
                                                     bottom: 5,
                                                 }}
-                                                >
+                                            >
                                                 <CartesianGrid strokeDasharray="3 3" />
-                                                <XAxis dataKey="time" displayName="time in seconds"/>
+                                                <XAxis dataKey="time" displayName="time in seconds" />
                                                 <YAxis />
-                                                <Tooltip />
+                                                <Tooltip
+                                                    formatter={(value, name, props) => {
+                                                        return [value.toExponential(3), name];
+                                                    }}
+                                                />
                                                 <Legend />
-                                                {bestPlantCombo.top10TotalDataPoints.map((val, index) => {
+                                                {/* {bestPlantCombo.top10TotalDataPoints.map((val, index) => {
                                                     return (
-                                                        <Line type="monotone" data={val} dataKey="production" label={"top " + index + " total potatoes"} stroke="#8884d8" activeDot={{ r: 8 }} />
-                                                    )})
-                                                }
+                                                        <Line
+                                                            type="monotone"
+                                                            data={val}
+                                                            dataKey="production"
+                                                            stroke="#8884d8"
+                                                            activeDot={{ r: 8 }}
+                                                        />
+                                                    )
+                                                })
+                                                } */}
                                                 {bestPlantCombo.top10ProductionDataPoints.map((val, index) => {
                                                     return (
-                                                        <Line type="monotone" data={val} dataKey="production" label={"top " + index + " production /s"} stroke="#82ca9d" activeDot={{ r: 8 }} />
-                                                    )})
+                                                        <Line
+                                                            type="monotone"
+                                                            data={val}
+                                                            name={`Top ${index + 1} Production`}
+                                                            dataKey="production"
+                                                            stroke="#82ca9d"
+                                                            activeDot={{ r: 8 }}
+                                                        />
+                                                    )
+                                                })
                                                 }
                                             </LineChart>
                                         </ResponsiveContainer>
