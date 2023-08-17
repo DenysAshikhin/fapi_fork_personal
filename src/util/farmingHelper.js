@@ -256,7 +256,7 @@ var farmingHelper = {
         let simulationTime = modifiers.time; //time in seconds
 
         const dataPointsMax = 100;
-        let dataPointThreshold = simulationTime / dataPointsMax;
+        let dataPointThreshold = helper.roundInt(simulationTime / dataPointsMax);
         let dataPoints = [];
 
         let totalPotatoes = modifiers.totalPotatoes;
@@ -301,8 +301,8 @@ var farmingHelper = {
                 }
             }
 
-            if(i % dataPointThreshold == 0) {
-                dataPoints.push({ "time": i, "production": totalPotatoes})
+            if (i % dataPointThreshold == 0) {
+                dataPoints.push({ "time": i, "production": totalPotatoes })
             }
 
         }
