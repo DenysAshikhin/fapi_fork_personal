@@ -170,7 +170,7 @@ var farmingHelper = {
                         plant.perHarvest = this.calcPlantHarvest(plant, modifiers);
                         plant.reqExp = 10 + 5 * plant.Rank * Math.pow(1.05, plant.Rank);
                     }
-                    else{
+                    else {
                         plant.curExp = totalExp;
                     }
                 }
@@ -293,27 +293,36 @@ var farmingHelper = {
         let numAutos = modifiers.numAutos;
         let simulationTime = modifiers.time; //time in seconds
 
-        const dataPointsMax = 100;
+        const dataPointsMax = modifiers.maxSteps ? modifiers.maxSteps : 100;
 
-        let dataPointThreshold = simulationTime < dataPointsMax ? 1 : helper.roundInt(simulationTime / dataPointsMax);
+        let tickRate = 60 * 15;
+        let dataPointThreshold = (simulationTime / tickRate )< dataPointsMax ? 1 : helper.roundInt(simulationTime / dataPointsMax);
         let dataPointsPotatoes = [];
         let dataPointsFries = [];
 
         let totalPotatoes = modifiers.totalPotatoes;
         let currPotatoes = modifiers.curPotatoes;
-
+        let prevPlantsProd = Array(plants.length).fill(0);
+        for (let i = 0; i < plants.length; i++) {
+            prevPlantsProd[i] = plants[i].production;
+        }
         //Iterate over each second
-        for (let i = 0; i < simulationTime; i++) {
+        for (let i = 0; i < simulationTime / tickRate; i++) {
             //Calculate new values for each plant
             for (let j = plants.length - 1; j >= 0; j--) {
                 let curr = plants[j];
-                let toAdd = j === plants.length - 1 ? 0 : plants[j + 1].production * 1;
+                let toAdd = j === plants.length - 1 ? 0 :
+                    // plants[j + 1].production * tickRate
+                tickRate > 1 ?
+                    //Some basic calculus to find total assuming linear growth
+                    0.5 * (prevPlantsProd[j + 1] + plants[j + 1].production) * tickRate : plants[j + 1].production * tickRate;
                 curr.totalMade += toAdd;
-                let res = this.calcFutureMult(curr, { ...modifiers, time: 1, numAuto: numAutos[j], string: false });
+                let res = this.calcFutureMult(curr, { ...modifiers, time: tickRate, numAuto: numAutos[j], string: false });
                 plants[j] = res;
+                prevPlantsProd[j] = plants[j].production;
             }
-            totalPotatoes += plants[0].production;
-            currPotatoes += plants[0].production;
+            totalPotatoes += plants[0].production * tickRate;
+            currPotatoes += plants[0].production * tickRate;
 
             if (modifiers.autoBuyPBC) {
                 let updateCosts = false;
@@ -364,7 +373,7 @@ var farmingHelper = {
         let res = -1;
         let potatoeSteps = [];
         for (let i = 0; i < steps.length; i++) {
-            res = this.calcHPProd(plants, { ...modifiers, numAutos: steps[i].autos, time: steps[i].time });
+            res = this.calcHPProd(plants, { ...modifiers, numAutos: steps[i].autos, time: steps[i].time, maxSteps: 100 / (modifiers_input.numSteps) });
             modifiers = res.finalModifiers;
             modifiers.totalPotatoes = res.totalPotatoes;
             plants = res.plants;

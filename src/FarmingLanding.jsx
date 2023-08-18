@@ -110,6 +110,8 @@ const FarmingLanding = ({ data }) => {
     const [bestPlantCombo, setBestPlantCombo] = useState([]);
     const [autoBuyPBC, setAutoBuyPBC] = useState(data.ASCFarmingShopAutoPage1 === 1);
     const [lockCustomAuto, setLockCustomAuto] = useState(false);
+    const [calcAFK, setCalcAFK] = useState(false);
+    const [calcStep, setCalcStep] = useState(false);
 
     useEffect(() => {
 
@@ -1073,7 +1075,8 @@ const FarmingLanding = ({ data }) => {
                                             })
 
                                             let combinations = generateCombinations(numSimulatedAutos, finalPlants.length);
-
+                                            setCalcAFK(true);
+                                            setCalcStep(false);
                                             if (lockCustomAuto) {
                                                 let finalCombo = [];
                                                 for (let i = 0; i < combinations.length; i++) {
@@ -1128,7 +1131,7 @@ const FarmingLanding = ({ data }) => {
                                         }}>Calculate
                                     </button>
 
-                                    {/* <button
+                                    <button
                                         style={{ margin: '0 12px 0 0' }}
                                         disabled={notEnoughAuto}
                                         onClick={(e) => {
@@ -1136,26 +1139,19 @@ const FarmingLanding = ({ data }) => {
                                             console.log(`Time start: ` + (new Date()).getTime())
                                             ReactGA.event({
                                                 category: "farming_interaction",
-                                                action: `clicked_optomise_auto`,
+                                                action: `clicked_optomise_step`,
                                                 label: `${futureTime}`,
                                                 value: futureTime
                                             })
 
-                                            // let steppedRes1 = farmingHelper.calcStepHPProd(
-                                            //     finalPlants,
-                                            //     {
-                                            //         ...modifiers,
-                                            //         steps: [
-                                            //             { time: 300, autos: plantAutos }, { time: 250, autos: plantAutos }, { time: 250, autos: plantAutos }, { time: 200, autos: plantAutos }
-                                            //         ]
-                                            //     }
-                                            // )
+                                            setCalcAFK(false);
+                                            setCalcStep(true);
 
 
-                                            let min = 0.8;
-                                            let max = secondsHour * 6;
+                                            let min = 0.9;
+                                            let max = secondsHour * futureTime;
                                             let nums = [];
-                                            let red = 0.17 * max;
+                                            let red = 0.05 * max;
                                             for (let i = 0; i < finalPlants.length; i++) {
                                                 let timer = farmingHelper.calcGrowthTime(finalPlants[i], modifiers);
                                                 if (timer < red) {
@@ -1167,6 +1163,7 @@ const FarmingLanding = ({ data }) => {
 
                                             let combinations = farmingHelper.findMultipliersWithMinPercentage(max, nums, min);
                                             console.log(`num combinations: ${combinations.length}`);
+                                            // return;
 
                                             let splitArraysIndicies = splitArrayIndices(combinations, numThreads);
                                             if (combinations.length < numThreads) {
@@ -1191,7 +1188,7 @@ const FarmingLanding = ({ data }) => {
                                                         combinations: combinations,
                                                         start: splitArraysIndicies[i][0],
                                                         end: splitArraysIndicies[i][1],
-                                                        time: 6,
+                                                        time: futureTime,
                                                         modifiers: { ...modifiers, },
                                                         finalPlants: finalPlants,
                                                         mode: 'step'
@@ -1202,7 +1199,7 @@ const FarmingLanding = ({ data }) => {
                                             }
 
 
-                                        }}>Calculate Step</button> */}
+                                        }}>Calculate Step</button>
                                     {notEnoughAuto && (
                                         <div>
                                             Not enough autos remaining!
@@ -1224,15 +1221,33 @@ const FarmingLanding = ({ data }) => {
                                 {(farmCalcProgress.current === farmCalcProgress.max && farmCalcProgress.current !== 0 && bestPlantCombo.prod) && (
                                     <>
                                         {/* best potato */}
-                                        <div style={{ marginRight: '24px', display: 'flex', alignItems: 'center' }}>
-                                            <div style={{ minWidth: '310px' }}>
-                                                Best Potatoe Generation
-                                                , {`${100}% Fries`}:
+                                        {calcAFK && (
+                                            <div style={{ marginRight: '24px', display: 'flex', alignItems: 'center' }}>
+                                                <div style={{ minWidth: '310px' }}>
+                                                    Best Potatoe Generation
+                                                    , {`${100}% Fries`}:
+                                                </div>
+                                                {bestPlantCombo.pot.map((val, index) => {
+                                                    return <div style={{ marginLeft: '12px', border: '1px solid black', padding: '0 6px 0 6px' }}>{`P${index + 1}: ${val} autos`} </div>
+                                                })}
                                             </div>
-                                            {bestPlantCombo.pot.map((val, index) => {
-                                                return <div style={{ marginLeft: '12px', border: '1px solid black', padding: '0 6px 0 6px' }}>{`P${index + 1}: ${val} autos`} </div>
-                                            })}
-                                        </div>
+                                        )}
+
+
+                                        {/* Best step by step breakdown */}
+                                        {calcStep && (
+                                            <div style={{ display: 'flex' }}>
+                                                <div>Best order:</div>
+                                                {bestPlantCombo.bestPot.result.result.steps.map((val, index) => {
+
+                                                    return <div style={{ margin: '0 3px' }}>{
+                                                        `P${index + 1} for ${val.time > secondsHour ? helper.secondsToString(val.time) : helper.secondsToStringWithS(val.time)}`
+                                                        + (index > 0 ? ', ' : '')
+                                                    }</div>
+
+                                                }).reverse()}
+                                            </div>
+                                        )}
                                         {/* <div style={{ display: 'flex', marginTop: '1px' }}>
                                         <div>
                                             Most Potatoe Total Made:
@@ -1348,11 +1363,11 @@ const FarmingLanding = ({ data }) => {
 
                                 )}
                                 {/* Graph stuff */}
-                                <div style={{ display: 'flex', marginTop: '6px', alignItems: 'center', minHeight: '300px' }}>
-                                    <ResponsiveContainer width="100%" height="100%" minHeight="300px">
+                                <div style={{ display: 'flex', marginTop: '6px', alignItems: 'center', minHeight: '400px' }}>
+                                    <ResponsiveContainer width="100%" height="100%" minHeight="400px">
                                         <LineChart
-                                            width={500}
-                                            height={300}
+                                            // width={500}
+                                            // height={300}
                                             margin={{
                                                 top: 5,
                                                 right: 30,

@@ -90,7 +90,7 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
                     }
                     steps.reverse();
 
-                    result = helper.calcStepHPProd(finalPlants, { ...dataObj, steps: steps });
+                    result = helper.calcStepHPProd(finalPlants, { ...dataObj, steps: steps, numSteps: numSteps });
                     break;
                 default:
                     result = helper.calcHPProd(finalPlants, dataObj);
