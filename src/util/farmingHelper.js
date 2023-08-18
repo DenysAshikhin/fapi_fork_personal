@@ -1,7 +1,38 @@
 import helper from './helper.js';
 
 var farmingHelper = {
+    findMultipliersWithMinPercentage: function (sum, numbers, minPercentage) {
+        const multipliers = [];
+        let count = 0;
 
+        function backtrack(index, currentSum, currentMultipliers) {
+            count++;
+
+            if (index === numbers.length) {
+                const productSum = currentMultipliers.reduce((acc, multiplier, i) => acc + multiplier * numbers[i], 0);
+                if (productSum >= minPercentage * sum) {
+                    multipliers.push([...currentMultipliers]);
+                }
+                return;
+            }
+            let max = Math.floor((sum - currentSum) / numbers[index]);
+            for (let multiplier = 0; multiplier <= max; multiplier++) {
+                currentMultipliers[index] = multiplier;
+                let tempSum = currentSum + multiplier * numbers[index];
+                if (tempSum < sum) {
+                    backtrack(index + 1, currentSum + multiplier * numbers[index], currentMultipliers);
+                }
+            }
+        }
+
+        backtrack(0, 0, []);
+        console.log(count);
+        return multipliers;
+    },
+    calcGrowthTime: function (plant, modifiers) {
+        let num = Math.floor(plant.TimeNeeded / plant.prestigeBonus / (1 + 0.05 * modifiers.shopGrowingSpeed) / modifiers.petPlantCombo / modifiers.contagionPlantGrowth);
+        return num < 10 ? 10 : num;
+    },
     calcPlantHarvest: function (plant, modifiers) {
         return helper.roundInt((1 + plant.Rank) * Math.pow(1.05, plant.Rank)) * Math.pow(1.02, plant.prestige) * modifiers.contagionHarvest;
     },
@@ -257,7 +288,7 @@ var farmingHelper = {
 
         const dataPointsMax = 100;
 
-        let dataPointThreshold = helper.roundInt(simulationTime / dataPointsMax);
+        let dataPointThreshold = simulationTime < dataPointsMax ? 1 : helper.roundInt(simulationTime / dataPointsMax);
         let dataPointsPotatoes = [];
         let dataPointsFries = [];
 
@@ -303,21 +334,44 @@ var farmingHelper = {
                 }
             }
 
-            if(i % dataPointThreshold == 0) {
-                dataPointsPotatoes.push({ "time": i, "production": totalPotatoes})
-                dataPointsFries.push({ "time": i, "fries": farmingHelper.calcFryOutput(totalPotatoes)})
+            if (i % dataPointThreshold == 0 || i === simulationTime - 1) {
+                dataPointsPotatoes.push({ "time": i, "production": totalPotatoes })
+                dataPointsFries.push({ "time": i, "fries": farmingHelper.calcFryOutput(totalPotatoes) })
             }
-
         }
-        // console.log(`plant 2 final prod: ${plants[1].production}`)
+
         return {
             totalPotatoes: totalPotatoes,
             potatoeProduction: plants[0].production,
             plants: plants,
             nextCosts: modifiers.nextCosts,
             dataPointsPotatoes: dataPointsPotatoes,
-            dataPointsFries: dataPointsFries
+            dataPointsFries: dataPointsFries,
+            finalModifiers: modifiers,
         };
+    },
+    calcStepHPProd: function (plants_input, modifiers_input) {
+        let plants = JSON.parse(JSON.stringify(plants_input));
+        let modifiers = JSON.parse(JSON.stringify(modifiers_input));
+        let steps = modifiers.steps;
+        let res = -1;
+        let potatoeSteps = [];
+        for (let i = 0; i < steps.length; i++) {
+            res = this.calcHPProd(plants, { ...modifiers, numAutos: steps[i].autos, time: steps[i].time });
+            modifiers = res.finalModifiers;
+            modifiers.totalPotatoes = res.totalPotatoes;
+            plants = res.plants;
+            potatoeSteps = potatoeSteps.concat(res.dataPointsPotatoes);
+            steps[i].obj = { text: `P${steps.length - i} for ${steps[i].time}`, numAutos: steps[i].autos, time: steps[i].time }
+
+        }
+        for (let i = 0; i < potatoeSteps.length; i++) {
+            potatoeSteps[i].time = i;
+        }
+        res.dataPointsPotatoes = potatoeSteps;
+        res.steps = steps;
+
+        return res;
     },
     calcAssemblyHP: function (data) {
         let bonus = 1;
