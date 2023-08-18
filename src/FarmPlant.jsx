@@ -67,7 +67,7 @@ const FarmingPlant = ({ data }) => {
         padding: '0 0 0 0',
         display: 'flex',
         height: fake ? '179px' : useFutureValues ? '204px' : '179px',
-        width: fake ? '490px' : ''
+        width: fake ? '228px' : ''
         // maxHeight:'128px' 
     }}>
         <div style={{ height: '214px', width: '214px', position: 'relative' }}>

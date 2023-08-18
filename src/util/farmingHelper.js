@@ -292,11 +292,13 @@ var farmingHelper = {
         let modifiers = JSON.parse(JSON.stringify(modifiers_input));
         let numAutos = modifiers.numAutos;
         let simulationTime = modifiers.time; //time in seconds
+        let startTime = modifiers.startTime ? modifiers.startTime : 0;
 
         const dataPointsMax = modifiers.maxSteps ? modifiers.maxSteps : 100;
+        const tickStart = modifiers.tickStart ? modifiers.tickStart : 0;
 
-        let tickRate = 60 * 0.1;
-        let dataPointThreshold = (simulationTime / tickRate )< dataPointsMax ? 1 : helper.roundInt(simulationTime / dataPointsMax);
+        let tickRate = modifiers.tickRate ? modifiers.tickRate : 60 * 1;
+        let dataPointThreshold = modifiers.dataPointThreshold ? modifiers.dataPointThreshold : (simulationTime / tickRate) < dataPointsMax ? 1 : helper.roundInt((simulationTime / tickRate) / dataPointsMax);
         let dataPointsPotatoes = [];
         let dataPointsFries = [];
 
@@ -306,16 +308,19 @@ var farmingHelper = {
         for (let i = 0; i < plants.length; i++) {
             prevPlantsProd[i] = plants[i].production;
         }
+
+        // let runTime = 0;
+        let i = 0;
         //Iterate over each second
-        for (let i = 0; i < simulationTime / tickRate; i++) {
+        for (; i < simulationTime / tickRate; i++) {
             //Calculate new values for each plant
             for (let j = plants.length - 1; j >= 0; j--) {
                 let curr = plants[j];
                 let toAdd = j === plants.length - 1 ? 0 :
                     // plants[j + 1].production * tickRate
-                tickRate > 1 ?
-                    //Some basic calculus to find total assuming linear growth
-                    0.5 * (prevPlantsProd[j + 1] + plants[j + 1].production) * tickRate : plants[j + 1].production * tickRate;
+                    tickRate > 1 ?
+                        //Some basic calculus to find total assuming linear growth
+                        0.5 * (prevPlantsProd[j + 1] + plants[j + 1].production) * tickRate : plants[j + 1].production * tickRate;
                 curr.totalMade += toAdd;
                 let res = this.calcFutureMult(curr, { ...modifiers, time: tickRate, numAuto: numAutos[j], string: false });
                 plants[j] = res;
@@ -350,9 +355,18 @@ var farmingHelper = {
                 }
             }
 
-            if (i % dataPointThreshold == 0 || i === simulationTime - 1) {
-                dataPointsPotatoes.push({ "time": i, "production": totalPotatoes })
-                dataPointsFries.push({ "time": i, "fries": farmingHelper.calcFryOutput(totalPotatoes) })
+            let curTime = helper.roundInt(i * tickRate + startTime);
+            if (i % dataPointThreshold === 0 && curTime >= tickStart) {
+                dataPointsPotatoes.push({ "time": curTime, "production": totalPotatoes })
+                dataPointsFries.push({ "time": curTime, "fries": farmingHelper.calcFryOutput(totalPotatoes) })
+            }
+        }
+
+        if (i > 0 && !modifiers.skipFinal) {
+            if (dataPointsPotatoes[dataPointsPotatoes.length - 1].production !== totalPotatoes) {
+                let curTime = helper.roundInt(i * tickRate + startTime);
+                dataPointsPotatoes.push({ "time": curTime, "production": totalPotatoes })
+                dataPointsFries.push({ "time": curTime, "fries": farmingHelper.calcFryOutput(totalPotatoes) })
             }
         }
 
@@ -372,17 +386,53 @@ var farmingHelper = {
         let steps = modifiers.steps;
         let res = -1;
         let potatoeSteps = [];
+        let runningTime = 0;
+
+
+        const dataPointsMax = modifiers.maxSteps ? modifiers.maxSteps : 100;
+
+        let tickRate = modifiers.tickRate ? modifiers.tickRate : 60 * 1;
+        let dataPointThreshold = (modifiers_input.time / tickRate) < dataPointsMax ? 1 : helper.roundInt((modifiers_input.time / tickRate) / dataPointsMax);
+
         for (let i = 0; i < steps.length; i++) {
-            res = this.calcHPProd(plants, { ...modifiers, numAutos: steps[i].autos, time: steps[i].time, maxSteps: 100 / (modifiers_input.numSteps) });
+            if (potatoeSteps.length > 0 && steps[i].time > 0) {
+                let adas = 0;
+            }
+            res = this.calcHPProd(plants, {
+                ...modifiers,
+                numAutos: steps[i].autos,
+                time: steps[i].time,
+                dataPointThreshold: dataPointThreshold,
+                startTime: potatoeSteps.length > 0 ? potatoeSteps[potatoeSteps.length - 1].time : 0,
+                skipFinal: i < (steps.length - 1),
+                tickStart: potatoeSteps.length > 0 ? potatoeSteps[potatoeSteps.length - 1].time + dataPointThreshold * tickRate : 0,
+            });
             modifiers = res.finalModifiers;
             modifiers.totalPotatoes = res.totalPotatoes;
             plants = res.plants;
             potatoeSteps = potatoeSteps.concat(res.dataPointsPotatoes);
             steps[i].obj = { text: `P${steps.length - i} for ${steps[i].time}`, numAutos: steps[i].autos, time: steps[i].time }
 
+            runningTime += steps[i].time;
+
         }
+        if (Math.abs(modifiers.time - potatoeSteps[potatoeSteps.length - 1]) > 100) {
+            let asdas = 0;
+        }
+        let highestTime = potatoeSteps[1].time;
+        let min = potatoeSteps[1].time;
+        let foundBreak = false;
         for (let i = 0; i < potatoeSteps.length; i++) {
-            potatoeSteps[i].time = i;
+            if (i > 0) {
+                if (potatoeSteps[i].time + highestTime < potatoeSteps[i - 1].time) {
+                    highestTime = potatoeSteps[i - 1].time + min;
+                    foundBreak = true;
+                }
+            }
+
+            // if (foundBreak) {
+            //     potatoeSteps[i].time += highestTime;
+            // }
         }
         res.dataPointsPotatoes = potatoeSteps;
         res.steps = steps;

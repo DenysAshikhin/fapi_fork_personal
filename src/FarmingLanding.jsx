@@ -300,12 +300,13 @@ const FarmingLanding = ({ data }) => {
             curPotatoes: currHP,
             totalPotatoes: totalHP,
             expBonus: shopRankEXP * soulPlantEXP * contagionPlantEXP * assemblyPlantExp,
-            autoBuyPBC: autoBuyPBC
+            autoBuyPBC: autoBuyPBC,
+            tickRate: Math.floor((futureTime * secondsHour) * 0.0015) < 1 ? 1 : Math.floor((futureTime * secondsHour) * 0.0015),
         }
     }, [
         shopGrowingSpeed, manualHarvestFormula, contagionHarvest, shopRankEXP, shopRankLevel, picPlants, Number(petPlantCombo),
         contagionPlantEXP, contagionPlantGrowth, soulPlantEXP, assemblyPlantExp, shopProdBonus, shopProdBonus, shopProdLevel,
-        contagionPlantProd, calcedBonus, nextCosts.expCost, nextCosts.growthCost, nextCosts.prodCost, currHP, totalHP, autoBuyPBC
+        contagionPlantProd, calcedBonus, nextCosts.expCost, nextCosts.growthCost, nextCosts.prodCost, currHP, totalHP, autoBuyPBC, futureTime
     ])
 
     const finalPlants = useMemo(() => {
@@ -348,25 +349,7 @@ const FarmingLanding = ({ data }) => {
     }, [modifiers, plantAutos, shopGrowingSpeed, petPlantCombo, contagionPlantGrowth])
 
 
-    // let tempRes = farmingHelper.calcHPProd(finalPlants, { ...modifiers, time: 1000, numAutos: plantAutos });
-
-    // let steppedRes1 = farmingHelper.calcStepHPProd(
-    //     finalPlants,
-    //     {
-    //         ...modifiers,
-    //         steps: [
-    //             { time: 300, autos: plantAutos }, { time: 250, autos: plantAutos }, { time: 250, autos: plantAutos }, { time: 200, autos: plantAutos }
-    //         ]
-    //     }
-    // )
-
-    // let customLines = [];
-    // customLines.push(steppedRes1.dataPointsPotatoes);
-
-
     const [customLines, setCustomLines] = useState([]);
-
-    // customLines.push(steppedRes1.dataPointsPotatoes)
 
 
     let tempFuture = useMemo(() => {
@@ -387,18 +370,6 @@ const FarmingLanding = ({ data }) => {
         customFuturePlants.push(newPlant);
         futurePlants.push(newPlant);
     }
-
-    // for (let i = finalPlants.length - 1; i >= 0; i--) {
-    //     let curr = JSON.parse(JSON.stringify(finalPlants[i]));
-    //     let toAdd = i === finalPlants.length - 1 ? 0 : futurePlants[0].production * secondsHour * futureTime
-    //     curr.totalMade += toAdd;
-    //     let newPlant = farmingHelper.calcFutureMult(curr, { ...modifiers, time: secondsHour * futureTime, numAuto: plantAutos[i] });
-    //     let prestigeTimings = farmingHelper.calcTimeTillPrestige(newPlant, { ...modifiers, time: secondsHour * futureTime, numAuto: plantAutos[i] })
-    //     newPlant.prestige = prestigeTimings.prestige;
-    //     newPlant.timeToPrestige = prestigeTimings.remainingTime;
-    //     customFuturePlants.unshift(newPlant);
-    //     futurePlants.unshift(newPlant);
-    // }
 
 
     useEffect(() => {
@@ -432,6 +403,13 @@ const FarmingLanding = ({ data }) => {
                 for (let i = 0; i < farmTotals.current.length; i++) {
                     let cur = farmTotals.current[i];
 
+
+
+                    if (!cur.totalPotCombo.result) {
+                        continue;
+                    }
+                    top10DataPointsPotatoes.push(...cur.top10DataPointsPotatoes);
+                    top10DataPointsFries.push(...cur.top10DataPointsFries);
                     if (cur.bestPicCombo.picGain > bestPic.pic) {
                         bestPic = { pic: cur.bestPicCombo.picGain, result: cur.bestPicCombo, prod: cur.bestPicCombo.potatoeProduction }
                     }
@@ -463,37 +441,45 @@ const FarmingLanding = ({ data }) => {
                         cur.top10DataPointsPotatoes[j].obj = cur.totalPotCombo;
                     }
 
-                    top10DataPointsPotatoes.push(...cur.top10DataPointsPotatoes);
-                    top10DataPointsFries.push(...cur.top10DataPointsFries);
                 }
 
                 top10DataPointsPotatoes = top10DataPointsPotatoes.sort((a, b) => b.result - a.result).slice(0, 10);
-
                 top10DataPointsFries = top10DataPointsFries.sort((a, b) => b.result - a.result).slice(0, 10);
 
-                bestProd.finalFry = farmingHelper.calcFryOutput(bestProd.result.result.totalPotatoes)
-                bestPic.finalFry = farmingHelper.calcFryOutput(bestPic.result.result.totalPotatoes)
-                bestPicPerc.finalFry = farmingHelper.calcFryOutput(bestPicPerc.result.result.totalPotatoes)
+                // for (let i = 0; i < top10DataPointsPotatoes.length; i++) {
+                //     let cur = top10DataPointsPotatoes[i];
 
-                let finalBests = {
-                    bestProd: bestProd,
-                    prod: bestProd.result.combo,
-                    bestPot: bestPot,
-                    pot: bestPot.result.combo,
-                    bestPic: bestPic,
-                    pic: bestPic.result.combo,
-                    bestPicPerc: bestPicPerc,
-                    picPerc: bestPicPerc.result.combo,
-                    top10DataPointsPotatoes: top10DataPointsPotatoes,
-                    top10DataPointsFries: top10DataPointsFries
+                //     let increase = cur.data[cur.data.length - 1].production - cur.data[cur.data.length - 2].production;
+                //     let timeIncrease = cur.data[cur.data.length - 1].time - cur.data[cur.data.length - 2].time;
+                //     let newObj = { time: cur.data[cur.data.length - 1].time + timeIncrease, production: cur.data[cur.data.length - 1].production + increase };
+                //     cur.data.push(newObj);
+                // }
+
+                if (bestProd.result) {
+                    bestProd.finalFry = farmingHelper.calcFryOutput(bestProd.result.result.totalPotatoes)
+                    bestPic.finalFry = farmingHelper.calcFryOutput(bestPic.result.result.totalPotatoes)
+                    bestPicPerc.finalFry = farmingHelper.calcFryOutput(bestPicPerc.result.result.totalPotatoes)
+
+                    let finalBests = {
+                        bestProd: bestProd,
+                        prod: bestProd.result.combo,
+                        bestPot: bestPot,
+                        pot: bestPot.result.combo,
+                        bestPic: bestPic,
+                        pic: bestPic.result.combo,
+                        bestPicPerc: bestPicPerc,
+                        picPerc: bestPicPerc.result.combo,
+                        top10DataPointsPotatoes: top10DataPointsPotatoes,
+                        top10DataPointsFries: top10DataPointsFries
+                    }
+                    console.log(`Best:`);
+                    console.log(finalBests);
+
+
+
+
+                    setBestPlantCombo(finalBests)
                 }
-                console.log(`Best:`);
-                console.log(finalBests);
-
-
-
-
-                setBestPlantCombo(finalBests)
             }
         }
 
@@ -708,9 +694,152 @@ const FarmingLanding = ({ data }) => {
 
     let displayPicPerc = bestPlantCombo.pic != bestPlantCombo.picPerc;
 
+    let dataList = [];
+    let tempList2 = tempFuture.dataPointsPotatoes;
+    function mergeAndCombine(list1, list2, customKey) {
 
+        let combinedList = [];
+        customKey = customKey ? customKey : 'value1';
+        let map1 = {};
+        for (let i = 0; i < list1.length; i++) {
+            map1[list1[i].time] = { ...list1[i] };
+            map1[list1[i].time].time = list1[i].time;
+            map1[list1[i].time].custom = list1[i].production;
+            map1[list1[i].time][customKey] = null;
+        }
+
+
+
+        for (let i = 0; i < list2.length; i++) {
+            if (list2[i].time in map1) {
+                map1[list2[i].time][customKey] = list2[i].production
+            }
+            else {
+                map1[list2[i].time] = { ...list2[i] };
+                map1[list2[i].time].time = list2[i].time;
+                map1[list2[i].time].custom = null;
+                map1[list2[i].time][customKey] = list2[i].production;
+                delete map1[list2[i].time].production;
+            }
+        }
+
+        combinedList = Object.values(map1)
+
+        return combinedList;
+    }
+    function interpolateAndExtrapolate(arr, customKey) {
+
+        let data = [];
+        let missing_custom_index = [];
+        let missing_value2_index = [];
+        let prev_custom = -1;
+        let prev_value2 = -1;
+        customKey = customKey ? customKey : 'value1';
+
+
+        for (let i = 0; i < arr.length; i++) {
+            let custom = arr[i].custom;
+            let value2 = arr[i][customKey];
+
+            if (prev_custom === -1) {
+                prev_custom = custom;
+            }
+            if (prev_value2 === -1) {
+                prev_value2 = value2;
+            }
+
+            if (custom) {
+                //interpolate previous values
+                if (missing_custom_index.length > 0) {
+                    let increase = (custom - prev_custom) / (missing_custom_index.length + 1);
+                    for (let j = 0; j < missing_custom_index.length; j++) {
+                        arr[missing_custom_index[j]].custom = prev_custom + increase * (j + 1);
+                    }
+                    missing_custom_index = [];
+                }
+                prev_custom = custom;
+            }
+            else {
+                missing_custom_index.push(i);
+            }
+
+            if (value2) {
+                //interpolate previous values
+                if (missing_value2_index.length > 0) {
+                    let increase = (value2 - prev_value2) / (missing_value2_index.length + 1);
+                    for (let j = 0; j < missing_value2_index.length; j++) {
+                        arr[missing_value2_index[j]][customKey] = prev_value2 + increase * (j + 1);
+                    }
+                    missing_value2_index = [];
+                }
+                prev_value2 = value2;
+            }
+            else {
+                missing_value2_index.push(i);
+            }
+        }
+
+        //extropolate the ends
+        if (!arr[arr.length - 1].custom) {
+            let missing_indexes = [];
+            for (let i = arr.length - 1; i >= 0; i--) {
+                if (arr[i].custom) {
+                    let diff = (arr[i].custom - arr[i - 1].custom);
+                    missing_indexes.reverse();
+                    for (let j = 0; j < missing_indexes.length; j++) {
+                        arr[missing_indexes[j]].custom = arr[i].custom + diff * (j + 1);
+                    }
+                    break;
+                }
+                else {
+                    missing_indexes.push(i);
+                }
+            }
+        }
+
+        if (!arr[arr.length - 1][customKey]) {
+            let missing_indexes = [];
+            for (let i = arr.length - 1; i >= 0; i--) {
+                if (arr[i][customKey]) {
+                    let diff = (arr[i][customKey] - arr[i - 1][customKey]);
+                    missing_indexes.reverse();
+                    for (let j = 0; j < missing_indexes.length; j++) {
+                        arr[missing_indexes[j]][customKey] = arr[i][customKey] + diff * (j + 1)
+                    }
+                    break;
+                }
+                else {
+                    missing_indexes.push(i);
+                }
+            }
+        }
+
+        for (let i = 0; i < arr.length; i++) {
+            arr[i].production = arr[i].custom;
+        }
+
+        return arr;
+    }
+
+    // if ((farmCalcProgress.current === farmCalcProgress.max && farmCalcProgress.current !== 0 && bestPlantCombo.prod)) {
+    //     dataList = tempList2;
+    //     let topPotatoe = bestPlantCombo.top10DataPointsPotatoes[0].data;
+    //     let topPotatoeLast = bestPlantCombo.top10DataPointsPotatoes[9].data;
+    //     let combined = mergeAndCombine(tempList2, topPotatoe, 'value2');
+    //     let smoothed = interpolateAndExtrapolate(combined, 'value2')
+    //     dataList = smoothed;
+
+    //     // combined = mergeAndCombine(smoothed, topPotatoeLast, 'value11');
+    //     // smoothed = interpolateAndExtrapolate(combined, 'value11')
+    //     // dataList = smoothed;
+    //     let x = 0;
+
+    // }
+    // else {
+    //     dataList = mergeAndCombine(tempList2, []);
+    // }
     return (
-        <div>
+        <div style={{ height: '100%' }}>
             <div style={{ display: 'flex', height: '148px' }}>
                 <div style={{ minWidth: '256px' }}>
                     <div>Shop Growing Speed: x{helper.roundTwoDecimal(Math.pow(1.05, shopGrowingSpeed))}</div>
@@ -728,7 +857,10 @@ const FarmingLanding = ({ data }) => {
                 </div>
                 {/* grasshopper */}
                 <div style={{ display: 'flex', position: 'relative', margin: '0 24px 0 12px' }}>
-                    <div style={{ display: 'flex', maxHeight: '24px' }}>
+                    <div>
+                        <FarmingPlant data={{ fake: true }} />
+                    </div>
+                    {/* <div style={{ display: 'flex', maxHeight: '24px' }}>
                         <div style={{ margin: '0 6px 0 0' }}>{`Next grasshopper breakpoint ${helper.roundInt(dataGrassHopper)} +`}</div>
                         <input
                             style={{
@@ -776,7 +908,7 @@ const FarmingLanding = ({ data }) => {
                             width: '100%', display: 'flex', justifyContent: 'center',
                             fontSize: '12px'
                         }}> +{(grassHopperAmount - currFries).toExponential(2)} ({grassHopperAmount.toExponential(2)})</div>
-                    </div>
+                    </div> */}
                     {/* <div>Grasshopper Amount: +{helper.roundTwoDecimal(grassHopperAmount - currFries)} ({helper.roundTwoDecimal(grassHopperAmount)})</div> */}
                 </div>
                 {/* Contagion */}
@@ -872,7 +1004,7 @@ const FarmingLanding = ({ data }) => {
             </div> */}
 
 
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '-webkit-fill-available' }}>
                 <h3>Future Calculations</h3>
                 <div style={{ display: 'flex' }}>
                     <MouseOverPopover tooltip={
@@ -940,11 +1072,11 @@ const FarmingLanding = ({ data }) => {
                 </div>
 
                 <div
-                    style={{ display: 'flex', width: '100%' }}
+                    style={{ display: 'flex', width: '100%', height: '-webkit-fill-available' }}
                 >
 
-                    <div style={{ display: 'flex' }}>
-                        <div style={{ color: 'black' }}>
+                    <div style={{ display: 'flex', width: '100%', height: '-webkit-fill-available' }}>
+                        <div style={{ color: 'black', width: '650px' }}>
                             <div style={{ display: 'flex' }}>
 
                                 <div>
@@ -1133,7 +1265,7 @@ const FarmingLanding = ({ data }) => {
 
                                     <button
                                         style={{ margin: '0 12px 0 0' }}
-                                        disabled={notEnoughAuto}
+
                                         onClick={(e) => {
 
                                             console.log(`Time start: ` + (new Date()).getTime())
@@ -1207,16 +1339,92 @@ const FarmingLanding = ({ data }) => {
                                     )}
                                 </div>
                             </div>
+                            <div>
+                                {/* Explanation */}
+                                < div style={{ display: 'flex' }}>
+                                    <div style={{ marginLeft: '24px' }}>
+                                        <h3 style={{ margin: '0' }}>How to use</h3>
+                                        <div>
+                                            <div >
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <div style={{ width: '6px', height: '6px', borderRadius: '3px', backgroundColor: 'black', }}></div>
+                                                    <div style={{ fontWeight: 'bold', margin: '0 6px 0 12px' }}>
+                                                        Hours to calculate:
+                                                    </div>
+                                                    <div>
+                                                        how far into the future to calculate best auto distributions, as well as future PIC/Levels for plants
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div >
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <div style={{ width: '6px', height: '6px', borderRadius: '3px', backgroundColor: 'black', }}></div>
+                                                    <div style={{ fontWeight: 'bold', margin: '0 6px 0 12px' }}>
+                                                        WIP - Calculate best auto placements:
+                                                    </div>
+                                                    <div>
+                                                        Calculates the best auto distribution for desired time into the future
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div >
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <div style={{ width: '6px', height: '6px', borderRadius: '3px', backgroundColor: 'black', }}></div>
+                                                    <div style={{ fontWeight: 'bold', margin: '0 6px 0 12px' }}>
+                                                        Num threads to use for calculating:
+                                                    </div>
+                                                    <div>
+                                                        How many parallel simulations to run, higher number means more CPU usage but quicker result (diminishing returns with more threads)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div >
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <div style={{ width: '6px', height: '6px', borderRadius: '3px', backgroundColor: 'black', }}></div>
+                                                    <div style={{ fontWeight: 'bold', margin: '0 6px 0 12px' }}>
+                                                        Auto purchase Page 1 Upgrades (PBC):
+                                                    </div>
+                                                    <div>
+                                                        Whether the simulation should automatically buy Farming Shop page 1 (Plant Boost Corner) upgrades. (This is an ascencion perk)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div >
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <div style={{ width: '6px', height: '6px', borderRadius: '3px', backgroundColor: 'black', }}></div>
+                                                    <div style={{ fontWeight: 'bold', margin: '0 6px 0 12px' }}>
+                                                        Lock in above `Num Autos`:
+                                                    </div>
+                                                    <div>
+                                                        If checked, generates only possible auto distributions from your `Num Autos` selected above. If there are more autos assigned than you have purchased, then it will be disabled
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+
+                                </div >
+                            </div>
 
                         </div>
-                        <div>
+                        <div style={{ width: 'calc(100% - 655px)', height: '-webkit-fill-available' }}>
                             {(farmCalcProgress.current > 0) && (
                                 <div>
                                     {`${helper.roundTwoDecimal(farmCalcProgress.current / farmCalcProgress.max * 100)}%`}
                                 </div>
                             )}
 
-                            <div style={{ display: 'flex', flexDirection: 'column', minHeight: '600px', minWidth: '600px' }}>
+                            <div style={{
+                                // minHeight: '-webkit-fill-available',
+                                // height: '-webkit-fill-available'
+                                height: '100%'
+                                // display: 'flex', flex: '1', flexDirection: 'column', height: '-webkit-fill-available'
+                                //  minHeight: '600px',
+                                //   minWidth: '600px' 
+                            }}>
 
                                 {(farmCalcProgress.current === farmCalcProgress.max && farmCalcProgress.current !== 0 && bestPlantCombo.prod) && (
                                     <>
@@ -1256,124 +1464,138 @@ const FarmingLanding = ({ data }) => {
                                             return <div style={{ marginLeft: '12px', border: '1px solid black', padding: '0 6px 0 6px' }}>{`P${index + 1}: ${val} autos`} </div>
                                         })}
                                     </div> */}
-                                        {/* best raw pic levels */}
-                                        <div style={{ display: 'flex', marginTop: '6px', alignItems: 'center' }}>
-                                            <div style={{ minWidth: '310px' }}>
-                                                Most PIC (+{`${bestPlantCombo.bestPic.result.picStats.picLevel} -> ${helper.roundTwoDecimal(bestPlantCombo.bestPic.result.picStats.picPercent * 100)}%`})
-                                                , {`${helper.roundTwoDecimal(bestPlantCombo.bestPic.finalFry / bestPlantCombo.bestProd.finalFry * 100)}% Fries`}:
-                                            </div>
-                                            {bestPlantCombo.pic.map((val, index) => {
-                                                return (
 
-                                                    <MouseOverPopover key={'popover' + index} tooltip={
-                                                        <div>
-                                                            <div>
-                                                                <div>
-                                                                    Show how many PIC levels are gained (if any) and the time to hit the NEXT pic with your MAX num autos used
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    }>
-                                                        <div style={{ marginLeft: '12px', border: '1px solid black', padding: '0 6px 0 6px' }}>
-                                                            <div>
-                                                                {`P${index + 1}: ${val} autos`}
-                                                            </div>
-                                                            {bestPlantCombo.bestPic.result.plants[index].picIncrease > 0 && (
-                                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        {/* Pic Stuff */}
+                                        {calcAFK && (
+                                            <>
+                                                {/* best raw pic levels */}
+                                                <div style={{ display: 'flex', marginTop: '6px', alignItems: 'center' }}>
+                                                    <div style={{ minWidth: '310px' }}>
+                                                        Most PIC (+{`${bestPlantCombo.bestPic.result.picStats.picLevel} -> ${helper.roundTwoDecimal(bestPlantCombo.bestPic.result.picStats.picPercent * 100)}%`})
+                                                        , {`${helper.roundTwoDecimal(bestPlantCombo.bestPic.finalFry / bestPlantCombo.bestProd.finalFry * 100)}% Fries`}:
+                                                    </div>
+                                                    {bestPlantCombo.pic.map((val, index) => {
+                                                        return (
 
-                                                                    <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
-                                                                    <div> {bestPlantCombo.bestPic.result.plants[index].prestige}</div>
-                                                                    <img style={{ height: '24px' }} src={`/fapi_fork_personal/right_arrow.svg`} />
-                                                                    <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
-                                                                    <div> {bestPlantCombo.bestPic.result.plants[index].prestige + bestPlantCombo.bestPic.result.plants[index].picIncrease}</div>
-                                                                </div>
-                                                            )}
-
-                                                            <div>
-                                                                {`Next prestige: ${helper.secondsToStringWithS(farmingHelper.calcTimeTillPrestige(
-                                                                    bestPlantCombo.bestPic.result.plants[index],
-                                                                    {
-                                                                        ...modifiers,
-                                                                        // numAuto: bestPlantCombo.bestPic.result.combo[index]
-                                                                        numAuto: data.FarmingShopAutoPlotBought
-                                                                    }
-                                                                ).remainingTime)
-                                                                    }`}
-                                                            </div>
-                                                        </div>
-                                                    </MouseOverPopover>
-                                                )
-                                            })}
-                                        </div>
-                                        {/* best pic % increase */}
-                                        {displayPicPerc && (
-                                            <div style={{ display: 'flex', marginTop: '6px', alignItems: 'center' }}>
-                                                <div style={{ minWidth: '310px' }}>
-                                                    Most PIC %
-                                                    (+{`${bestPlantCombo.bestPicPerc.result.picStats.picLevel} -> ${helper.roundTwoDecimal(bestPlantCombo.bestPicPerc.result.picStats.picPercent * 100)}%`})
-                                                    , {`${helper.roundTwoDecimal(bestPlantCombo.bestPicPerc.finalFry / bestPlantCombo.bestProd.finalFry * 100)}% Fries`}:
-                                                </div>
-                                                {bestPlantCombo.picPerc.map((val, index) => {
-                                                    return (
-                                                        <MouseOverPopover key={'picPercPopover' + index} tooltip={
-                                                            <div>
+                                                            <MouseOverPopover key={'popover' + index} tooltip={
                                                                 <div>
                                                                     <div>
-                                                                        Show how many PIC levels are gained (if any) and the time to hit the NEXT pic with your MAX num autos used
+                                                                        <div>
+                                                                            Show how many PIC levels are gained (if any) and the time to hit the NEXT pic with your MAX num autos used
+                                                                        </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
-                                                        }>
-                                                            <div style={{ marginLeft: '12px', border: '1px solid black', padding: '0 6px 0 6px' }}>
-
-                                                                <div>
-                                                                    {`P${index + 1}: ${val} autos`}
-                                                                </div>
-                                                                {bestPlantCombo.bestPicPerc.result.plants[index].picIncrease > 0 && (
-                                                                    <div style={{ display: 'flex', alignItems: 'center' }}>
-
-                                                                        <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
-                                                                        <div> {bestPlantCombo.bestPicPerc.result.plants[index].prestige}</div>
-                                                                        <img style={{ height: '24px' }} src={`/fapi_fork_personal/right_arrow.svg`} />
-                                                                        <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
-                                                                        <div> {bestPlantCombo.bestPicPerc.result.plants[index].prestige + bestPlantCombo.bestPicPerc.result.plants[index].picIncrease}</div>
+                                                            }>
+                                                                <div style={{ marginLeft: '12px', border: '1px solid black', padding: '0 6px 0 6px' }}>
+                                                                    <div>
+                                                                        {`P${index + 1}: ${val} autos`}
                                                                     </div>
-                                                                )}
+                                                                    {bestPlantCombo.bestPic.result.plants[index].picIncrease > 0 && (
+                                                                        <div style={{ display: 'flex', alignItems: 'center' }}>
 
-                                                                <div>
-                                                                    {`Next prestige: ${helper.secondsToStringWithS(farmingHelper.calcTimeTillPrestige(
-                                                                        bestPlantCombo.bestPicPerc.result.plants[index],
-                                                                        {
-                                                                            ...modifiers,
-                                                                            // numAuto: bestPlantCombo.bestPic.result.combo[index]
-                                                                            numAuto: data.FarmingShopAutoPlotBought
-                                                                        }
-                                                                    ).remainingTime)
-                                                                        }`}
+                                                                            <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
+                                                                            <div> {bestPlantCombo.bestPic.result.plants[index].prestige}</div>
+                                                                            <img style={{ height: '24px' }} src={`/fapi_fork_personal/right_arrow.svg`} />
+                                                                            <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
+                                                                            <div> {bestPlantCombo.bestPic.result.plants[index].prestige + bestPlantCombo.bestPic.result.plants[index].picIncrease}</div>
+                                                                        </div>
+                                                                    )}
+
+                                                                    <div>
+                                                                        {`Next prestige: ${helper.secondsToStringWithS(farmingHelper.calcTimeTillPrestige(
+                                                                            bestPlantCombo.bestPic.result.plants[index],
+                                                                            {
+                                                                                ...modifiers,
+                                                                                // numAuto: bestPlantCombo.bestPic.result.combo[index]
+                                                                                numAuto: data.FarmingShopAutoPlotBought
+                                                                            }
+                                                                        ).remainingTime)
+                                                                            }`}
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                        </MouseOverPopover>
-                                                    )
-                                                })}
-                                            </div>
+                                                            </MouseOverPopover>
+                                                        )
+                                                    })}
+                                                </div>
+                                                {/* best pic % increase */}
+                                                {displayPicPerc && (
+                                                    <div style={{ display: 'flex', marginTop: '6px', alignItems: 'center' }}>
+                                                        <div style={{ minWidth: '310px' }}>
+                                                            Most PIC %
+                                                            (+{`${bestPlantCombo.bestPicPerc.result.picStats.picLevel} -> ${helper.roundTwoDecimal(bestPlantCombo.bestPicPerc.result.picStats.picPercent * 100)}%`})
+                                                            , {`${helper.roundTwoDecimal(bestPlantCombo.bestPicPerc.finalFry / bestPlantCombo.bestProd.finalFry * 100)}% Fries`}:
+                                                        </div>
+                                                        {bestPlantCombo.picPerc.map((val, index) => {
+                                                            return (
+                                                                <MouseOverPopover key={'picPercPopover' + index} tooltip={
+                                                                    <div>
+                                                                        <div>
+                                                                            <div>
+                                                                                Show how many PIC levels are gained (if any) and the time to hit the NEXT pic with your MAX num autos used
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                }>
+                                                                    <div style={{ marginLeft: '12px', border: '1px solid black', padding: '0 6px 0 6px' }}>
+
+                                                                        <div>
+                                                                            {`P${index + 1}: ${val} autos`}
+                                                                        </div>
+                                                                        {bestPlantCombo.bestPicPerc.result.plants[index].picIncrease > 0 && (
+                                                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+
+                                                                                <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
+                                                                                <div> {bestPlantCombo.bestPicPerc.result.plants[index].prestige}</div>
+                                                                                <img style={{ height: '24px' }} src={`/fapi_fork_personal/right_arrow.svg`} />
+                                                                                <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
+                                                                                <div> {bestPlantCombo.bestPicPerc.result.plants[index].prestige + bestPlantCombo.bestPicPerc.result.plants[index].picIncrease}</div>
+                                                                            </div>
+                                                                        )}
+
+                                                                        <div>
+                                                                            {`Next prestige: ${helper.secondsToStringWithS(farmingHelper.calcTimeTillPrestige(
+                                                                                bestPlantCombo.bestPicPerc.result.plants[index],
+                                                                                {
+                                                                                    ...modifiers,
+                                                                                    // numAuto: bestPlantCombo.bestPic.result.combo[index]
+                                                                                    numAuto: data.FarmingShopAutoPlotBought
+                                                                                }
+                                                                            ).remainingTime)
+                                                                                }`}
+                                                                        </div>
+                                                                    </div>
+                                                                </MouseOverPopover>
+                                                            )
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </>
                                         )}
+
 
 
                                     </>
 
                                 )}
                                 {/* Graph stuff */}
-                                <div style={{ display: 'flex', marginTop: '6px', alignItems: 'center', minHeight: '400px' }}>
-                                    <ResponsiveContainer width="100%" height="100%" minHeight="400px">
+                                <div style={{
+                                    // height:'70%'
+                                    height: '-webkit-fill-available'
+                                    // display: 'flex', marginTop: '6px', alignItems: 'center',
+                                    // minHeight: '600px'
+
+                                }}>
+                                    <ResponsiveContainer width="100%" height="100%"
+                                    //  minHeight="400px"
+                                    >
                                         <LineChart
-                                            // width={500}
-                                            // height={300}
                                             margin={{
                                                 top: 5,
                                                 right: 30,
                                                 left: 20,
                                                 bottom: 5,
                                             }}
+                                        // data={dataList}
                                         >
                                             <CartesianGrid strokeDasharray="3 3" />
                                             <XAxis dataKey="time" xAxisId="mainTime" name="time in seconds" />
@@ -1388,18 +1610,48 @@ const FarmingLanding = ({ data }) => {
 
                                             {(farmCalcProgress.current === farmCalcProgress.max && farmCalcProgress.current !== 0 && bestPlantCombo.prod) && (
                                                 <>
+
+
+
+                                                    {/* <Line
+                                                        type="monotone"
+                                                        xAxisId={"mainTime"}
+                                                        yAxisId="potatoes"
+                                                        dataKey="value2"
+                                                        name={`Top ${1} production`}
+                                                        stroke="#8884d8"
+                                                        activeDot={{ r: 8 }}
+                                                    />
+                                                    <Line
+                                                        type="monotone"
+                                                        xAxisId={"mainTime"}
+                                                        yAxisId="potatoes"
+                                                        dataKey="value11"
+                                                        name={`Top ${10} production`}
+                                                        stroke="red"
+                                                        activeDot={{ r: 8 }}
+                                                    /> */}
+
+
+
+
                                                     {bestPlantCombo.top10DataPointsPotatoes.map((val, index) => {
+                                                        if (index > 3) return;
                                                         return (<XAxis dataKey="time" hide={true} xAxisId={"potatoXAxis" + index} name="time in seconds" />)
                                                     })
                                                     }
+
                                                     {bestPlantCombo.top10DataPointsPotatoes.map((val, index) => {
+                                                        if (index > 3) return;
                                                         return (
                                                             <Line
                                                                 type="monotone"
                                                                 xAxisId={"potatoXAxis" + index}
+                                                                // xAxisId={"mainTime"}
                                                                 yAxisId="potatoes"
                                                                 data={val.data}
                                                                 dataKey="production"
+                                                                // dataKey="value2"
                                                                 name={`Top ${index + 1} production`}
                                                                 stroke="#8884d8"
                                                                 activeDot={{ r: 8 }}
@@ -1408,7 +1660,7 @@ const FarmingLanding = ({ data }) => {
                                                     })
                                                     }
                                                 </>
-                                            )} *
+                                            )}
 
                                             <Line
                                                 type="monotone"
@@ -1416,12 +1668,13 @@ const FarmingLanding = ({ data }) => {
                                                 yAxisId="potatoes"
                                                 data={tempFuture.dataPointsPotatoes}
                                                 dataKey="production"
+                                                // dataKey="custom"
                                                 name="Currently selected production"
                                                 stroke="#82ca9d"
                                                 strokeWidth={2}
                                                 activeDot={{ r: 8 }}
                                             />
-                                            {customLines.length > 0 && (
+                                            {/* {customLines.length > 0 && (
                                                 customLines.map((e, index) => {
                                                     return (
                                                         <Line
@@ -1437,7 +1690,7 @@ const FarmingLanding = ({ data }) => {
                                                         />
                                                     )
                                                 })
-                                            )}
+                                            )} */}
                                             {/*bestPlantCombo.top10DataPointsPotatoes.map((val, index) => {
                                                     return (<XAxis dataKey="time" hide={true} xAxisId={"fryXAxis" + index} name="time in seconds"/>)})
                                                 }
@@ -1465,76 +1718,7 @@ const FarmingLanding = ({ data }) => {
                 </div>
             </div >
 
-            {/* Explanation */}
-            < div style={{ display: 'flex' }}>
-                <div>
-                    <FarmingPlant data={{ fake: true }} />
-                </div>
-                <div style={{ marginLeft: '24px' }}>
-                    <h3 style={{ margin: '0' }}>How to use</h3>
-                    <div>
-                        <div >
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <div style={{ width: '6px', height: '6px', borderRadius: '3px', backgroundColor: 'black', }}></div>
-                                <div style={{ fontWeight: 'bold', margin: '0 6px 0 12px' }}>
-                                    Hours to calculate:
-                                </div>
-                                <div>
-                                    how far into the future to calculate best auto distributions, as well as future PIC/Levels for plants
-                                </div>
-                            </div>
-                        </div>
 
-                        <div >
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <div style={{ width: '6px', height: '6px', borderRadius: '3px', backgroundColor: 'black', }}></div>
-                                <div style={{ fontWeight: 'bold', margin: '0 6px 0 12px' }}>
-                                    WIP - Calculate best auto placements:
-                                </div>
-                                <div>
-                                    Calculates the best auto distribution for desired time into the future
-                                </div>
-                            </div>
-                        </div>
-                        <div >
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <div style={{ width: '6px', height: '6px', borderRadius: '3px', backgroundColor: 'black', }}></div>
-                                <div style={{ fontWeight: 'bold', margin: '0 6px 0 12px' }}>
-                                    Num threads to use for calculating:
-                                </div>
-                                <div>
-                                    How many parallel simulations to run, higher number means more CPU usage but quicker result (diminishing returns with more threads)
-                                </div>
-                            </div>
-                        </div>
-                        <div >
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <div style={{ width: '6px', height: '6px', borderRadius: '3px', backgroundColor: 'black', }}></div>
-                                <div style={{ fontWeight: 'bold', margin: '0 6px 0 12px' }}>
-                                    Auto purchase Page 1 Upgrades (PBC):
-                                </div>
-                                <div>
-                                    Whether the simulation should automatically buy Farming Shop page 1 (Plant Boost Corner) upgrades. (This is an ascencion perk)
-                                </div>
-                            </div>
-                        </div>
-                        <div >
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <div style={{ width: '6px', height: '6px', borderRadius: '3px', backgroundColor: 'black', }}></div>
-                                <div style={{ fontWeight: 'bold', margin: '0 6px 0 12px' }}>
-                                    Lock in above `Num Autos`:
-                                </div>
-                                <div>
-                                    If checked, generates only possible auto distributions from your `Num Autos` selected above. If there are more autos assigned than you have purchased, then it will be disabled
-                                </div>
-                            </div>
-                        </div>
-
-
-                    </div>
-                </div>
-
-            </div >
         </div >
     );
 };
