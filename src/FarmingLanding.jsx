@@ -338,6 +338,7 @@ const FarmingLanding = ({ data }) => {
             let prod = farmingHelper.calcProdOutput(plant, modifiers);
             plant.production = prod;
             plant.elapsedTime = 0;
+            plant.originalRank = plant.Rank;
 
             tempArr.push(plant);
         }
@@ -377,7 +378,8 @@ const FarmingLanding = ({ data }) => {
         let newPlant = tempFuture.plants[i];
         let prestigeTimings = farmingHelper.calcTimeTillPrestige(newPlant, { ...modifiers, time: secondsHour * futureTime, numAuto: plantAutos[i] });
 
-        newPlant.prestige = prestigeTimings.prestige;
+
+        newPlant.nextPrestige = prestigeTimings.prestige;
         newPlant.timeToPrestige = prestigeTimings.remainingTime;
 
         customFuturePlants.push(newPlant);
@@ -855,7 +857,8 @@ const FarmingLanding = ({ data }) => {
                 </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}  >
+            {/* current plants */}
+            {/* <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}  >
                 {finalPlants.map((val, index) => {
                     return <FarmingPlant
                         key={'top' + index}
@@ -864,7 +867,7 @@ const FarmingLanding = ({ data }) => {
                             modifiers: modifiers
                         }} />
                 })}
-            </div>
+            </div> */}
 
 
             <div style={{ display: 'flex', flexDirection: 'column' }}>
