@@ -261,6 +261,14 @@ var farmingHelper = {
         let modifiers = JSON.parse(JSON.stringify(modifiers_input));
         let numAutos = modifiers.numAutos;
         let time = modifiers.time;//time in seconds
+        let simulationTime = modifiers.time; //time in seconds
+
+        const dataPointsMax = modifiers.maxSteps ? modifiers.maxSteps : 100;
+
+        let tickRate = 60 * 0.1;
+        let dataPointThreshold = (simulationTime / tickRate )< dataPointsMax ? 1 : helper.roundInt(simulationTime / dataPointsMax);
+        let dataPointsPotatoes = [];
+        let dataPointsFries = [];
 
         let totalPotatoes = modifiers.totalPotatoes;
         let currPotatoes = modifiers.curPotatoes;
