@@ -1760,7 +1760,7 @@ function App() {
                         </div>
                     )}
                 </div>
-                <div style={{ overflow: 'auto', width: '100%' }}>
+                <div style={{ overflow: 'auto', width: '100%', display: 'flex', flex: 1 }}>
                     {selectComponent()}
                 </div>
 
