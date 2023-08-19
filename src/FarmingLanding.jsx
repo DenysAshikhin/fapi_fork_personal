@@ -350,6 +350,7 @@ const FarmingLanding = ({ data }) => {
 
 
     const [customLines, setCustomLines] = useState([]);
+    const [calcDone, setCalcDone] = useState(true);
 
 
     let tempFuture = useMemo(() => {
@@ -483,7 +484,7 @@ const FarmingLanding = ({ data }) => {
 
 
 
-
+                    setCalcDone(true);
                     setBestPlantCombo(finalBests)
                 }
             }
@@ -845,8 +846,6 @@ const FarmingLanding = ({ data }) => {
     //     dataList = mergeAndCombine(tempList2, []);
     // }
 
-
-    // console.log(tempFuture)
 
     return (
         <div style={{ height: '100%', display: 'flex', flex: 1, flexDirection: 'column' }}>
@@ -1216,9 +1215,9 @@ const FarmingLanding = ({ data }) => {
                                     flexDirection: 'column'
                                 }}>
                                     <button
-                                        disabled={notEnoughAuto}
+                                        disabled={notEnoughAuto || !calcDone}
                                         onClick={(e) => {
-
+                                            setCalcDone(false);
                                             console.log(`Time start: ` + (new Date()).getTime())
                                             ReactGA.event({
                                                 category: "farming_interaction",
@@ -1297,9 +1296,9 @@ const FarmingLanding = ({ data }) => {
                                 }}>
                                     <button
 
-                                        disabled={futureTime < 1}
+                                        disabled={futureTime < 1 || !calcDone}
                                         onClick={(e) => {
-
+                                            setCalcDone(false);
                                             console.log(`Time start: ` + (new Date()).getTime())
                                             ReactGA.event({
                                                 category: "farming_interaction",
@@ -1468,11 +1467,13 @@ const FarmingLanding = ({ data }) => {
 
                         display: 'flex',
                         flex: 1,
-                        flexDirection: 'column'
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
                         // backgroundColor: 'red',
                         // height: '-webkit-fill-available'
                     }}>
-                        {(farmCalcProgress.current === farmCalcProgress.max && farmCalcProgress.current !== 0 && bestPlantCombo.prod) && (
+
+                        {(farmCalcProgress.current === farmCalcProgress.max && farmCalcProgress.current !== 0 && bestPlantCombo.prod && calcDone) && (
                             <>
                                 {/* best potato */}
                                 {calcAFK && (
@@ -1480,9 +1481,8 @@ const FarmingLanding = ({ data }) => {
                                         <>
                                             <div style={{ display: 'flex' }}>
                                                 {/* style={{ marginRight: '24px', display: 'flex', alignItems: 'center' }}> */}
-                                                <div style={{ minWidth: '310px' }}>
-                                                    Best Potatoe Generation
-                                                    , {`${100}% Fries`}:
+                                                <div style={{ minWidth: '270px', display: 'flex', justifyContent: 'flex-end', marginRight: '2px' }}>
+                                                    Best Potatoe Generation, {`${100}% Fries`}:
                                                 </div>
                                                 {bestPlantCombo.pot.map((val, index) => {
                                                     return <div className='bestSuggestion'>{`P${index + 1}: ${val} autos`} </div>
@@ -1490,7 +1490,7 @@ const FarmingLanding = ({ data }) => {
                                             </div>
                                             {/* best raw pic levels */}
                                             <div style={{ display: 'flex', marginTop: '6px', alignItems: 'center' }}>
-                                                <div style={{ minWidth: '310px' }}>
+                                                <div style={{ minWidth: '270px' }}>
                                                     <div className='calcInfo' >
                                                         <div>
                                                             Most PIC (+{`${bestPlantCombo.bestPic.result.picStats.picLevel} -> ${helper.roundTwoDecimal(bestPlantCombo.bestPic.result.picStats.picPercent * 100)}%`})
@@ -1565,7 +1565,7 @@ const FarmingLanding = ({ data }) => {
                                             {/* best pic % increase */}
                                             {displayPicPerc && (
                                                 <div style={{ display: 'flex', marginTop: '6px', alignItems: 'center' }}>
-                                                    <div style={{ minWidth: '310px' }}>
+                                                    <div style={{ minWidth: '270px' }}>
                                                         <div className='calcInfo' >
                                                             <div>
                                                                 Most PIC %
@@ -1648,7 +1648,7 @@ const FarmingLanding = ({ data }) => {
                                         <>
                                             <div style={{ display: 'flex' }}>
 
-                                                <div style={{ minWidth: '310px' }}>Best order:</div>
+                                                <div style={{ minWidth: '270px', display: 'flex', justifyContent: 'flex-end' }}>Best order, 100% Fries</div>
                                                 {bestPlantCombo.bestPot.result.result.steps.map((val, index) => {
 
                                                     return <div className='bestSuggestion' >{
@@ -1661,7 +1661,7 @@ const FarmingLanding = ({ data }) => {
                                             {/* Best PIC */}
                                             {bestPlantCombo.bestPic.pic > 0 && (
                                                 <div style={{ display: 'flex', marginTop: '6px', alignItems: 'center' }}>
-                                                    <div style={{ minWidth: '310px' }}>
+                                                    <div style={{ minWidth: '270px' }}>
                                                         <div className='calcInfo' >
                                                             <div>
                                                                 Most PIC (+{`${bestPlantCombo.bestPic.result.picStats.picLevel} -> ${helper.roundTwoDecimal(bestPlantCombo.bestPic.result.picStats.picPercent * 100)}%`})
@@ -1742,7 +1742,7 @@ const FarmingLanding = ({ data }) => {
                                             {/* Best PIC Percentage */}
                                             {displayPicPerc > 0 && (
                                                 <div style={{ display: 'flex', marginTop: '6px', alignItems: 'center' }}>
-                                                    <div style={{ minWidth: '310px' }}>
+                                                    <div style={{ minWidth: '270px' }}>
 
 
                                                         <div className='calcInfo' >
@@ -1807,10 +1807,10 @@ const FarmingLanding = ({ data }) => {
                                                                             }`}
                                                                         <div style={{ display: 'flex', alignItems: 'center' }}>
                                                                             <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
-                                                                            <div> {bestPlantCombo.bestPicPerc.result.plants[index].prestige + bestPlantCombo.bestPicPerc.result.plants[index].picIncrease}</div>
+                                                                            <div> {bestPlantCombo.bestPicPerc.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].prestige + bestPlantCombo.bestPicPerc.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].picIncrease}</div>
                                                                             <img style={{ height: '24px' }} src={`/fapi_fork_personal/right_arrow.svg`} />
                                                                             <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
-                                                                            <div> {bestPlantCombo.bestPicPerc.result.plants[index].prestige + bestPlantCombo.bestPicPerc.result.plants[index].picIncrease + 1}</div>
+                                                                            <div> {bestPlantCombo.bestPicPerc.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].prestige + bestPlantCombo.bestPicPerc.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].picIncrease + 1}</div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -1842,7 +1842,8 @@ const FarmingLanding = ({ data }) => {
                             flex: 1,
                             flexDirection: 'column',
                             position: 'relative',
-                            minHeight: '400px'
+                            minHeight: '400px',
+                            width: '100%'
                             // minHeight: '-webkit-fill-available',
                             // height: '-webkit-fill-available'
                             // height: '100%'
@@ -1889,7 +1890,7 @@ const FarmingLanding = ({ data }) => {
                                         />
                                         <Legend />
 
-                                        {(farmCalcProgress.current === farmCalcProgress.max && farmCalcProgress.current !== 0 && bestPlantCombo.prod) && (
+                                        {(farmCalcProgress.current === farmCalcProgress.max && farmCalcProgress.current !== 0 && bestPlantCombo.prod && calcDone) && (
                                             <>
 
                                                 {/* <Line
