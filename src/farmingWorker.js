@@ -30,10 +30,7 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
         let top10DataPointsFries = [];
 
         for (let i = data.start; i <= data.end; i++) {
-            // console.log(`calculating loop: ${i} / ${combinations.length} <------> ${data.start}  == ${data.end}`);
-            if (i === 246) {
-                let adsad = 0;
-            }
+
             let combo = combinations[i];
             dataObj.numAutos = combo;
             let result;
@@ -43,13 +40,16 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
                     break;
                 case 'step':
 
-
                     let steps = [];
                     let runningTime = 0;
 
                     let curStep = 0;
                     let numSteps = 0;
                     let minTime = 0;
+
+                    if (combo[4] === 1 && combo[5] === 15) {
+                        let bigsad = -1;
+                    }
 
                     for (let j = 0; j < combo.length; j++) {
                         if (combo[j] > 0) {
@@ -65,32 +65,29 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
                         }
                         let autos = Array(data.baseTimers.length).fill(0);
                         autos[j] = data.baseTimers.length;
+                        autos.reverse();
                         let runTime = combo[j] * data.baseTimers[j];
                         runningTime += runTime;
 
-                        // if (curStep === numSteps) {
-                        if (curStep === 1) {
+                        if (curStep === numSteps && combo[j] > 0) {
                             runTime += remaining;
-                            curStep++;//double counting on purpose
                         }
 
                         steps.push({
                             time: runTime,
                             autos: autos
                         })
-
-                        let testerTotal = 0;
-                        for (let j = 0; j < steps.length; j++) {
-                            testerTotal += steps[j].time
-                        }
-                        if (Math.floor(testerTotal) > (secondsHour * futureTime)) {
-                            let xsd = 0;
-                        }
-
                     }
-                    steps.reverse();
 
-                    result = helper.calcStepHPProd(finalPlants, { ...dataObj, steps: steps, numSteps: numSteps });
+                    try {
+
+                        result = helper.calcStepHPProd(finalPlants, { ...dataObj, steps: steps, numSteps: numSteps });
+                    }
+                    catch (err) {
+                        console.log(err);
+                        let bigsad = -1;
+                        continue;
+                    }
                     break;
                 default:
                     result = helper.calcHPProd(finalPlants, dataObj);

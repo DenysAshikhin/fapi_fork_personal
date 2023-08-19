@@ -292,7 +292,8 @@ var farmingHelper = {
         let modifiers = JSON.parse(JSON.stringify(modifiers_input));
         let numAutos = modifiers.numAutos;
         let simulationTime = modifiers.time; //time in seconds
-        let startTime = modifiers.startTime ? modifiers.startTime : 0;
+        let startTime = modifiers.startTime ? modifiers.startTime : 0;//used for consistent tick timings
+        const runningTime = modifiers.runningTime ? modifiers.runningTime : 0;//Used for calculating end timings if necessary
 
         const dataPointsMax = modifiers.maxSteps ? modifiers.maxSteps : 100;
         const tickStart = modifiers.tickStart ? modifiers.tickStart : 0;
@@ -311,8 +312,9 @@ var farmingHelper = {
 
         // let runTime = 0;
         let i = 0;
+        let finalPass = false;
         //Iterate over each second
-        for (; i < simulationTime / tickRate; i++) {
+        for (; i < simulationTime / tickRate || finalPass; i++) {
             //Calculate new values for each plant
             for (let j = plants.length - 1; j >= 0; j--) {
                 let curr = plants[j];
@@ -326,6 +328,11 @@ var farmingHelper = {
                 plants[j] = res;
                 prevPlantsProd[j] = plants[j].production;
             }
+
+            let curTime = helper.roundInt(i * tickRate + startTime);
+
+
+
             totalPotatoes += plants[0].production * tickRate;
             currPotatoes += plants[0].production * tickRate;
 
@@ -355,18 +362,56 @@ var farmingHelper = {
                 }
             }
 
-            let curTime = helper.roundInt(i * tickRate + startTime);
-            if (i % dataPointThreshold === 0 && curTime >= tickStart) {
+
+            if (i % dataPointThreshold === 0 && curTime >= tickStart && curTime <= (simulationTime + runningTime)) {
                 dataPointsPotatoes.push({ "time": curTime, "production": totalPotatoes })
                 dataPointsFries.push({ "time": curTime, "fries": farmingHelper.calcFryOutput(totalPotatoes) })
             }
+
+            if (!modifiers.skipFinal) {
+
+                if (finalPass && curTime >= (simulationTime + runningTime)) {
+                    break;
+                }
+                if (!finalPass && curTime < (simulationTime + runningTime)) {
+                    finalPass = true;
+                }
+
+            }
+
+
         }
 
         if (i > 0 && !modifiers.skipFinal) {
-            if (dataPointsPotatoes[dataPointsPotatoes.length - 1].production !== totalPotatoes) {
-                let curTime = helper.roundInt(i * tickRate + startTime);
+
+            let curTime = helper.roundInt(i * tickRate + startTime);
+            //Handling rare case when you have to add, but only once due to intervals duration, but only at the end, and didn't fit in the for loop above
+            if (dataPointsPotatoes.length === 0) {
+                if (curTime > (simulationTime + runningTime)) {
+                    let bigsad = 1;
+                }
                 dataPointsPotatoes.push({ "time": curTime, "production": totalPotatoes })
                 dataPointsFries.push({ "time": curTime, "fries": farmingHelper.calcFryOutput(totalPotatoes) })
+            }
+            else if (dataPointsPotatoes[dataPointsPotatoes.length - 1].production !== totalPotatoes) {
+                if (curTime > (simulationTime + runningTime)) {
+                    let bigsad = 1;
+
+
+
+                    let timeIncrease = curTime - dataPointsPotatoes[dataPointsPotatoes.length - 1].time;
+                    let increase = (totalPotatoes - dataPointsPotatoes[dataPointsPotatoes.length - 1].production) / timeIncrease;
+                    let trueTimeIncrease = (simulationTime + runningTime) - dataPointsPotatoes[dataPointsPotatoes.length - 1].time;
+                    let finalPotatoes = dataPointsPotatoes[dataPointsPotatoes.length - 1].production + increase * trueTimeIncrease;
+
+                    let newObj = { time: dataPointsPotatoes[dataPointsPotatoes.length - 1].time + trueTimeIncrease, production: finalPotatoes };
+                    dataPointsPotatoes.push(newObj);
+
+                    dataPointsFries.push({ "time": dataPointsPotatoes[dataPointsPotatoes.length - 1].time + trueTimeIncrease, "fries": farmingHelper.calcFryOutput(dataPointsPotatoes[dataPointsPotatoes.length - 1].production + increase * trueTimeIncrease) })
+
+                    //This means the `current` potatoes aren't updated to reflect the backwards fill/fix but it shouldn't be a big deal, and not used for anything atm
+                    totalPotatoes = finalPotatoes;
+                }
             }
         }
 
@@ -396,7 +441,7 @@ var farmingHelper = {
 
         for (let i = 0; i < steps.length; i++) {
             if (potatoeSteps.length > 0 && steps[i].time > 0) {
-                let adas = 0;
+                let adas = 0;// bigsad = -1;
             }
             res = this.calcHPProd(plants, {
                 ...modifiers,
@@ -404,6 +449,7 @@ var farmingHelper = {
                 time: steps[i].time,
                 dataPointThreshold: dataPointThreshold,
                 startTime: potatoeSteps.length > 0 ? potatoeSteps[potatoeSteps.length - 1].time : 0,
+                runningTime: runningTime,
                 skipFinal: i < (steps.length - 1),
                 tickStart: potatoeSteps.length > 0 ? potatoeSteps[potatoeSteps.length - 1].time + dataPointThreshold * tickRate : 0,
             });
@@ -427,6 +473,7 @@ var farmingHelper = {
                 if (potatoeSteps[i].time + highestTime < potatoeSteps[i - 1].time) {
                     highestTime = potatoeSteps[i - 1].time + min;
                     foundBreak = true;
+                    throw new Error(`oof`)
                 }
             }
 
