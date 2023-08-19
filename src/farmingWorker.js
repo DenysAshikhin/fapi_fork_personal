@@ -11,6 +11,7 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
         const mode = data.mode;
         const secondsHour = 3600;
         let futureTime = data.time;
+        const numSimulatedAutos = data.numSimulatedAutos ? data.numSimulatedAutos : 1;
         // let totalNumAutos = data.FarmingShopAutoPlotBought;
         // let numPlants = finalPlants.length;
         let combinations = data.combinations;
@@ -64,7 +65,7 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
                             curStep++;
                         }
                         let autos = Array(data.baseTimers.length).fill(0);
-                        autos[j] = data.baseTimers.length;
+                        autos[j] = numSimulatedAutos;
                         autos.reverse();
                         let runTime = combo[j] * data.baseTimers[j];
                         runningTime += runTime;
