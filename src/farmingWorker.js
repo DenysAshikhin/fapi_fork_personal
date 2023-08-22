@@ -48,10 +48,6 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
                     let numSteps = 0;
                     let minTime = 0;
 
-                    if (combo[4] === 1 && combo[5] === 15) {
-                        let bigsad = -1;
-                    }
-
                     for (let j = 0; j < combo.length; j++) {
                         if (combo[j] > 0) {
                             numSteps++;
@@ -79,16 +75,7 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
                             autos: autos
                         })
                     }
-
-                    try {
-
-                        result = helper.calcStepHPProd(finalPlants, { ...dataObj, steps: steps, numSteps: numSteps });
-                    }
-                    catch (err) {
-                        console.log(err);
-                        let bigsad = -1;
-                        continue;
-                    }
+                    result = helper.calcStepHPProd(finalPlants, { ...dataObj, steps: steps, numSteps: numSteps });
                     break;
                 default:
                     result = helper.calcHPProd(finalPlants, dataObj);

@@ -387,17 +387,11 @@ var farmingHelper = {
             let curTime = helper.roundInt(i * tickRate + startTime);
             //Handling rare case when you have to add, but only once due to intervals duration, but only at the end, and didn't fit in the for loop above
             if (dataPointsPotatoes.length === 0) {
-                if (curTime > (simulationTime + runningTime)) {
-                    let bigsad = 1;
-                }
                 dataPointsPotatoes.push({ "time": curTime, "production": totalPotatoes })
                 dataPointsFries.push({ "time": curTime, "fries": farmingHelper.calcFryOutput(totalPotatoes) })
             }
             else if (dataPointsPotatoes[dataPointsPotatoes.length - 1].production !== totalPotatoes) {
                 if (curTime > (simulationTime + runningTime)) {
-                    let bigsad = 1;
-
-
 
                     let timeIncrease = curTime - dataPointsPotatoes[dataPointsPotatoes.length - 1].time;
                     let increase = (totalPotatoes - dataPointsPotatoes[dataPointsPotatoes.length - 1].production) / timeIncrease;
@@ -440,9 +434,6 @@ var farmingHelper = {
         let dataPointThreshold = (modifiers_input.time / tickRate) < dataPointsMax ? 1 : helper.roundInt((modifiers_input.time / tickRate) / dataPointsMax);
 
         for (let i = 0; i < steps.length; i++) {
-            if (potatoeSteps.length > 0 && steps[i].time > 0) {
-                let adas = 0;// bigsad = -1;
-            }
             res = this.calcHPProd(plants, {
                 ...modifiers,
                 numAutos: steps[i].autos,

@@ -132,7 +132,7 @@ const FarmingLanding = ({ data }) => {
         }
 
 
-        let soulPlantEXP = 1 + (0.25 * data.SoulLeafTreatment);
+        let soulPlantEXP = Math.pow(1.25, data.SoulLeafTreatment);
 
         let shopGrowingSpeed = data.FarmingShopPlantGrowingSpeed;
         let manualHarvestFormula = data.FarmingShopPlantManualHarvestFormula;
@@ -245,7 +245,7 @@ const FarmingLanding = ({ data }) => {
     let nextCosts = farmingHelper.getNextShopCosts(data);
 
 
-    let soulPlantEXP = 1 + (0.25 * data.SoulLeafTreatment);
+    let soulPlantEXP = Math.pow(1.25, data.SoulLeafTreatment);
 
     let shopGrowingSpeed = data.FarmingShopPlantGrowingSpeed;
     let manualHarvestFormula = data.FarmingShopPlantManualHarvestFormula;
@@ -701,156 +701,15 @@ const FarmingLanding = ({ data }) => {
 
     let displayPicPerc = bestPlantCombo.pic != bestPlantCombo.picPerc;
 
-    let dataList = [];
-    let tempList2 = tempFuture.dataPointsPotatoes;
-    function mergeAndCombine(list1, list2, customKey) {
-
-        let combinedList = [];
-        customKey = customKey ? customKey : 'value1';
-        let map1 = {};
-        for (let i = 0; i < list1.length; i++) {
-            map1[list1[i].time] = { ...list1[i] };
-            map1[list1[i].time].time = list1[i].time;
-            map1[list1[i].time].custom = list1[i].production;
-            map1[list1[i].time][customKey] = null;
-        }
+    // console.log(`exp compare: ${modifiers.expBonus} VS ${helper.calcPOW(data.PlantRankExpBonus)}`)
 
 
-
-        for (let i = 0; i < list2.length; i++) {
-            if (list2[i].time in map1) {
-                map1[list2[i].time][customKey] = list2[i].production
-            }
-            else {
-                map1[list2[i].time] = { ...list2[i] };
-                map1[list2[i].time].time = list2[i].time;
-                map1[list2[i].time].custom = null;
-                map1[list2[i].time][customKey] = list2[i].production;
-                delete map1[list2[i].time].production;
-            }
-        }
-
-        combinedList = Object.values(map1)
-
-        return combinedList;
-    }
-    function interpolateAndExtrapolate(arr, customKey) {
-
-        let data = [];
-        let missing_custom_index = [];
-        let missing_value2_index = [];
-        let prev_custom = -1;
-        let prev_value2 = -1;
-        customKey = customKey ? customKey : 'value1';
-
-
-        for (let i = 0; i < arr.length; i++) {
-            let custom = arr[i].custom;
-            let value2 = arr[i][customKey];
-
-            if (prev_custom === -1) {
-                prev_custom = custom;
-            }
-            if (prev_value2 === -1) {
-                prev_value2 = value2;
-            }
-
-            if (custom) {
-                //interpolate previous values
-                if (missing_custom_index.length > 0) {
-                    let increase = (custom - prev_custom) / (missing_custom_index.length + 1);
-                    for (let j = 0; j < missing_custom_index.length; j++) {
-                        arr[missing_custom_index[j]].custom = prev_custom + increase * (j + 1);
-                    }
-                    missing_custom_index = [];
-                }
-                prev_custom = custom;
-            }
-            else {
-                missing_custom_index.push(i);
-            }
-
-            if (value2) {
-                //interpolate previous values
-                if (missing_value2_index.length > 0) {
-                    let increase = (value2 - prev_value2) / (missing_value2_index.length + 1);
-                    for (let j = 0; j < missing_value2_index.length; j++) {
-                        arr[missing_value2_index[j]][customKey] = prev_value2 + increase * (j + 1);
-                    }
-                    missing_value2_index = [];
-                }
-                prev_value2 = value2;
-            }
-            else {
-                missing_value2_index.push(i);
-            }
-        }
-
-        //extropolate the ends
-        if (!arr[arr.length - 1].custom) {
-            let missing_indexes = [];
-            for (let i = arr.length - 1; i >= 0; i--) {
-                if (arr[i].custom) {
-                    let diff = (arr[i].custom - arr[i - 1].custom);
-                    missing_indexes.reverse();
-                    for (let j = 0; j < missing_indexes.length; j++) {
-                        arr[missing_indexes[j]].custom = arr[i].custom + diff * (j + 1);
-                    }
-                    break;
-                }
-                else {
-                    missing_indexes.push(i);
-                }
-            }
-        }
-
-        if (!arr[arr.length - 1][customKey]) {
-            let missing_indexes = [];
-            for (let i = arr.length - 1; i >= 0; i--) {
-                if (arr[i][customKey]) {
-                    let diff = (arr[i][customKey] - arr[i - 1][customKey]);
-                    missing_indexes.reverse();
-                    for (let j = 0; j < missing_indexes.length; j++) {
-                        arr[missing_indexes[j]][customKey] = arr[i][customKey] + diff * (j + 1)
-                    }
-                    break;
-                }
-                else {
-                    missing_indexes.push(i);
-                }
-            }
-        }
-
-        for (let i = 0; i < arr.length; i++) {
-            arr[i].production = arr[i].custom;
-        }
-
-        return arr;
-    }
-
-    // if ((farmCalcProgress.current === farmCalcProgress.max && farmCalcProgress.current !== 0 && bestPlantCombo.prod)) {
-    //     dataList = tempList2;
-    //     let topPotatoe = bestPlantCombo.top10DataPointsPotatoes[0].data;
-    //     let topPotatoeLast = bestPlantCombo.top10DataPointsPotatoes[9].data;
-    //     let combined = mergeAndCombine(tempList2, topPotatoe, 'value2');
-    //     let smoothed = interpolateAndExtrapolate(combined, 'value2')
-    //     dataList = smoothed;
-
-    //     // combined = mergeAndCombine(smoothed, topPotatoeLast, 'value11');
-    //     // smoothed = interpolateAndExtrapolate(combined, 'value11')
-    //     // dataList = smoothed;
-    //     let x = 0;
-
-    // }
-    // else {
-    //     dataList = mergeAndCombine(tempList2, []);
-    // }
 
 
     return (
         <div style={{ height: '100%', display: 'flex', flex: 1, flexDirection: 'column' }}>
-            <div style={{ display: 'flex', height: '148px' }}>
-                <div style={{ minWidth: '256px' }}>
+            {/* <div style={{ display: 'flex', height: '148px' }}> */}
+            {/* <div style={{ minWidth: '256px' }}>
                     <div>Shop Growing Speed: x{helper.roundTwoDecimal(Math.pow(1.05, shopGrowingSpeed))}</div>
                     <div>Shop Rank EXP: x{helper.roundTwoDecimal(shopRankEXP)}</div>
                     <div>Soul Shop Rank EXP: x{helper.roundTwoDecimal(soulPlantEXP)}</div>
@@ -863,13 +722,14 @@ const FarmingLanding = ({ data }) => {
                             {currFries.toExponential(3)}
                         </div>
                     </div>
+                </div> */}
+            {/* grasshopper */}
+            {/* 
+            <div style={{ display: 'flex', position: 'relative', margin: '0 24px 0 12px' }}>
+                <div>
+                    <FarmingPlant data={{ fake: true }} />
                 </div>
-                {/* grasshopper */}
-                <div style={{ display: 'flex', position: 'relative', margin: '0 24px 0 12px' }}>
-                    <div>
-                        <FarmingPlant data={{ fake: true }} />
-                    </div>
-                    {/* <div style={{ display: 'flex', maxHeight: '24px' }}>
+                {/* <div style={{ display: 'flex', maxHeight: '24px' }}>
                         <div style={{ margin: '0 6px 0 0' }}>{`Next grasshopper breakpoint ${helper.roundInt(dataGrassHopper)} +`}</div>
                         <input
                             style={{
@@ -918,22 +778,24 @@ const FarmingLanding = ({ data }) => {
                             fontSize: '12px'
                         }}> +{(grassHopperAmount - currFries).toExponential(2)} ({grassHopperAmount.toExponential(2)})</div>
                     </div> */}
-                    {/* <div>Grasshopper Amount: +{helper.roundTwoDecimal(grassHopperAmount - currFries)} ({helper.roundTwoDecimal(grassHopperAmount)})</div> */}
-                </div>
-                {/* Contagion */}
-                <div style={{ minWidth: '160px', display: 'flex', margin: '0 24px 0 0' }}>
+            {/* <div>Grasshopper Amount: +{helper.roundTwoDecimal(grassHopperAmount - currFries)} ({helper.roundTwoDecimal(grassHopperAmount)})</div> 
+            </div> */}
+
+            {/* Contagion */}
+
+            {/* <div style={{ minWidth: '160px', display: 'flex', margin: '0 24px 0 0' }}>
                     <div style={{ position: 'relative', display: 'flex', width: '160px' }}>
                         <img style={{ height: '95%', position: 'absolute' }} src={`/fapi_fork_personal/farming/contagion.png`} />
 
                         {/* Rank EXP */}
-                        <div style={{ position: 'absolute', height: '40%', width: '100%' }}>
+            {/* <div style={{ position: 'absolute', height: '40%', width: '100%' }}>
                             <img style={{ position: 'absolute', height: '60%', left: '3%', top: '9%' }} src={`/fapi_fork_personal/farming/rank3.png`} />
                             <div style={{ position: 'absolute', color: 'white', background: 'black', borderRadius: '6px', height: '12px', fontSize: '12px', top: '60%', left: '4%', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0 3px 0 3px' }}>
                                 x{helper.roundTwoDecimal(contagionPlantEXP)}
                             </div>
-                        </div>
-                        {/* Growth  */}
-                        <div style={{ position: 'absolute', height: '40%', width: '70%', bottom: '1px' }}>
+                        </div> */}
+            {/* Growth  */}
+            {/* <div style={{ position: 'absolute', height: '40%', width: '70%', bottom: '1px' }}>
                             <img style={{ position: 'absolute', height: '70%', bottom: '15%' }} src={`/fapi_fork_personal/farming/growth.png`} />
                             <div style={{
                                 position: 'absolute',
@@ -947,9 +809,9 @@ const FarmingLanding = ({ data }) => {
                                 display: 'flex',
                                 justifyContent: 'center', alignItems: 'center', width: 'calc(40% - 10px)'
                             }}>x{helper.roundTwoDecimal(contagionPlantGrowth)} </div>
-                        </div>
+                        </div> */}
 
-                        {/* Shovel */}
+            {/* Shovel 
                         <div style={{ position: 'absolute', height: '40%', width: '100%' }}>
                             <img style={{ position: 'absolute', height: '60%', right: '3%', top: '9%' }} src={`/fapi_fork_personal/farming/shovel.png`} />
                             <div style={{ position: 'absolute', color: 'white', background: 'black', borderRadius: '6px', height: '12px', fontSize: '12px', top: '60%', right: '4.75%', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0 3px 0 3px' }}>
@@ -960,9 +822,9 @@ const FarmingLanding = ({ data }) => {
                     <div>
                     </div>
 
-                </div>
-                {/* Assembly */}
-                <div style={{ width: '340px', background: '#c9c9c9', zIndex: '-2', borderRadius: '6px' }}>
+                </div> */}
+            {/* Assembly */}
+            {/* <div style={{ width: '340px', background: '#c9c9c9', zIndex: '-2', borderRadius: '6px' }}>
 
                     <div style={{ position: 'relative', height: '36px', width: '235px', borderRadius: '6px', marginBottom: '6px' }}>
                         <img style={{
@@ -997,8 +859,8 @@ const FarmingLanding = ({ data }) => {
 
                         </div>
                     </div>
-                </div>
-            </div>
+                </div> */}
+            {/* </div> */}
 
             {/* current plants */}
             {/* <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}  >
@@ -1747,7 +1609,7 @@ const FarmingLanding = ({ data }) => {
 
                                                         <div className='calcInfo' >
                                                             <div>
-                                                                Most PIC (+{`${bestPlantCombo.bestPicPerc.result.picStats.picLevel} -> ${helper.roundTwoDecimal(bestPlantCombo.bestPicPerc.result.picStats.picPercent * 100)}%`})
+                                                                Most PIC % (+{`${bestPlantCombo.bestPicPerc.result.picStats.picLevel} -> ${helper.roundTwoDecimal(bestPlantCombo.bestPicPerc.result.picStats.picPercent * 100)}%`})
                                                             </div>
                                                             <div>
                                                                 {`${helper.roundTwoDecimal(bestPlantCombo.bestPicPerc.finalFry / bestPlantCombo.bestProd.finalFry * 100)}% Fries`}:
@@ -1880,12 +1742,27 @@ const FarmingLanding = ({ data }) => {
                                     // data={dataList}
                                     >
                                         <CartesianGrid strokeDasharray="3 3" />
-                                        <XAxis dataKey="time" xAxisId="mainTime" name="time in seconds" />
+                                        <XAxis
+                                            dataKey="time"
+                                            xAxisId="mainTime"
+                                            name="time in seconds"
+                                            tickFormatter={(e, index) => {
+
+                                                console.log(e);
+                                                console.log(index);
+                                                return (helper.secondsToString(e));
+                                            }}
+                                        minTickGap={7}
+                                        />
+
                                         <YAxis yAxisId="potatoes" />
                                         {/*<YAxis yAxisId="fries" orientation="right" />*/}
                                         <Tooltip
                                             formatter={(value, name, props) => {
-                                                return [value.toExponential(3), name];
+                                                return [value.toExponential(2), name];
+                                            }}
+                                            labelFormatter={(label, payload) => {
+                                                return helper.secondsToString(label);
                                             }}
                                         />
                                         <Legend />
