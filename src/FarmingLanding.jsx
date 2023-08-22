@@ -5,7 +5,7 @@ import helper from "./util/helper.js";
 import farmingHelper from "./util/farmingHelper.js";
 import './FarmingLanding.css';
 import ReactGA from "react-ga4";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Label } from 'recharts';
 
 const FarmerWorker = new Worker(new URL('./farmingWorker.js', import.meta.url))
 // const FarmerWorker = new Worker('./farmingWorker.js', { type: "module" })
@@ -103,7 +103,9 @@ const FarmingLanding = ({ data }) => {
     const secondsHour = 3600;
     const farmCalcStarted = useRef({});
     const farmTotals = useRef([]);
-    const [numThreads, setNumThreads] = useState(6);
+    const [numThreads, setNumThreads] = useState(8);
+
+    const [numSimulatedAutos, setNumSimulatedAutos] = useState(data.FarmingShopAutoPlotBought);
 
 
     const [farmCalcProgress, setFarmCalcProgress] = useState({ current: 0, max: 0 });
@@ -679,7 +681,7 @@ const FarmingLanding = ({ data }) => {
     const dataGrassHopper = helper.calcPOW(data.GrasshopperTotal);
     const level = dataGrassHopper + (futureGrasshopper - 1);
     let grassHopperAmount = helper.roundInt(2250 + (level + 1) * (level + 2) / 2 * 250 * Math.pow(1.025, level));
-    let numSimulatedAutos = data.FarmingShopAutoPlotBought;
+
 
     let notEnoughAuto = false;
 
@@ -876,55 +878,131 @@ const FarmingLanding = ({ data }) => {
 
 
             <div style={{
-                display: 'flex', flex: 1, flexDirection: 'column', width: '100%',
-                // height: '-webkit-fill-available'
+                display: 'flex', flex: 1, flexDirection: 'column', width: '100%'
             }}>
-                <h3>Future Calculations</h3>
+                <h3 style={{ margin: '12px 0' }}>Future Calculations</h3>
                 <div style={{ display: 'flex' }}>
-                    <MouseOverPopover tooltip={
-                        <div>
-                            How many hours into the future to calculate for each plant
-                        </div>
-                    }>
-                        <div>Hours to calculate</div>
 
-                    </MouseOverPopover>
+                    {/* Hours to calc */}
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <MouseOverPopover tooltip={
+                            <div>
+                                How many hours into the future to calculate for each plant
+                            </div>
+                        }>
+                            <div>Hours to calculate</div>
 
-                    <input
-                        style={{
-                            // width: '48px'
-                            // , WebkitAppearance: 'none' 
-                        }}
-                        type='number'
-                        className='prepNumber'
-                        value={futureTime}
-                        onChange={
-                            (e) => {
-                                try {
-                                    let x = Number(e.target.value);
-                                    // x = Math.floor(x);
-                                    if (x < 0.01 || x > 99999999) {
-                                        return;
-                                    }
-                                    setFutureTime(x);
+                        </MouseOverPopover>
 
-                                    ReactGA.event({
-                                        category: "farming_interaction",
-                                        action: `changed_futureHours`,
-                                        label: `${x}`,
-                                        value: x
-                                    })
-
-                                }
-                                catch (err) {
-                                    console.log(err);
-                                }
+                        <input
+                            style={{
+                                // width: '48px'
+                                // , WebkitAppearance: 'none' 
                             }}
-                        placeholder={futureTime + ''}
-                        min="0.01"
-                        max="99999999"
-                    />
+                            type='number'
+                            className='prepNumber'
+                            value={futureTime}
+                            onChange={
+                                (e) => {
+                                    try {
+                                        let x = Number(e.target.value);
+                                        // x = Math.floor(x);
+                                        if (x < 0.01 || x > 99999999) {
+                                            return;
+                                        }
+                                        setFutureTime(x);
+
+                                        ReactGA.event({
+                                            category: "farming_interaction",
+                                            action: `changed_futureHours`,
+                                            label: `${x}`,
+                                            value: x
+                                        })
+
+                                    }
+                                    catch (err) {
+                                        console.log(err);
+                                    }
+                                }}
+                            placeholder={futureTime + ''}
+                            min="0.01"
+                            max="99999999"
+                        />
+                    </div>
+
+                    {/* Hours to calc */}
+                    <div style={{ display: 'flex', alignItems: 'center', marginLeft: '12px' }}>
+                        <MouseOverPopover tooltip={
+                            <div>
+                                How many autos to consider for calculations as the max
+                            </div>
+                        }>
+                            <div style={{ marginRight: '6px' }}>Max Autos</div>
+                        </MouseOverPopover>
+
+                        <input
+                            style={{
+                                // width: '48px'
+                                // , WebkitAppearance: 'none' 
+                            }}
+                            type='number'
+                            className='prepNumber'
+                            value={numSimulatedAutos}
+                            onChange={
+                                (e) => {
+                                    try {
+                                        let x = Number(e.target.value);
+                                        // x = Math.floor(x);
+                                        if (x < 0 || x > 8) {
+                                            return;
+                                        }
+                                        setNumSimulatedAutos(x);
+
+                                        ReactGA.event({
+                                            category: "farming_interaction",
+                                            action: `changed_maxAutos`,
+                                            label: `${x}`,
+                                            value: x
+                                        })
+
+                                    }
+                                    catch (err) {
+                                        console.log(err);
+                                    }
+                                }}
+                            placeholder={numSimulatedAutos + ''}
+                            min="1"
+                            max="8"
+                        />
+                    </div>
+
+                    {/* Max all autos */}
+                    <div style={{ display: 'flex', alignItems: 'center', margin: '0 12px' }}>
+                        {/* <div>Max All Autos</div> */}
+                        <button onClick={(e) => {
+                            let temp = Array(20).fill(numSimulatedAutos);
+                            setPlantAutos(temp);
+                            ReactGA.event({
+                                category: "farming_interaction",
+                                action: `max_auto`,
+                                label:`max_auto`,
+                            })
+                        }}>Max Autos</button>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        {/* <div>Clear All Autos</div> */}
+                        <button onClick={(e) => {
+                            let temp = Array(20).fill(0);
+                            setPlantAutos(temp);
+                            ReactGA.event({
+                                category: "farming_interaction",
+                                action: `clear_auto`,
+                                label:`clear_auto`,
+                            })
+                        }}>Clear Autos</button>
+                    </div>
                 </div>
+
 
                 {/* Future plants */}
                 <div style={{ display: 'flex', flexWrap: 'wrap' }}>
@@ -1752,10 +1830,20 @@ const FarmingLanding = ({ data }) => {
                                                 console.log(index);
                                                 return (helper.secondsToString(e));
                                             }}
-                                        minTickGap={7}
+                                            minTickGap={7}
                                         />
 
-                                        <YAxis yAxisId="potatoes" />
+                                        <YAxis yAxisId="potatoes"
+                                            width={78}
+                                        >
+                                            <Label
+                                                value="Total HP Made"
+                                                position="insideLeft"
+                                                angle={-90}
+                                                style={{ textAnchor: 'middle' }}
+                                            />
+
+                                        </YAxis >
                                         {/*<YAxis yAxisId="fries" orientation="right" />*/}
                                         <Tooltip
                                             formatter={(value, name, props) => {
@@ -1764,6 +1852,7 @@ const FarmingLanding = ({ data }) => {
                                             labelFormatter={(label, payload) => {
                                                 return helper.secondsToString(label);
                                             }}
+
                                         />
                                         <Legend />
 
