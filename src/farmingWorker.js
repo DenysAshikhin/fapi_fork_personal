@@ -1,5 +1,5 @@
 import helper from './util/farmingHelper.js';
-
+import mathHelper from './util/math.js';
 
 
 // eslint-disable-next-line no-restricted-globals
@@ -7,7 +7,23 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
 
     try {
         let finalPlants = data.finalPlants;
+
+        //for some reason the break-infinity values get changed into {mantissa: x, exponent: y} objects, revert
+
+        for (let i = 0; i < finalPlants.length; i++) {
+            let cur = finalPlants[i];
+            cur.created = mathHelper.createDecimal(cur.created);
+            cur.totalMade = mathHelper.createDecimal(cur.totalMade);
+            cur.production = mathHelper.createDecimal(cur.production);
+        }
+
         let modifiers = data.modifiers;
+        //Same thing for modifiers
+        modifiers.shopProdBonus = mathHelper.createDecimal(modifiers.shopProdBonus);
+        modifiers.hpBonus = mathHelper.createDecimal(modifiers.hpBonus);
+        modifiers.curPotatoes = mathHelper.createDecimal(modifiers.curPotatoes);
+        modifiers.totalPotatoes = mathHelper.createDecimal(modifiers.totalPotatoes);
+
         const mode = data.mode;
         const secondsHour = 3600;
         let futureTime = data.time;
@@ -17,9 +33,9 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
         let combinations = data.combinations;
 
 
-        let totalPot = 0;
+        let totalPot = mathHelper.createDecimal(0);
         let totalPotCombo = {};
-        let bestProd = 0;
+        let bestProd = mathHelper.createDecimal(0);
         let bestProdCombo = {};
         let bestPIC = 0;
         let bestPicCombo = { potatoeProduction: 0 };
@@ -82,7 +98,6 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
                     break;
             }
 
-
             let picGained = 0;
             let picPercent = 0;
 
@@ -93,7 +108,7 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
                 result.plants[j].picIncrease = picIncrease;
             }
 
-            if (result.totalPotatoes >= totalPot) {
+            if (result.totalPotatoes.greaterThanOrEqualTo(totalPot) === true) {
                 totalPot = result.totalPotatoes;
                 totalPotCombo = { combo: combo, result: result, plants: result.plants }
 
@@ -108,7 +123,7 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
             }
 
 
-            if (result.potatoeProduction >= bestProd) {
+            if (result.potatoeProduction.greaterThanOrEqualTo(bestProd) === true) {
                 bestProd = result.potatoeProduction;
                 bestProdCombo = { combo: combo, result: result, plants: result.plants }
             }
@@ -119,7 +134,7 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
                 bestPicCombo = temp;
             }
             else if (picGained === bestPIC) {
-                if (result.potatoeProduction > bestPicCombo.potatoeProduction) {
+                if (result.potatoeProduction.greaterThanOrEqualTo(bestPicCombo.potatoeProduction)) {
                     let temp = { combo: combo, result: result, plants: result.plants, potatoeProduction: result.potatoeProduction, picGain: picGained, picStats: { picLevel: picGained, picPercent: picPercent } };
                     bestPIC = picGained;
                     bestPicCombo = temp;
@@ -132,7 +147,7 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
                 bestPICPercCombo = temp;
             }
             else if (picPercent === bestPICPerc) {
-                if (result.potatoeProduction > bestPICPercCombo.potatoeProduction) {
+                if (result.potatoeProduction.greaterThanOrEqualTo(bestPICPercCombo.potatoeProduction)) {
                     let temp = { combo: combo, result: result, plants: result.plants, potatoeProduction: result.potatoeProduction, picGain: picPercent, picStats: { picLevel: picGained, picPercent: picPercent } };
 
                     bestPICPerc = picPercent;

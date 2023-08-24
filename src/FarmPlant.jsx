@@ -32,19 +32,23 @@ const FarmingPlant = ({ data }) => {
     let harvestTime = `${helper.secondsToStringWithS(plant.growthTime)}`;
     let harvestAmount = `${helper.roundTwoDecimal(plant.perHarvest)}`;
     let totalHarvest = `${plant.created.toExponential(3)}`;
-    let outMult = ` (x${helper.roundTwoDecimal(useFutureValues ? plant.futureMult : plant.currMult)})`;
+    // let outMult = ` (x${helper.roundTwoDecimal(useFutureValues ? plant.futureMult : plant.currMult)})`;
+    let outMult;
+    try{
+
+        outMult = ` (x${plant.futureMult.toPrecision(3).toString()})`;
+    }
+    catch(err){
+        console.log(err);
+        let bigsad = -1;
+    }
     let pic = `${plant.prestige}`;
     let futurePic = `${plant.nextPrestige}`
     let picTime = useFutureValues && !fake ? `${plant.timeToPrestige > 3600 ? helper.secondsToString(plant.timeToPrestige) : helper.secondsToStringWithS(plant.timeToPrestige)}` : ``;
     let rank = `${plant.Rank}`;
     let originalRank = `${plant.originalRank}`
     let rankTime = `${plant.timeToLevel > 3600 ? helper.secondsToString(plant.timeToLevel) : helper.secondsToStringWithS(plant.timeToLevel)}`;
-    let futureMult = `(${helper.roundTwoDecimal(useFutureValues ? plant.futureMult * (customMultipliers[index]) : plant.currMult * (customMultipliers[index]))})`;
     let totalProd = !fake ? `${plant.production.toExponential(2)}` : ``;
-
-    if (useFutureValues) {
-        futureMult = `${customMultipliers[index]}` + futureMult;
-    }
 
     if (fake) {
         plantTitle = `Plant`;
@@ -58,7 +62,6 @@ const FarmingPlant = ({ data }) => {
         picTime = useFutureValues ? `Time to next PIC + 'Hours to calculate'` : ``;
         rank = `Rank`;
         rankTime = `Time to Rank`;
-        futureMult = `'Custom Weight' (Base Mult. * 'Custom Weight')`;
     }
 
 
@@ -229,92 +232,6 @@ const FarmingPlant = ({ data }) => {
 
                 </div>
             </div>
-
-            {/* Weight */}
-            {/* <div style={{ fontSize: '12px', marginTop: '0px', height: '12px', padding: '0 1px 0 1px', color: 'black', bottom: fake ? '7%' : '7%', left: '1%', display: 'flex', position: 'absolute' }}>
-                <div style={{
-                    display: 'flex',
-                    alignItems: fake ? '' : 'center',
-                    fontSize: '12px', fontFamily: 'sans-serif'
-                }}>
-                    <MouseOverPopover tooltip={
-                        <div>
-                            <div>Used to give more weight to this plant for the (Total Mult Additive) and `Weighted Mult Increase`</div>
-                        </div>
-                    }>
-                        <div style={{ width: fake ? '66px' : '' }}>{`Weight: x`}</div>
-                    </MouseOverPopover>
-
-
-                    {allowSetMultipliers && (<input id='prepFormInput'
-                        style={{
-                            width: fake ? '128px' : '48px',
-                            height: '10px',
-                            display: 'flex',
-                            alignContent: 'center'
-                            // , WebkitAppearance: 'none' 
-                        }}
-                        step={`0.01`}
-                        type='number'
-                        className='prepNumber'
-                        value={customMultipliers[index]}
-                        onChange={
-                            (e) => {
-                                try {
-                                    let x = Number(e.target.value);
-                                    // x = Math.floor(x);
-                                    if (x < 0.0001 || x > 99999999) {
-                                        return;
-                                    }
-                                    let newArr = [...customMultipliers];
-                                    newArr[index] = x;
-
-                                    ReactGA.event({
-                                        category: "farming_interaction",
-                                        action: `changed_plant_${index}_weight`,
-                                        label: `${x}`,
-                                        value: x
-                                    })
-                                    setCustomMultipliers(newArr);
-
-                                }
-                                catch (err) {
-                                    console.log(err);
-                                }
-                                // console.log(`pressed: ${e.target.value}`)
-
-                            }}
-                        placeholder={customMultipliers[index] + ''}
-                        min="0.0001"
-                        max="99999999"
-                    />)}
-
-
-                    <MouseOverPopover tooltip={
-                        <div>
-                            <div>Used to give more weight to this plant for the (Total Mult Additive) and `Weighted Mult Increase`</div>
-                        </div>
-                    }>
-                        {!fake && (
-                            <div style={{ width: fake ? '164px' : '' }}>
-                                {futureMult}
-                            </div>
-                        )}
-                        {fake && (
-                            <div style={{ display: 'flex', width: '390px' }}>
-
-                                <div style={{ border: '1px solid black', marginRight: '6px' }}>
-                                    Custom Weight
-                                </div>
-                                <div>
-                                    (Base Mult. * 'Custom Weight')
-                                </div>
-                            </div>
-                        )}
-                    </MouseOverPopover>
-
-                </div>
-            </div> */}
 
             {/* Num Auto */}
             {!fake && useFutureValues && (

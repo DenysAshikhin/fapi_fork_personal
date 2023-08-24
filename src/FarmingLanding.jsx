@@ -3,6 +3,7 @@ import MouseOverPopover from "./tooltip";
 import FarmingPlant from './FarmPlant';
 import helper from "./util/helper.js";
 import farmingHelper from "./util/farmingHelper.js";
+import mathHelper from './util/math.js';
 import './FarmingLanding.css';
 import ReactGA from "react-ga4";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Label } from 'recharts';
@@ -92,6 +93,7 @@ function splitArrayIndices(arr, x) {
     return indices;
 }
 
+
 const FarmingLanding = ({ data }) => {
 
     const [customMultipliers, setCustomMultipliers] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]);
@@ -104,6 +106,7 @@ const FarmingLanding = ({ data }) => {
     const farmCalcStarted = useRef({});
     const farmTotals = useRef([]);
     const [numThreads, setNumThreads] = useState(8);
+    const [yScale, setYScale] = useState('auto');
 
     const [numSimulatedAutos, setNumSimulatedAutos] = useState(data.FarmingShopAutoPlotBought);
 
@@ -240,7 +243,9 @@ const FarmingLanding = ({ data }) => {
     //data.FarmingShopUniqueHealthy -> each index is a multiplier of x(1 + arr[i])
 
     let currentHPBonus = helper.calcPOW(data.HealthyPotatoBonus);
-    let calcedBonus = farmingHelper.calcHPBonus(data);
+    let tempCalcBonus = mathHelper.createDecimal(data.HealthyPotatoBonus);
+    // let calcedBonus = farmingHelper.calcHPBonus(data);
+    let calcedBonus = mathHelper.createDecimal(data.HealthyPotatoBonus);
     let currHP = helper.calcPOW(data.HealthyPotatoCurrent);
     let totalHP = helper.calcPOW(data.HealthyPotatoTotal);
 
@@ -251,8 +256,7 @@ const FarmingLanding = ({ data }) => {
 
     let shopGrowingSpeed = data.FarmingShopPlantGrowingSpeed;
     let manualHarvestFormula = data.FarmingShopPlantManualHarvestFormula;
-    let shopProdBonus = Math.pow(1.25, data.FarmingShopPlantTotalProduction);
-    let shopProdLevel = data.FarmingShopPlantTotalProduction;
+    // let shopProdBonus = Math.pow(1.25, data.FarmingShopPlantTotalProduction);
     let shopRankEXP = 1 + data.FarmingShopPlantRankExpEarned * 0.1;
     let shopRankLevel = data.FarmingShopPlantRankExpEarned;
     let picPlants = data.FarmingShopPlantImprovement;
@@ -294,21 +298,22 @@ const FarmingLanding = ({ data }) => {
             contagionPlantGrowth: contagionPlantGrowth,
             soulPlantEXP: soulPlantEXP,
             assemblyPlantExp: assemblyPlantExp,
-            shopProdBonus: shopProdBonus,
-            shopProdLevel: shopProdLevel,
+
+            shopProdBonus: mathHelper.pow(1.25, data.FarmingShopPlantTotalProduction),
+            shopProdLevel: data.FarmingShopPlantTotalProduction,
             contagionPlantProd: contagionPlantProd,
-            hpBonus: calcedBonus,
+            hpBonus: mathHelper.createDecimal(data.HealthyPotatoBonus),
             nextCosts: nextCosts,
-            curPotatoes: currHP,
-            totalPotatoes: totalHP,
+            curPotatoes: mathHelper.createDecimal(data.HealthyPotatoCurrent),
+            totalPotatoes: mathHelper.createDecimal(data.HealthyPotatoTotal),
             expBonus: shopRankEXP * soulPlantEXP * contagionPlantEXP * assemblyPlantExp,
             autoBuyPBC: autoBuyPBC,
             tickRate: Math.floor((futureTime * secondsHour) * 0.0015) < 1 ? 1 : Math.floor((futureTime * secondsHour) * 0.0015),
         }
     }, [
         shopGrowingSpeed, manualHarvestFormula, contagionHarvest, shopRankEXP, shopRankLevel, picPlants, Number(petPlantCombo),
-        contagionPlantEXP, contagionPlantGrowth, soulPlantEXP, assemblyPlantExp, shopProdBonus, shopProdBonus, shopProdLevel,
-        contagionPlantProd, calcedBonus, nextCosts.expCost, nextCosts.growthCost, nextCosts.prodCost, currHP, totalHP, autoBuyPBC, futureTime
+        contagionPlantEXP, contagionPlantGrowth, soulPlantEXP, assemblyPlantExp, contagionPlantProd, data,
+        nextCosts.expCost, nextCosts.growthCost, nextCosts.prodCost, currHP, totalHP, autoBuyPBC, futureTime
     ])
 
     const finalPlants = useMemo(() => {
@@ -325,47 +330,151 @@ const FarmingLanding = ({ data }) => {
             if (plant.growthTime < 10) {
                 plant.growthTime = 10;
             }
-            plant.created = plant.ManuallyCreated.mantissa * (Math.pow(10, plant.ManuallyCreated.exponent));
-            plant.totalMade = plant.TotalCreated.mantissa * (Math.pow(10, plant.TotalCreated.exponent));
-
-            plant.perHarvest = helper.roundInt((1 + plant.Rank) * Math.pow(1.05, plant.Rank)) * Math.pow(1.02, plant.prestige);
+          
+                plant.created = mathHelper.createDecimal(plant.ManuallyCreated);
+                plant.totalMade = mathHelper.createDecimal(plant.TotalCreated);
+           
             plant.perHarvest = farmingHelper.calcPlantHarvest(plant, modifiers);
             plant.curExp = plant.CurrentExp.mantissa * (Math.pow(10, plant.CurrentExp.exponent));
             plant.reqExp = plant.ExpNeeded.mantissa * (Math.pow(10, plant.ExpNeeded.exponent));
             //plant.timeToLevel = (plant.reqExp - plant.curExp) / plant.perHarvest * plant.growthTime;
-            plant.timeToLevel = farmingHelper.calcTimeTillLevel(plant, { ...modifiers, numAuto: plantAutos[i] }).timeToLevel;
-            plant.currMult = Math.pow((1 + 0.05 * (1 + manualHarvestFormula * 0.02)), helper.calculateLogarithm(1.25, plant.created));
 
+            let prod = farmingHelper.calcProdOutput(plant, modifiers);
+            plant.production = prod;
+            plant.futureMult =farmingHelper.futureMultBD(plant, modifiers);
+            plant.timeToLevel = farmingHelper.calcTimeTillLevel(plant, { ...modifiers, numAuto: plantAutos[i] }).timeToLevel;
 
             if (plant.timeToLevel <= timeTillNextLevel) {
                 timeTillNextLevel = plant.timeToLevel;
             }
-            let prod = farmingHelper.calcProdOutput(plant, modifiers);
-            plant.production = prod;
+
             plant.elapsedTime = 0;
             plant.originalRank = plant.Rank;
-
             tempArr.push(plant);
         }
         return tempArr;
     }, [modifiers, plantAutos, shopGrowingSpeed, petPlantCombo, contagionPlantGrowth])
 
 
-    const [customLines, setCustomLines] = useState([]);
     const [calcDone, setCalcDone] = useState(true);
-
+    const [expDiff, setExpDiff] = useState(0);
 
     let tempFuture = useMemo(() => {
         console.log(`calcing`);
         let result = farmingHelper.calcHPProd(finalPlants, { ...modifiers, time: secondsHour * futureTime, numAutos: plantAutos });
-
         for (let i = 0; i < result.dataPointsPotatoes.length; i++) {
-            result.dataPointsPotatoes[i].time = helper.roundInt(result.dataPointsPotatoes[i].time)
+            let cur = result.dataPointsPotatoes[i];
+            cur.time = helper.roundInt(cur.time);
+            cur.originalProduction = mathHelper.createDecimal(cur.production.toString());
         }
 
         return result;
     },
         [finalPlants, modifiers, futureTime, plantAutos, secondsHour]);
+
+    //Go through all datapoints, find highest exp, and reduce it for all equally if necessary so JS doesn't break
+    const graphObjects = useMemo(() => {
+        console.log(`updating EXPDIFF`);
+
+        const maxExp = 300;
+        let currMaxExp = 0;
+        let diff_exp = 0;
+
+        // Go over all the custom input data points first
+        for (let i = 0; i < tempFuture.dataPointsPotatoes.length; i++) {
+            let cur = tempFuture.dataPointsPotatoes[i];
+            if (cur.originalProduction.exponent > currMaxExp) {
+                currMaxExp = cur.originalProduction.exponent;
+            }
+        }
+
+        if (bestPlantCombo.top10DataPointsPotatoes) {
+            // Go over all the top 1 results
+            for (let i = 0; i < bestPlantCombo.top10DataPointsPotatoes.length; i++) {
+                if (i > 0) break;
+                let cur = bestPlantCombo.top10DataPointsPotatoes[i];
+                for (let j = 0; j < cur.data.length; j++) {
+                    let cur_iner = cur.data[j];
+                    if (cur_iner.originalProduction.exponent > currMaxExp) {
+                        currMaxExp = cur_iner.originalProduction.exponent;
+                    }
+                }
+            }
+
+            // go over the best PIC
+
+            // go over the best PIC %
+        }
+
+
+        // if (currMaxExp > maxExp) {
+        diff_exp = currMaxExp > maxExp ? currMaxExp - maxExp : 0;
+
+        // Reduce all the exponents for custom input first
+        for (let i = 0; i < tempFuture.dataPointsPotatoes.length; i++) {
+            let cur = tempFuture.dataPointsPotatoes[i];
+            cur.production = mathHelper.createDecimal(cur.originalProduction.toString());
+            cur.production.exponent -= diff_exp;
+            cur.production = cur.production.toNumber();
+        }
+
+        // Go over all the top 1 results
+        if (bestPlantCombo.top10DataPointsPotatoes) {
+            // Go over all the top 1 results
+            for (let i = 0; i < bestPlantCombo.top10DataPointsPotatoes.length; i++) {
+                if (i > 0) break;
+                let cur = bestPlantCombo.top10DataPointsPotatoes[i];
+                for (let j = 0; j < cur.data.length; j++) {
+                    let cur_iner = cur.data[j];
+                    cur_iner.production = mathHelper.createDecimal(cur_iner.originalProduction.toString());
+                    cur_iner.production.exponent -= diff_exp;
+                    cur_iner.production = cur_iner.production.toNumber();
+                }
+            }
+
+            // go over the best PIC
+
+            // go over the best PIC %
+        }
+        // }
+
+        // for (let i = 0; i < tempFuture.dataPointsPotatoes.length; i++) {
+        //     let cur = tempFuture.dataPointsPotatoes[i];
+        //     cur.production = cur.production.toNumber();
+        // }
+
+
+        // if (bestPlantCombo.top10DataPointsPotatoes) {
+        //     // Go over all the top 1 results
+        //     for (let i = 0; i < bestPlantCombo.top10DataPointsPotatoes.length; i++) {
+        //         if (i > 0) break;
+        //         let cur = bestPlantCombo.top10DataPointsPotatoes[i];
+        //         for (let j = 0; j < cur.data.length; j++) {
+        //             let cur_iner = cur.data[j];
+        //             cur_iner.production = cur_iner.production.toNumber();
+        //         }
+        //     }
+
+        //     // go over the best PIC
+
+        //     // go over the best PIC %
+        // }
+
+
+        if (expDiff !== diff_exp) {
+            setExpDiff(diff_exp);
+        }
+
+        return {
+            customProduction: tempFuture,
+            top10Potatoes: bestPlantCombo.top10DataPointsPotatoes
+        }
+
+    }, [tempFuture, expDiff, bestPlantCombo])
+
+
+
+
     let customFuturePlants = [];
     let futurePlants = [];
     for (let i = 0; i < tempFuture.plants.length; i++) {
@@ -401,10 +510,10 @@ const FarmingLanding = ({ data }) => {
                 })
                 console.log(`ready to find best`);
 
-                let bestProd = { prod: 0 };
-                let bestPot = { pot: 0 };
-                let bestPic = { pic: 0, prod: 0 }
-                let bestPicPerc = { pic: 0, prod: 0 }
+                let bestProd = { prod: mathHelper.createDecimal(0) };
+                let bestPot = { pot: mathHelper.createDecimal(0) };
+                let bestPic = { pic: 0, prod: mathHelper.createDecimal(0) }
+                let bestPicPerc = { pic: 0, prod: mathHelper.createDecimal(0) }
 
                 let top10DataPointsPotatoes = [];
                 let top10DataPointsFries = [];
@@ -413,17 +522,57 @@ const FarmingLanding = ({ data }) => {
                     let cur = farmTotals.current[i];
 
 
-
                     if (!cur.totalPotCombo.result) {
                         continue;
                     }
+
+
+                    //Have to reset potatoe values again
+                    cur.bestPicCombo.potatoeProduction = cur.bestPicCombo.potatoeProduction ? mathHelper.createDecimal(cur.bestPicCombo.potatoeProduction) : cur.bestPicCombo.potatoeProduction;
+                    cur.bestPicCombo.result.potatoeProduction = cur.bestPicCombo.result.potatoeProduction ? mathHelper.createDecimal(cur.bestPicCombo.result.potatoeProduction) : cur.bestPicCombo.result.potatoeProduction;
+                    cur.bestPicCombo.result.totalPotatoes = cur.bestPicCombo.result.totalPotatoes ? mathHelper.createDecimal(cur.bestPicCombo.result.totalPotatoes) : cur.bestPicCombo.result.totalPotatoes;
+                    cur.bestPICPercCombo.potatoeProduction = cur.bestPICPercCombo.potatoeProduction ? mathHelper.createDecimal(cur.bestPICPercCombo.potatoeProduction) : cur.bestPICPercCombo.potatoeProduction;
+                    cur.bestPICPercCombo.result.potatoeProduction = cur.bestPICPercCombo.result.potatoeProduction ? mathHelper.createDecimal(cur.bestPICPercCombo.result.potatoeProduction) : cur.bestPICPercCombo.result.potatoeProduction;
+                    cur.bestPICPercCombo.result.totalPotatoes = cur.bestPICPercCombo.result.totalPotatoes ? mathHelper.createDecimal(cur.bestPICPercCombo.result.totalPotatoes) : cur.bestPICPercCombo.result.totalPotatoes;
+                    cur.bestProdCombo.result.potatoeProduction = cur.bestProdCombo.result.potatoeProduction ? mathHelper.createDecimal(cur.bestProdCombo.result.potatoeProduction) : cur.bestProdCombo.result.potatoeProduction;
+                    cur.bestProdCombo.result.totalPotatoes = cur.bestProdCombo.result.totalPotatoes ? mathHelper.createDecimal(cur.bestProdCombo.result.totalPotatoes) : cur.bestProdCombo.result.totalPotatoes;
+                    cur.totalPotCombo.result.totalPotatoes = cur.totalPotCombo.result.totalPotatoes ? mathHelper.createDecimal(cur.totalPotCombo.result.totalPotatoes) : cur.totalPotCombo.result.totalPotatoes;
+                    cur.totalPotCombo.result.potatoeProduction = cur.totalPotCombo.result.potatoeProduction ? mathHelper.createDecimal(cur.totalPotCombo.result.potatoeProduction) : cur.totalPotCombo.result.potatoeProduction;
+
+
+
+                    for (let j = 0; j < cur.top10DataPointsPotatoes.length; j++) {
+
+                        let cur_top = cur.top10DataPointsPotatoes[j];
+                        cur_top.result = mathHelper.createDecimal(cur_top.result);
+
+                        for (let k = 0; k < cur_top.data.length; k++) {
+                            let cur_data = cur_top.data[k];
+                            cur_data.production = mathHelper.createDecimal(cur_data.production);
+                            cur_data.time = helper.roundInt(cur_data.time);
+                        }
+                    }
+
+                    for (let j = 0; j < cur.top10DataPointsFries.length; j++) {
+
+                        let cur_top = cur.top10DataPointsFries[j];
+                        cur_top.result = mathHelper.createDecimal(cur_top.result);
+
+                        for (let k = 0; k < cur_top.data.length; k++) {
+                            let cur_data = cur_top.data[k];
+                            cur_data.fries = mathHelper.createDecimal(cur_data.fries);
+                            cur_data.time = helper.roundInt(cur_data.time);
+                        }
+                    }
+
+
                     top10DataPointsPotatoes.push(...cur.top10DataPointsPotatoes);
                     top10DataPointsFries.push(...cur.top10DataPointsFries);
                     if (cur.bestPicCombo.picGain > bestPic.pic) {
                         bestPic = { pic: cur.bestPicCombo.picGain, result: cur.bestPicCombo, prod: cur.bestPicCombo.potatoeProduction }
                     }
                     else if (cur.bestPicCombo.picGain === bestPic.pic) {
-                        if (cur.bestPicCombo.potatoeProduction > bestPic.prod) {
+                        if (cur.bestPicCombo.potatoeProduction.greaterThan(bestPic.prod)) {
                             bestPic = { pic: cur.bestPicCombo.picGain, result: cur.bestPicCombo, prod: cur.bestPicCombo.potatoeProduction }
                         }
                     }
@@ -432,17 +581,17 @@ const FarmingLanding = ({ data }) => {
                         bestPicPerc = { pic: cur.bestPICPercCombo.picGain, result: cur.bestPICPercCombo, prod: cur.bestPICPercCombo.potatoeProduction }
                     }
                     else if (cur.bestPICPercCombo.picGain === bestPicPerc.pic) {
-                        if (cur.bestPICPercCombo.potatoeProduction > bestPicPerc.prod) {
+                        if (cur.bestPICPercCombo.potatoeProduction.greaterThan(bestPicPerc.prod)) {
                             bestPicPerc = { pic: cur.bestPICPercCombo.picGain, result: cur.bestPICPercCombo, prod: cur.bestPICPercCombo.potatoeProduction }
                         }
                     }
 
 
-                    if (cur.bestProdCombo.result.potatoeProduction > bestProd.prod) {
+                    if (cur.bestProdCombo.result.potatoeProduction.greaterThan(bestProd.prod)) {
                         bestProd = { prod: cur.bestProdCombo.result.potatoeProduction, result: cur.bestProdCombo }
 
                     }
-                    if (cur.totalPotCombo.result.totalPotatoes > bestPot.pot) {
+                    if (cur.totalPotCombo.result.totalPotatoes.greaterThan(bestPot.pot)) {
                         bestPot = { pot: cur.totalPotCombo.result.totalPotatoes, result: cur.totalPotCombo }
                     }
 
@@ -452,22 +601,45 @@ const FarmingLanding = ({ data }) => {
 
                 }
 
-                top10DataPointsPotatoes = top10DataPointsPotatoes.sort((a, b) => b.result - a.result).slice(0, 10);
-                top10DataPointsFries = top10DataPointsFries.sort((a, b) => b.result - a.result).slice(0, 10);
+                top10DataPointsPotatoes = top10DataPointsPotatoes.sort((a, b) => b.result.compare(a.result)).slice(0, 10);
+                top10DataPointsFries = top10DataPointsFries.sort((a, b) => b.result.compare(a.result)).slice(0, 10);
+                // top10DataPointsFries =[]
 
 
                 for (let i = 0; i < top10DataPointsPotatoes.length; i++) {
 
                     let cur = top10DataPointsPotatoes[i];
                     for (let j = 0; j < cur.data.length; j++) {
-                        cur.data[j].time = helper.roundInt(cur.data[j].time)
+                        cur.data[j].time = helper.roundInt(cur.data[j].time);
+                        cur.data[j].originalProduction = mathHelper.createDecimal(cur.data[j].production.toString());
                     }
                 }
 
                 if (bestProd.result) {
-                    bestProd.finalFry = farmingHelper.calcFryOutput(bestProd.result.result.totalPotatoes)
-                    bestPic.finalFry = farmingHelper.calcFryOutput(bestPic.result.result.totalPotatoes)
-                    bestPicPerc.finalFry = farmingHelper.calcFryOutput(bestPicPerc.result.result.totalPotatoes)
+                    bestProd.finalFry = farmingHelper.calcFryOutput(bestProd.result.result.totalPotatoes);
+                    bestPot.finalFry = farmingHelper.calcFryOutput(bestPot.result.result.totalPotatoes);
+                    bestPic.finalFry = farmingHelper.calcFryOutput(bestPic.result.result.totalPotatoes);
+                    bestPicPerc.finalFry = farmingHelper.calcFryOutput(bestPicPerc.result.result.totalPotatoes);
+
+                    for (let i = 0; i < bestPic.result.plants.length; i++) {
+
+                        bestPic.result.plants[i].created = mathHelper.createDecimal(`${bestPic.result.plants[i].created.mantissa}e${bestPic.result.plants[i].created.exponent}`);
+                        bestPic.result.plants[i].totalMade = mathHelper.createDecimal(`${bestPic.result.plants[i].totalMade.mantissa}e${bestPic.result.plants[i].totalMade.exponent}`);
+                        bestPic.result.plants[i].production = mathHelper.createDecimal(`${bestPic.result.plants[i].production.mantissa}e${bestPic.result.plants[i].production.exponent}`);
+
+                        bestPicPerc.result.plants[i].created = mathHelper.createDecimal(`${bestPicPerc.result.plants[i].created.mantissa}e${bestPicPerc.result.plants[i].created.exponent}`);
+                        bestPicPerc.result.plants[i].totalMade = mathHelper.createDecimal(`${bestPicPerc.result.plants[i].totalMade.mantissa}e${bestPicPerc.result.plants[i].totalMade.exponent}`);
+                        bestPicPerc.result.plants[i].production = mathHelper.createDecimal(`${bestPicPerc.result.plants[i].production.mantissa}e${bestPicPerc.result.plants[i].production.exponent}`);
+
+                        bestProd.result.plants[i].created = mathHelper.createDecimal(`${bestProd.result.plants[i].created.mantissa}e${bestProd.result.plants[i].created.exponent}`);
+                        bestProd.result.plants[i].totalMade = mathHelper.createDecimal(`${bestProd.result.plants[i].totalMade.mantissa}e${bestProd.result.plants[i].totalMade.exponent}`);
+                        bestProd.result.plants[i].production = mathHelper.createDecimal(`${bestProd.result.plants[i].production.mantissa}e${bestProd.result.plants[i].production.exponent}`);
+
+                        bestPot.result.plants[i].created = mathHelper.createDecimal(`${bestPot.result.plants[i].created.mantissa}e${bestPot.result.plants[i].created.exponent}`);
+                        bestPot.result.plants[i].totalMade = mathHelper.createDecimal(`${bestPot.result.plants[i].totalMade.mantissa}e${bestPot.result.plants[i].totalMade.exponent}`);
+                        bestPot.result.plants[i].production = mathHelper.createDecimal(`${bestPot.result.plants[i].production.mantissa}e${bestPot.result.plants[i].production.exponent}`);
+                    }
+
 
                     let finalBests = {
                         bestProd: bestProd,
@@ -710,6 +882,7 @@ const FarmingLanding = ({ data }) => {
 
     return (
         <div style={{ height: '100%', display: 'flex', flex: 1, flexDirection: 'column' }}>
+
             {/* <div style={{ display: 'flex', height: '148px' }}> */}
             {/* <div style={{ minWidth: '256px' }}>
                     <div>Shop Growing Speed: x{helper.roundTwoDecimal(Math.pow(1.05, shopGrowingSpeed))}</div>
@@ -930,7 +1103,7 @@ const FarmingLanding = ({ data }) => {
                         />
                     </div>
 
-                    {/* Hours to calc */}
+                    {/* Max autos */}
                     <div style={{ display: 'flex', alignItems: 'center', marginLeft: '12px' }}>
                         <MouseOverPopover tooltip={
                             <div>
@@ -985,7 +1158,7 @@ const FarmingLanding = ({ data }) => {
                             ReactGA.event({
                                 category: "farming_interaction",
                                 action: `max_auto`,
-                                label:`max_auto`,
+                                label: `max_auto`,
                             })
                         }}>Max Autos</button>
                     </div>
@@ -997,7 +1170,7 @@ const FarmingLanding = ({ data }) => {
                             ReactGA.event({
                                 category: "farming_interaction",
                                 action: `clear_auto`,
-                                label:`clear_auto`,
+                                label: `clear_auto`,
                             })
                         }}>Clear Autos</button>
                     </div>
@@ -1143,6 +1316,19 @@ const FarmingLanding = ({ data }) => {
                                         checked={!!lockCustomAuto}
                                         value={!!lockCustomAuto}
                                     />
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', }}>
+                                    <div style={{ marginRight: '6px' }}>
+                                        Y-Axis Scale
+                                    </div>
+                                    <button
+                                        onClick={(e) => {
+                                            setYScale(yScale === 'auto' ? `log` : 'auto')
+                                        }}
+                                    >
+                                        {yScale === 'auto' ? `Log` : 'Default'}
+                                    </button>
+
                                 </div>
                             </div>
 
@@ -1399,9 +1585,9 @@ const FarmingLanding = ({ data }) => {
                                 </div>
                             </div>
                         </div >
-
-
                     </div>
+
+
                     <div style={{
                         width: 'calc(100% - 655px)',
 
@@ -1436,7 +1622,10 @@ const FarmingLanding = ({ data }) => {
                                                             Most PIC (+{`${bestPlantCombo.bestPic.result.picStats.picLevel} -> ${helper.roundTwoDecimal(bestPlantCombo.bestPic.result.picStats.picPercent * 100)}%`})
                                                         </div>
                                                         <div>
-                                                            {` ${helper.roundTwoDecimal(bestPlantCombo.bestPic.finalFry / bestPlantCombo.bestProd.finalFry * 100)}% Fries`}
+                                                            {` ${helper.roundTwoDecimal(
+                                                                mathHelper.divideDecimal(bestPlantCombo.bestPic.finalFry, bestPlantCombo.bestProd.finalFry).toNumber()
+                                                                * 100)
+                                                                }% Fries`}
                                                         </div>
                                                     </div>
                                                     <div className='futurePicExplanation'>
@@ -1512,7 +1701,10 @@ const FarmingLanding = ({ data }) => {
                                                                 (+{`${bestPlantCombo.bestPicPerc.result.picStats.picLevel} -> ${helper.roundTwoDecimal(bestPlantCombo.bestPicPerc.result.picStats.picPercent * 100)}%`})
                                                             </div>
                                                             <div>
-                                                                {` ${helper.roundTwoDecimal(bestPlantCombo.bestPicPerc.finalFry / bestPlantCombo.bestProd.finalFry * 100)}% Fries`}
+                                                                {` ${helper.roundTwoDecimal(
+                                                                    mathHelper.divideDecimal(bestPlantCombo.bestPicPerc.finalFry, bestPlantCombo.bestProd.finalFry).toNumber()
+                                                                    * 100)
+                                                                    }% Fries`}
                                                             </div>
                                                         </div>
                                                         <div className='futurePicExplanation'>
@@ -1607,7 +1799,10 @@ const FarmingLanding = ({ data }) => {
                                                                 Most PIC (+{`${bestPlantCombo.bestPic.result.picStats.picLevel} -> ${helper.roundTwoDecimal(bestPlantCombo.bestPic.result.picStats.picPercent * 100)}%`})
                                                             </div>
                                                             <div>
-                                                                {`${helper.roundTwoDecimal(bestPlantCombo.bestPic.finalFry / bestPlantCombo.bestProd.finalFry * 100)}% Fries`}:
+                                                                {` ${helper.roundTwoDecimal(
+                                                                    mathHelper.divideDecimal(bestPlantCombo.bestPic.finalFry, bestPlantCombo.bestProd.finalFry).toNumber()
+                                                                    * 100)
+                                                                    }% Fries`}:
                                                             </div>
                                                         </div>
 
@@ -1690,7 +1885,10 @@ const FarmingLanding = ({ data }) => {
                                                                 Most PIC % (+{`${bestPlantCombo.bestPicPerc.result.picStats.picLevel} -> ${helper.roundTwoDecimal(bestPlantCombo.bestPicPerc.result.picStats.picPercent * 100)}%`})
                                                             </div>
                                                             <div>
-                                                                {`${helper.roundTwoDecimal(bestPlantCombo.bestPicPerc.finalFry / bestPlantCombo.bestProd.finalFry * 100)}% Fries`}:
+                                                                {` ${helper.roundTwoDecimal(
+                                                                    mathHelper.divideDecimal(bestPlantCombo.bestPicPerc.finalFry, bestPlantCombo.bestProd.finalFry).toNumber()
+                                                                    * 100)
+                                                                    }% Fries`}:
                                                             </div>
                                                         </div>
                                                         <div className='futurePicExplanation'>
@@ -1784,12 +1982,6 @@ const FarmingLanding = ({ data }) => {
                             position: 'relative',
                             minHeight: '400px',
                             width: '100%'
-                            // minHeight: '-webkit-fill-available',
-                            // height: '-webkit-fill-available'
-                            // height: '100%'
-                            // display: 'flex', flex: '1', flexDirection: 'column', height: '-webkit-fill-available'
-                            //  minHeight: '600px',
-                            //   minWidth: '600px' 
                         }}>
 
 
@@ -1800,16 +1992,8 @@ const FarmingLanding = ({ data }) => {
                                 position: 'absolute',
                                 height: '99%',
                                 width: '100%'
-                                // height: '100%',
-                                // height: '-webkit-fill-available',
-                                // background: 'gray'
-                                // display: 'flex', marginTop: '6px', alignItems: 'center',
-                                // minHeight: '600px'
-
                             }}>
-                                <ResponsiveContainer width="100%" height="100%"
-                                //  minHeight="400px"
-                                >
+                                <ResponsiveContainer width="100%" height="100%"  >
                                     <LineChart
                                         margin={{
                                             top: 5,
@@ -1817,7 +2001,6 @@ const FarmingLanding = ({ data }) => {
                                             left: 20,
                                             bottom: 5,
                                         }}
-                                    // data={dataList}
                                     >
                                         <CartesianGrid strokeDasharray="3 3" />
                                         <XAxis
@@ -1825,17 +2008,23 @@ const FarmingLanding = ({ data }) => {
                                             xAxisId="mainTime"
                                             name="time in seconds"
                                             tickFormatter={(e, index) => {
-
-                                                console.log(e);
-                                                console.log(index);
                                                 return (helper.secondsToString(e));
                                             }}
                                             minTickGap={7}
                                         />
 
-                                        <YAxis yAxisId="potatoes"
-                                            width={78}
+                                        <YAxis
+                                            yAxisId="potatoes"
+                                            scale={yScale}
+                                            domain={['auto', 'auto']}
+                                            tickFormatter={(e, index, payload) => {
+                                                let temp = mathHelper.createDecimal(e);
+                                                temp.exponent += expDiff;
+                                                return temp.toPrecision(3).toString();
+                                            }}
+                                            width={95}
                                         >
+
                                             <Label
                                                 value="Total HP Made"
                                                 position="insideLeft"
@@ -1847,7 +2036,7 @@ const FarmingLanding = ({ data }) => {
                                         {/*<YAxis yAxisId="fries" orientation="right" />*/}
                                         <Tooltip
                                             formatter={(value, name, props) => {
-                                                return [value.toExponential(2), name];
+                                                return [props.payload.originalProduction.toPrecision(3).toString(), name];
                                             }}
                                             labelFormatter={(label, payload) => {
                                                 return helper.secondsToString(label);
@@ -1881,7 +2070,7 @@ const FarmingLanding = ({ data }) => {
 
                                                 {/* {calcStep && ( */}
                                                 <>
-                                                    {bestPlantCombo.bestPic.pic > 0 && (
+                                                    {bestPlantCombo.bestPic.pic > 0 && false && (
                                                         <>
                                                             <XAxis dataKey="time" hide={true} xAxisId={"bestPIC"} name="time in seconds" />
                                                             <Line
@@ -1898,7 +2087,7 @@ const FarmingLanding = ({ data }) => {
                                                             />
                                                         </>
                                                     )}
-                                                    {displayPicPerc && (
+                                                    {displayPicPerc && false && (
                                                         <>
                                                             <XAxis dataKey="time" hide={true} xAxisId={"bestPICPerc"} name="time in seconds" />
                                                             <Line
@@ -1919,13 +2108,13 @@ const FarmingLanding = ({ data }) => {
                                                 </>
                                                 {/* )} */}
 
-                                                {bestPlantCombo.top10DataPointsPotatoes.map((val, index) => {
+                                                {graphObjects.top10Potatoes.map((val, index) => {
                                                     if (index > 0) return;
                                                     return (<XAxis dataKey="time" hide={true} xAxisId={"potatoXAxis" + index} name="time in seconds" />)
                                                 })
                                                 }
 
-                                                {bestPlantCombo.top10DataPointsPotatoes.map((val, index) => {
+                                                {graphObjects.top10Potatoes.map((val, index) => {
                                                     if (index > 0) return;
                                                     return (
                                                         <Line
@@ -1950,7 +2139,7 @@ const FarmingLanding = ({ data }) => {
                                             type="monotone"
                                             xAxisId="mainTime"
                                             yAxisId="potatoes"
-                                            data={tempFuture.dataPointsPotatoes}
+                                            data={graphObjects.customProduction.dataPointsPotatoes}
                                             dataKey="production"
                                             // dataKey="custom"
                                             name="Currently selected production"

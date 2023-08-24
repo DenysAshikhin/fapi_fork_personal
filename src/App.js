@@ -1614,7 +1614,9 @@ function App() {
 
     const handleData = (uploadedData) => {
 
-        uploadedData.PetDamageBonuses = uploadedData.PetDamageBonuses > 0 ? uploadedData.PetDamageBonuses : 1;
+        console.log(uploadedData)
+        // uploadedData.PetDamageBonuses = helper.calcPOW(uploadedData.PetDamageBonusesBD);
+        uploadedData.PetDamageBonuses = 1;
 
         setData(uploadedData);
 
@@ -1633,7 +1635,6 @@ function App() {
 
 
         setGroupCache({});
-        console.log(uploadedData)
 
         uploadedData.PetsCollection.sort((a, b) => a.ID - b.ID);
 
