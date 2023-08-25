@@ -44,27 +44,16 @@ var farmingHelper = {
     calcProdOutput: function (plant_input, modifiers_input) {
 
         let TotalCreated = plant_input.totalMade;
-        // let TotalCreated = mathHelper.createDecimal(plant_input.totalMade);
         let ManuallyCreated = plant_input.created;
-        // let ManuallyCreated = mathHelper.createDecimal(plant_input.created);
         let shovel = modifiers_input.manualHarvestFormula;
         let shopProdBonus = modifiers_input.shopProdBonus;
         //note bigsad = -1 -> need to take into account assumbly in the future
         const assemblyBonus = 1;
         let prestige = plant_input.prestige;
         // GM.PD.PlantTotalProductionBonus = 1 * BigDouble.Pow(1.25, GM.PD.FarmingShopPlantTotalProduction) * GM.ASMA.GetAssemblerBonus(26) * GM.GHLM.GetBonus(3) * Math.Pow(1.01, Math.Max(0, GM.PD.CurrentEventPoint - 75));
-        let PlantTotalProductionBonus2 = shopProdBonus * assemblyBonus * modifiers_input.contagionPlantProd;
         let PlantTotalProductionBonus = mathHelper.multiplyDecimal(mathHelper.multiplyDecimal(shopProdBonus, assemblyBonus), modifiers_input.contagionPlantProd);
 
-        let plantMult2 = Math.pow(
-            (1 + 0.05 * (1 + shovel * 0.02)),
-            helper.calculateLogarithm(1.25, ManuallyCreated)
-        )
-        let plantMult = mathHelper.pow(
-            (1 + 0.05 * (1 + shovel * 0.02)),
-            mathHelper.logDecimal(ManuallyCreated, 1.25)
-        )
-        let output2 = TotalCreated * plantMult * PlantTotalProductionBonus * Math.pow(1.02, prestige);
+        let plantMult = plant_input.futureMult;
 
         let output = mathHelper.multiplyDecimal(
             mathHelper.multiplyDecimal(
@@ -75,7 +64,6 @@ var farmingHelper = {
         )
             ;
         if (plant_input.ID === 1) {
-            output2 *= modifiers_input.hpBonus;
             output = mathHelper.multiplyDecimal(output, modifiers_input.hpBonus);
         }
 
@@ -122,7 +110,9 @@ var farmingHelper = {
 
             leftOver = 0;
         }
-        return { leftOver, numLevels };
+
+        let reqExp = 10 + 5 * (plant.Rank + numLevels) * Math.pow(1.05, plant.Rank + numLevels);
+        return { leftOver, numLevels, reqExp };
     },
     futureMultBD: function (plant, modifiers) {
         return mathHelper.pow(
@@ -146,12 +136,13 @@ var farmingHelper = {
 
         while (remainingTime > 0) {
 
-            plant.timeToLevel = Math.ceil((plant.reqExp - plant.curExp) / expTick) * plant.growthTime;
+            // plant.timeToLevel = Math.ceil((plant.reqExp - plant.curExp) / expTick) * plant.growthTime - plant.elapsedTime;
+            plant.timeToLevel = this.calcTimeTillLevel(plant, modifiers);
 
             let elapsedTime = 0;
 
             let rankIncrease = false;
-            if (plant.timeToLevel >= remainingTime) {
+            if (plant.timeToLevel > remainingTime) {
                 elapsedTime = remainingTime;
             }
             else {
@@ -170,66 +161,39 @@ var farmingHelper = {
                 plant.created = mathHelper.addDecimal(plant.created, toCreate);
                 plant.totalMade = mathHelper.addDecimal(plant.totalMade, toCreate);
 
-                plant.futureMult =this.futureMultBD(plant, modifiers);
+                plant.futureMult = this.futureMultBD(plant, modifiers);
 
                 if (rankIncrease) {
 
                     let leftOver = this.calcCarryOverEXP({ plant, expTick, numAutos });
                     plant.curExp = leftOver.leftOver;
                     plant.Rank += leftOver.numLevels;
-                    // plant.perHarvest = helper.roundInt((1 + plant.Rank) * Math.pow(1.05, plant.Rank)) * Math.pow(1.02, plant.prestige);
                     plant.perHarvest = this.calcPlantHarvest(plant, modifiers);
-                    plant.reqExp = 10 + 5 * plant.Rank * Math.pow(1.05, plant.Rank);
+                    // plant.reqExp = 10 + 5 * plant.Rank * Math.pow(1.05, plant.Rank);
+                    plant.reqExp = leftOver.reqExp;
                 }
                 else {
                     let gainedEXP = numHarvests * expTick;
-                    // plant.curExp += gainedEXP;
                     let totalExp = plant.curExp + gainedEXP;
-
-                    if (totalExp > plant.reqExp) {
-                        let leftOver = this.calcCarryOverEXP({ plant, expTick, numAutos });
-                        plant.curExp = leftOver.leftOver;
-                        plant.Rank += leftOver.numLevels;
-                        // plant.perHarvest = helper.roundInt((1 + plant.Rank) * Math.pow(1.05, plant.Rank)) * Math.pow(1.02, plant.prestige);
-                        plant.perHarvest = this.calcPlantHarvest(plant, modifiers);
-                        plant.reqExp = 10 + 5 * plant.Rank * Math.pow(1.05, plant.Rank);
-                    }
-                    else {
-                        plant.curExp = totalExp;
-                    }
+                    plant.curExp = totalExp;
                 }
-
                 plant.elapsedTime = plant.elapsedTime % plant.growthTime;
             }
-            let newOutPut = this.calcProdOutput(plant, modifiers);
-            plant.production = newOutPut;
         }
+        let newOutPut = this.calcProdOutput(plant, modifiers);
+        plant.production = newOutPut;
         return plant;
     },
     calcTimeTillLevel: function (plant_input, modifiers_input) {
-
-        let plant = JSON.parse(JSON.stringify(plant_input));
-        this.resetPlantBD(plant);
-        let modifiers = JSON.parse(JSON.stringify(modifiers_input));
-        this.resetModifiersBD(modifiers);
+        let plant = plant_input;
+        let modifiers = modifiers_input;
         let numAutos = modifiers.numAuto || modifiers?.numAuto === 0 ? modifiers.numAuto : 1;
 
-
-        plant.growthTime = Math.floor(plant.TimeNeeded / plant.prestigeBonus / (1 + 0.05 * modifiers.shopGrowingSpeed) / modifiers.petPlantCombo / modifiers.contagionPlantGrowth);
-        if (plant.growthTime < 10) {
-            plant.growthTime = 10;
-        }
-        plant.reqExp = 10 + 5 * plant.Rank * Math.pow(1.05, plant.Rank);
         let remExp = plant.reqExp - plant.curExp;
         let expBonus = plant.prestigeBonus * modifiers.expBonus * numAutos;
         let ticksTillLevel = Math.ceil((remExp) / expBonus);
 
-        plant.timeToLevel = ticksTillLevel * plant.growthTime;
-
-
-
-        // plant.timeToLevel = (remExp / expBonus) * plant.growthTime;
-        return plant;
+        return ticksTillLevel * plant.growthTime - plant.elapsedTime;
     },
     getNextShopCosts: function (data) {
 
@@ -240,8 +204,6 @@ var farmingHelper = {
         let expCost = 1;
         let expLevel = data.FarmingShopPlantRankExpEarned ? data.FarmingShopPlantRankExpEarned : data.shopRankLevel;
 
-
-        let prodCost1 = 100000000.0 * Math.pow(100 * Math.pow(1.05, prodLevel - 50), prodLevel);
         let temp1 = mathHelper.pow(
             1.05, prodLevel - 50
         );
@@ -281,9 +243,9 @@ var farmingHelper = {
         let prestiged = false;
         let totalTime = 0;
         let runningHarvests = 0;
-
+        let expTick = plant.prestigeBonus * modifiers.expBonus * numAutos;
         while (!prestiged) {
-            let timeToLevel = this.calcTimeTillLevel(plant, modifiers).timeToLevel;
+            let timeToLevel = this.calcTimeTillLevel(plant, modifiers);
             let requiredHarvests = runningHarvests + (10 * Math.pow(2, plant.prestige));
             let remainingHarvests = requiredHarvests - plant.created;
             let timeTillPrestige = Math.ceil((remainingHarvests / (plant.perHarvest * numAutos))) * plant.growthTime;
@@ -305,9 +267,10 @@ var farmingHelper = {
                 plant.created = mathHelper.addDecimal(plant.created, ticks * plant.perHarvest * numAutos);
                 plant.totalMade = mathHelper.addDecimal(plant.totalMade, ticks * plant.perHarvest * numAutos);
 
-
-                plant.Rank++;
-                plant.curExp = 0;
+                let rankRes = this.calcCarryOverEXP({ plant, numAutos, expTick })
+                plant.Rank += rankRes.numLevels;
+                plant.curExp = rankRes.leftOver;
+                plant.reqExp = rankRes.reqExp;
                 plant.perHarvest = this.calcPlantHarvest(plant, modifiers);
                 totalTime += timeToLevel;
                 plant.elapsedTime = plant.elapsedTime % plant.growthTime;
@@ -326,12 +289,12 @@ var farmingHelper = {
         return { remainingTime: totalTime, prestige: plant.prestige, prestiged: prestiged }
     },
     resetPlantBD: function (plant) {
-      
-            plant.totalMade = plant?.totalMade?.mantissa || plant?.totalMade?.mantissa === 0 ? plant.totalMade : mathHelper.createDecimal(plant.totalMade);
-            plant.created = plant?.created?.mantissa || plant?.created?.mantissa === 0 ? plant.created : mathHelper.createDecimal(plant.created);
-            plant.production = plant?.production?.mantissa || plant?.production?.mantissa === 0 ? plant.production : mathHelper.createDecimal(plant.production);
-            plant.futureMult = plant?.futureMult?.mantissa || plant?.futureMult?.mantissa === 0 ? plant.futureMult : mathHelper.createDecimal(plant.futureMult);
-       
+
+        plant.totalMade = plant?.totalMade?.mantissa || plant?.totalMade?.mantissa === 0 ? plant.totalMade : mathHelper.createDecimal(plant.totalMade);
+        plant.created = plant?.created?.mantissa || plant?.created?.mantissa === 0 ? plant.created : mathHelper.createDecimal(plant.created);
+        plant.production = plant?.production?.mantissa || plant?.production?.mantissa === 0 ? plant.production : mathHelper.createDecimal(plant.production);
+        plant.futureMult = mathHelper.createDecimal(plant.futureMult);
+
     },
     resetModifiersBD: function (modifiers) {
         modifiers.shopProdBonus = modifiers?.shopProdBonus?.mantissa || modifiers?.shopProdBonus?.mantissa === 0 ? modifiers.shopProdBonus : mathHelper.createDecimal(modifiers.shopProdBonus);
@@ -346,9 +309,9 @@ var farmingHelper = {
         }
         let modifiers = JSON.parse(JSON.stringify(modifiers_input));
         this.resetModifiersBD(modifiers);
-        modifiers.nextCosts.prodCost = mathHelper.createDecimal( modifiers.nextCosts.prodCost)
-        modifiers.nextCosts.growthCost = mathHelper.createDecimal( modifiers.nextCosts.growthCost)
-        modifiers.nextCosts.expCost = mathHelper.createDecimal( modifiers.nextCosts.expCost)
+        modifiers.nextCosts.prodCost = mathHelper.createDecimal(modifiers.nextCosts.prodCost)
+        modifiers.nextCosts.growthCost = mathHelper.createDecimal(modifiers.nextCosts.growthCost)
+        modifiers.nextCosts.expCost = mathHelper.createDecimal(modifiers.nextCosts.expCost)
 
         let numAutos = modifiers.numAutos;
         let simulationTime = modifiers.time; //time in seconds
@@ -401,23 +364,19 @@ var farmingHelper = {
 
             if (modifiers.autoBuyPBC) {
                 let updateCosts = false;
-                // if (currPotatoes >= modifiers.nextCosts.prodCost) {
                 if (currPotatoes.greaterThanOrEqualTo(modifiers.nextCosts.prodCost) === true) {
                     currPotatoes = mathHelper.subtractDecimal(currPotatoes, modifiers.nextCosts.prodCost);
                     modifiers.shopProdLevel++;
                     modifiers.shopProdBonus = this.calcShopProdBonus(modifiers, modifiers.shopProdLevel);
                     updateCosts = true;
                 }
-                // if (currPotatoes >= modifiers.nextCosts.growthCost) {
                 if (currPotatoes.greaterThanOrEqualTo(modifiers.nextCosts.growthCost) === true) {
                     // currPotatoes -= modifiers.nextCosts.growthCost;
                     currPotatoes = mathHelper.subtractDecimal(currPotatoes, modifiers.nextCosts.growthCost);
                     modifiers.shopGrowingSpeed++;
                     updateCosts = true;
                 }
-                // if (currPotatoes >= modifiers.nextCosts.expCost) {
                 if (currPotatoes.greaterThanOrEqualTo(modifiers.nextCosts.expCost) === true) {
-                    // currPotatoes -= modifiers.nextCosts.expCost;
                     currPotatoes = mathHelper.subtractDecimal(currPotatoes, modifiers.nextCosts.expCost);
                     modifiers.shopRankLevel++;
                     modifiers.shopRankEXP = 1 + modifiers.shopRankLevel * 0.1;
@@ -521,22 +480,6 @@ var farmingHelper = {
             runningTime += steps[i].time;
 
         }
-        let highestTime = potatoeSteps[1].time;
-        let min = potatoeSteps[1].time;
-        let foundBreak = false;
-        // for (let i = 0; i < potatoeSteps.length; i++) {
-        //     if (i > 0) {
-        //         if (potatoeSteps[i].time + highestTime < potatoeSteps[i - 1].time) {
-        //             highestTime = potatoeSteps[i - 1].time + min;
-        //             foundBreak = true;
-        //             throw new Error(`oof`)
-        //         }
-        //     }
-
-        //     // if (foundBreak) {
-        //     //     potatoeSteps[i].time += highestTime;
-        //     // }
-        // }
         res.dataPointsPotatoes = potatoeSteps;
         res.steps = steps;
 

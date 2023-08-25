@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import MouseOverPopover from "./tooltip";
+import MouseOverPopover from "../tooltip";
 import FarmingPlant from './FarmPlant';
-import helper from "./util/helper.js";
-import farmingHelper from "./util/farmingHelper.js";
-import mathHelper from './util/math.js';
+import helper from "../util/helper.js";
+import farmingHelper from "../util/farmingHelper.js";
+import mathHelper from '../util/math.js';
 import './FarmingLanding.css';
 import ReactGA from "react-ga4";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Label } from 'recharts';
+import Graph from './graph.jsx';
 
 const FarmerWorker = new Worker(new URL('./farmingWorker.js', import.meta.url))
 // const FarmerWorker = new Worker('./farmingWorker.js', { type: "module" })
@@ -107,6 +107,7 @@ const FarmingLanding = ({ data }) => {
     const farmTotals = useRef([]);
     const [numThreads, setNumThreads] = useState(8);
     const [yScale, setYScale] = useState('auto');
+    const [calcedFutureTime, setCalcedFutureTime] = useState(futureTime);//Used to lock in for pic displaying what future time what used when calculating
 
     const [numSimulatedAutos, setNumSimulatedAutos] = useState(data.FarmingShopAutoPlotBought);
 
@@ -249,8 +250,6 @@ const FarmingLanding = ({ data }) => {
     let currHP = helper.calcPOW(data.HealthyPotatoCurrent);
     let totalHP = helper.calcPOW(data.HealthyPotatoTotal);
 
-    let nextCosts = farmingHelper.getNextShopCosts(data);
-
 
     let soulPlantEXP = Math.pow(1.25, data.SoulLeafTreatment);
 
@@ -283,7 +282,7 @@ const FarmingLanding = ({ data }) => {
     }
 
     const modifiers = useMemo(() => {
-        console.log(`setin modif`)
+        console.log(`setin modif`);
         return {
             time: 0,
             // numAuto: numAuto,
@@ -303,18 +302,20 @@ const FarmingLanding = ({ data }) => {
             shopProdLevel: data.FarmingShopPlantTotalProduction,
             contagionPlantProd: contagionPlantProd,
             hpBonus: mathHelper.createDecimal(data.HealthyPotatoBonus),
-            nextCosts: nextCosts,
+            nextCosts: farmingHelper.getNextShopCosts(data),
             curPotatoes: mathHelper.createDecimal(data.HealthyPotatoCurrent),
             totalPotatoes: mathHelper.createDecimal(data.HealthyPotatoTotal),
             expBonus: shopRankEXP * soulPlantEXP * contagionPlantEXP * assemblyPlantExp,
             autoBuyPBC: autoBuyPBC,
             tickRate: Math.floor((futureTime * secondsHour) * 0.0015) < 1 ? 1 : Math.floor((futureTime * secondsHour) * 0.0015),
         }
-    }, [
-        shopGrowingSpeed, manualHarvestFormula, contagionHarvest, shopRankEXP, shopRankLevel, picPlants, Number(petPlantCombo),
-        contagionPlantEXP, contagionPlantGrowth, soulPlantEXP, assemblyPlantExp, contagionPlantProd, data,
-        nextCosts.expCost, nextCosts.growthCost, nextCosts.prodCost, currHP, totalHP, autoBuyPBC, futureTime
-    ])
+    },
+        [
+            shopGrowingSpeed, manualHarvestFormula, contagionHarvest, shopRankEXP, shopRankLevel, picPlants, Number(petPlantCombo),
+            contagionPlantEXP, contagionPlantGrowth, soulPlantEXP, assemblyPlantExp, contagionPlantProd,
+            data, currHP, totalHP, autoBuyPBC, futureTime
+        ]
+    )
 
     const finalPlants = useMemo(() => {
         console.log(`generating inter plants`);
@@ -330,18 +331,18 @@ const FarmingLanding = ({ data }) => {
             if (plant.growthTime < 10) {
                 plant.growthTime = 10;
             }
-          
-                plant.created = mathHelper.createDecimal(plant.ManuallyCreated);
-                plant.totalMade = mathHelper.createDecimal(plant.TotalCreated);
-           
+
+            plant.created = mathHelper.createDecimal(plant.ManuallyCreated);
+            plant.totalMade = mathHelper.createDecimal(plant.TotalCreated);
+
             plant.perHarvest = farmingHelper.calcPlantHarvest(plant, modifiers);
             plant.curExp = plant.CurrentExp.mantissa * (Math.pow(10, plant.CurrentExp.exponent));
             plant.reqExp = plant.ExpNeeded.mantissa * (Math.pow(10, plant.ExpNeeded.exponent));
             //plant.timeToLevel = (plant.reqExp - plant.curExp) / plant.perHarvest * plant.growthTime;
 
+            plant.futureMult = farmingHelper.futureMultBD(plant, modifiers);
             let prod = farmingHelper.calcProdOutput(plant, modifiers);
             plant.production = prod;
-            plant.futureMult =farmingHelper.futureMultBD(plant, modifiers);
             plant.timeToLevel = farmingHelper.calcTimeTillLevel(plant, { ...modifiers, numAuto: plantAutos[i] }).timeToLevel;
 
             if (plant.timeToLevel <= timeTillNextLevel) {
@@ -402,12 +403,22 @@ const FarmingLanding = ({ data }) => {
             }
 
             // go over the best PIC
-
+            for (let i = 0; i < bestPlantCombo.bestPic.result.result.dataPointsPotatoes.length; i++) {
+                let cur = bestPlantCombo.bestPic.result.result.dataPointsPotatoes[i];
+                if (cur.originalProduction.exponent > currMaxExp) {
+                    currMaxExp = cur.originalProduction.exponent;
+                }
+            }
             // go over the best PIC %
+            for (let i = 0; i < bestPlantCombo.bestPicPerc.result.result.dataPointsPotatoes.length; i++) {
+                let cur = bestPlantCombo.bestPicPerc.result.result.dataPointsPotatoes[i];
+                if (cur.originalProduction.exponent > currMaxExp) {
+                    currMaxExp = cur.originalProduction.exponent;
+                }
+            }
         }
 
 
-        // if (currMaxExp > maxExp) {
         diff_exp = currMaxExp > maxExp ? currMaxExp - maxExp : 0;
 
         // Reduce all the exponents for custom input first
@@ -418,7 +429,6 @@ const FarmingLanding = ({ data }) => {
             cur.production = cur.production.toNumber();
         }
 
-        // Go over all the top 1 results
         if (bestPlantCombo.top10DataPointsPotatoes) {
             // Go over all the top 1 results
             for (let i = 0; i < bestPlantCombo.top10DataPointsPotatoes.length; i++) {
@@ -433,33 +443,20 @@ const FarmingLanding = ({ data }) => {
             }
 
             // go over the best PIC
-
+            for (let i = 0; i < bestPlantCombo.bestPic.result.result.dataPointsPotatoes.length; i++) {
+                let cur = bestPlantCombo.bestPic.result.result.dataPointsPotatoes[i];
+                cur.production = mathHelper.createDecimal(cur.originalProduction.toString());
+                cur.production.exponent -= diff_exp;
+                cur.production = cur.production.toNumber();
+            }
             // go over the best PIC %
+            for (let i = 0; i < bestPlantCombo.bestPicPerc.result.result.dataPointsPotatoes.length; i++) {
+                let cur = bestPlantCombo.bestPicPerc.result.result.dataPointsPotatoes[i];
+                cur.production = mathHelper.createDecimal(cur.originalProduction.toString());
+                cur.production.exponent -= diff_exp;
+                cur.production = cur.production.toNumber();
+            }
         }
-        // }
-
-        // for (let i = 0; i < tempFuture.dataPointsPotatoes.length; i++) {
-        //     let cur = tempFuture.dataPointsPotatoes[i];
-        //     cur.production = cur.production.toNumber();
-        // }
-
-
-        // if (bestPlantCombo.top10DataPointsPotatoes) {
-        //     // Go over all the top 1 results
-        //     for (let i = 0; i < bestPlantCombo.top10DataPointsPotatoes.length; i++) {
-        //         if (i > 0) break;
-        //         let cur = bestPlantCombo.top10DataPointsPotatoes[i];
-        //         for (let j = 0; j < cur.data.length; j++) {
-        //             let cur_iner = cur.data[j];
-        //             cur_iner.production = cur_iner.production.toNumber();
-        //         }
-        //     }
-
-        //     // go over the best PIC
-
-        //     // go over the best PIC %
-        // }
-
 
         if (expDiff !== diff_exp) {
             setExpDiff(diff_exp);
@@ -467,7 +464,9 @@ const FarmingLanding = ({ data }) => {
 
         return {
             customProduction: tempFuture,
-            top10Potatoes: bestPlantCombo.top10DataPointsPotatoes
+            top10Potatoes: bestPlantCombo.top10DataPointsPotatoes,
+            bestPic: bestPlantCombo?.bestPic?.result?.result?.dataPointsPotatoes,
+            bestPicPerc: bestPlantCombo?.bestPicPerc?.result?.result?.dataPointsPotatoes,
         }
 
     }, [tempFuture, expDiff, bestPlantCombo])
@@ -480,7 +479,6 @@ const FarmingLanding = ({ data }) => {
     for (let i = 0; i < tempFuture.plants.length; i++) {
         let newPlant = tempFuture.plants[i];
         let prestigeTimings = farmingHelper.calcTimeTillPrestige(newPlant, { ...modifiers, time: secondsHour * futureTime, numAuto: plantAutos[i] });
-
 
         newPlant.nextPrestige = prestigeTimings.prestige;
         newPlant.timeToPrestige = prestigeTimings.remainingTime;
@@ -566,6 +564,28 @@ const FarmingLanding = ({ data }) => {
                     }
 
 
+                    for (let j = 0; j < cur.bestPicCombo.result.dataPointsPotatoes.length; j++) {
+                        let cur_data = cur.bestPicCombo.result.dataPointsPotatoes[j];
+                        cur_data.production = mathHelper.createDecimal(cur_data.production);
+                        cur_data.time = helper.roundInt(cur_data.time);
+                    }
+                    for (let j = 0; j < cur.bestPicCombo.result.dataPointsFries.length; j++) {
+                        let cur_data = cur.bestPicCombo.result.dataPointsFries[j];
+                        cur_data.fries = mathHelper.createDecimal(cur_data.fries);
+                        cur_data.time = helper.roundInt(cur_data.time);
+                    }
+                    for (let j = 0; j < cur.bestPICPercCombo.result.dataPointsPotatoes.length; j++) {
+                        let cur_data = cur.bestPICPercCombo.result.dataPointsPotatoes[j];
+                        cur_data.production = mathHelper.createDecimal(cur_data.production);
+                        cur_data.time = helper.roundInt(cur_data.time);
+                    }
+                    for (let j = 0; j < cur.bestPICPercCombo.result.dataPointsFries.length; j++) {
+                        let cur_data = cur.bestPICPercCombo.result.dataPointsFries[j];
+                        cur_data.fries = mathHelper.createDecimal(cur_data.fries);
+                        cur_data.time = helper.roundInt(cur_data.time);
+                    }
+
+
                     top10DataPointsPotatoes.push(...cur.top10DataPointsPotatoes);
                     top10DataPointsFries.push(...cur.top10DataPointsFries);
                     if (cur.bestPicCombo.picGain > bestPic.pic) {
@@ -613,6 +633,17 @@ const FarmingLanding = ({ data }) => {
                         cur.data[j].time = helper.roundInt(cur.data[j].time);
                         cur.data[j].originalProduction = mathHelper.createDecimal(cur.data[j].production.toString());
                     }
+                }
+
+                for (let i = 0; i < bestPic.result.result.dataPointsPotatoes.length; i++) {
+                    let cur = bestPic.result.result.dataPointsPotatoes[i];
+                    cur.time = helper.roundInt(cur.time);
+                    cur.originalProduction = mathHelper.createDecimal(cur.production.toString());
+                }
+                for (let i = 0; i < bestPicPerc.result.result.dataPointsPotatoes.length; i++) {
+                    let cur = bestPicPerc.result.result.dataPointsPotatoes[i];
+                    cur.time = helper.roundInt(cur.time);
+                    cur.originalProduction = mathHelper.createDecimal(cur.production.toString());
                 }
 
                 if (bestProd.result) {
@@ -1344,6 +1375,7 @@ const FarmingLanding = ({ data }) => {
                                         disabled={notEnoughAuto || !calcDone}
                                         onClick={(e) => {
                                             setCalcDone(false);
+                                            setCalcedFutureTime(futureTime);
                                             console.log(`Time start: ` + (new Date()).getTime())
                                             ReactGA.event({
                                                 category: "farming_interaction",
@@ -1425,6 +1457,7 @@ const FarmingLanding = ({ data }) => {
                                         disabled={futureTime < 1 || !calcDone}
                                         onClick={(e) => {
                                             setCalcDone(false);
+                                            setCalcedFutureTime(futureTime);
                                             console.log(`Time start: ` + (new Date()).getTime())
                                             ReactGA.event({
                                                 category: "farming_interaction",
@@ -1630,7 +1663,7 @@ const FarmingLanding = ({ data }) => {
                                                     </div>
                                                     <div className='futurePicExplanation'>
                                                         <div>
-                                                            Next PIC after {futureTime} hours + x hours
+                                                            Next PIC after {calcedFutureTime} hours + x hours
                                                         </div>
                                                         <div>
                                                             with {numSimulatedAutos} autos per plant
@@ -1673,7 +1706,7 @@ const FarmingLanding = ({ data }) => {
                                                                         {
                                                                             ...bestPlantCombo.bestPic.result.result.finalModifiers,
                                                                             // numAuto: bestPlantCombo.bestPic.result.combo[index]
-                                                                            numAuto: data.FarmingShopAutoPlotBought
+                                                                            numAuto: numSimulatedAutos
                                                                         }
                                                                     ).remainingTime)
                                                                         }`}
@@ -1709,7 +1742,7 @@ const FarmingLanding = ({ data }) => {
                                                         </div>
                                                         <div className='futurePicExplanation'>
                                                             <div>
-                                                                Next PIC after {futureTime} hours
+                                                                Next PIC after {calcedFutureTime} hours
                                                             </div>
                                                             <div>
                                                                 with {numSimulatedAutos} autos per plant
@@ -1750,7 +1783,7 @@ const FarmingLanding = ({ data }) => {
                                                                             {
                                                                                 ...bestPlantCombo.bestPicPerc.result.result.finalModifiers,
                                                                                 // numAuto: bestPlantCombo.bestPic.result.combo[index]
-                                                                                numAuto: data.FarmingShopAutoPlotBought
+                                                                                numAuto: numSimulatedAutos
                                                                             }
                                                                         ).remainingTime)
                                                                             }`}
@@ -1808,7 +1841,7 @@ const FarmingLanding = ({ data }) => {
 
                                                         <div className='futurePicExplanation'>
                                                             <div>
-                                                                Next PIC after {futureTime} hours + x hours
+                                                                Next PIC after {calcedFutureTime} hours + x hours
                                                             </div>
                                                             <div>
                                                                 with {numSimulatedAutos} autos per plant
@@ -1852,7 +1885,7 @@ const FarmingLanding = ({ data }) => {
                                                                             {
                                                                                 ...bestPlantCombo.bestPic.result.result.finalModifiers,
                                                                                 // numAuto: bestPlantCombo.bestPic.result.combo[bestPlantCombo.bestPic.result.plants.length - 1 - index]
-                                                                                numAuto: data.FarmingShopAutoPlotBought
+                                                                                numAuto: numSimulatedAutos
                                                                             }
                                                                         ).remainingTime)
                                                                             }`}
@@ -1893,7 +1926,7 @@ const FarmingLanding = ({ data }) => {
                                                         </div>
                                                         <div className='futurePicExplanation'>
                                                             <div>
-                                                                Next PIC after {futureTime} hours
+                                                                Next PIC after {calcedFutureTime} hours
                                                             </div>
                                                             <div>
                                                                 with {numSimulatedAutos} autos per plant
@@ -1939,7 +1972,7 @@ const FarmingLanding = ({ data }) => {
                                                                             {
                                                                                 ...bestPlantCombo.bestPicPerc.result.result.finalModifiers,
                                                                                 // numAuto: bestPlantCombo.bestPicPerc.result.combo[bestPlantCombo.bestPic.result.plants.length - 1 - index]
-                                                                                numAuto: data.FarmingShopAutoPlotBought
+                                                                                numAuto: numSimulatedAutos
                                                                             }
                                                                         ).remainingTime)
                                                                             }`}
@@ -1975,7 +2008,6 @@ const FarmingLanding = ({ data }) => {
                         )}
 
                         <div style={{
-
                             display: 'flex',
                             flex: 1,
                             flexDirection: 'column',
@@ -1993,196 +2025,14 @@ const FarmingLanding = ({ data }) => {
                                 height: '99%',
                                 width: '100%'
                             }}>
-                                <ResponsiveContainer width="100%" height="100%"  >
-                                    <LineChart
-                                        margin={{
-                                            top: 5,
-                                            right: 30,
-                                            left: 20,
-                                            bottom: 5,
-                                        }}
-                                    >
-                                        <CartesianGrid strokeDasharray="3 3" />
-                                        <XAxis
-                                            dataKey="time"
-                                            xAxisId="mainTime"
-                                            name="time in seconds"
-                                            tickFormatter={(e, index) => {
-                                                return (helper.secondsToString(e));
-                                            }}
-                                            minTickGap={7}
-                                        />
-
-                                        <YAxis
-                                            yAxisId="potatoes"
-                                            scale={yScale}
-                                            domain={['auto', 'auto']}
-                                            tickFormatter={(e, index, payload) => {
-                                                let temp = mathHelper.createDecimal(e);
-                                                temp.exponent += expDiff;
-                                                return temp.toPrecision(3).toString();
-                                            }}
-                                            width={95}
-                                        >
-
-                                            <Label
-                                                value="Total HP Made"
-                                                position="insideLeft"
-                                                angle={-90}
-                                                style={{ textAnchor: 'middle' }}
-                                            />
-
-                                        </YAxis >
-                                        {/*<YAxis yAxisId="fries" orientation="right" />*/}
-                                        <Tooltip
-                                            formatter={(value, name, props) => {
-                                                return [props.payload.originalProduction.toPrecision(3).toString(), name];
-                                            }}
-                                            labelFormatter={(label, payload) => {
-                                                return helper.secondsToString(label);
-                                            }}
-
-                                        />
-                                        <Legend />
-
-                                        {(farmCalcProgress.current === farmCalcProgress.max && farmCalcProgress.current !== 0 && bestPlantCombo.prod && calcDone) && (
-                                            <>
-
-                                                {/* <Line
-                                                        type="monotone"
-                                                        xAxisId={"mainTime"}
-                                                        yAxisId="potatoes"
-                                                        dataKey="value2"
-                                                        name={`Top ${1} production`}
-                                                        stroke="#8884d8"
-                                                        activeDot={{ r: 8 }}
-                                                    />
-                                                    <Line
-                                                        type="monotone"
-                                                        xAxisId={"mainTime"}
-                                                        yAxisId="potatoes"
-                                                        dataKey="value11"
-                                                        name={`Top ${10} production`}
-                                                        stroke="red"
-                                                        activeDot={{ r: 8 }}
-                                            /> */}
-
-
-                                                {/* {calcStep && ( */}
-                                                <>
-                                                    {bestPlantCombo.bestPic.pic > 0 && false && (
-                                                        <>
-                                                            <XAxis dataKey="time" hide={true} xAxisId={"bestPIC"} name="time in seconds" />
-                                                            <Line
-                                                                type="monotone"
-                                                                xAxisId={"bestPIC"}
-                                                                // xAxisId={"mainTime"}
-                                                                yAxisId="potatoes"
-                                                                data={bestPlantCombo.bestPic.result.result.dataPointsPotatoes}
-                                                                dataKey="production"
-                                                                // dataKey="value2"
-                                                                name={`Most PIC`}
-                                                                stroke="orange"
-                                                                activeDot={{ r: 8 }}
-                                                            />
-                                                        </>
-                                                    )}
-                                                    {displayPicPerc && false && (
-                                                        <>
-                                                            <XAxis dataKey="time" hide={true} xAxisId={"bestPICPerc"} name="time in seconds" />
-                                                            <Line
-                                                                type="monotone"
-                                                                xAxisId={"bestPICPerc"}
-                                                                // xAxisId={"mainTime"}
-                                                                yAxisId="potatoes"
-                                                                data={bestPlantCombo.bestPicPerc.result.result.dataPointsPotatoes}
-                                                                dataKey="production"
-                                                                // dataKey="value2"
-                                                                name={`Most PIC %`}
-                                                                // stroke="#8884d8"
-                                                                stroke="red"
-                                                                activeDot={{ r: 8 }}
-                                                            />
-                                                        </>
-                                                    )}
-                                                </>
-                                                {/* )} */}
-
-                                                {graphObjects.top10Potatoes.map((val, index) => {
-                                                    if (index > 0) return;
-                                                    return (<XAxis dataKey="time" hide={true} xAxisId={"potatoXAxis" + index} name="time in seconds" />)
-                                                })
-                                                }
-
-                                                {graphObjects.top10Potatoes.map((val, index) => {
-                                                    if (index > 0) return;
-                                                    return (
-                                                        <Line
-                                                            type="monotone"
-                                                            xAxisId={"potatoXAxis" + index}
-                                                            // xAxisId={"mainTime"}
-                                                            yAxisId="potatoes"
-                                                            data={val.data}
-                                                            dataKey="production"
-                                                            // dataKey="value2"
-                                                            name={`Top ${index + 1} production`}
-                                                            stroke="#8884d8"
-                                                            activeDot={{ r: 8 }}
-                                                        />
-                                                    )
-                                                })
-                                                }
-                                            </>
-                                        )}
-
-                                        <Line
-                                            type="monotone"
-                                            xAxisId="mainTime"
-                                            yAxisId="potatoes"
-                                            data={graphObjects.customProduction.dataPointsPotatoes}
-                                            dataKey="production"
-                                            // dataKey="custom"
-                                            name="Currently selected production"
-                                            stroke="#82ca9d"
-                                            strokeWidth={2}
-                                            activeDot={{ r: 8 }}
-                                        />
-                                        {/* {customLines.length > 0 && (
-                                                customLines.map((e, index) => {
-                                                    return (
-                                                        <Line
-                                                            type="monotone"
-                                                            xAxisId="mainTime"
-                                                            yAxisId="potatoes"
-                                                            data={e}
-                                                            dataKey="production"
-                                                            name={`Custom Line ${index}`}
-                                                            stroke="#8884d8"
-                                                            strokeWidth={2}
-                                                            activeDot={{ r: 8 }}
-                                                        />
-                                                    )
-                                                })
-                                            )} *
-                                {/*bestPlantCombo.top10DataPointsPotatoes.map((val, index) => {
-                                                    return (<XAxis dataKey="time" hide={true} xAxisId={"fryXAxis" + index} name="time in seconds"/>)})
-                                                }
-                                                {bestPlantCombo.top10DataPointsFries.map((val, index) => {
-                                                    return (
-                                                        <Line
-                                                            type="monotone"
-                                                            xAxisId={"fryXAxis" + index}
-                                                            yAxisId="fries"
-                                                            data={val.data}
-                                                            dataKey="fries"
-                                                            name={`Top ${index + 1} fries`}
-                                                            stroke="#82ca9d"
-                                                            activeDot={{ r: 5 }}
-                                                        />
-                                                    )})
-                                                    */}
-                                    </LineChart>
-                                </ResponsiveContainer>
+                                <Graph
+                                    graphObjects={graphObjects}
+                                    showCalc={(farmCalcProgress.current === farmCalcProgress.max && farmCalcProgress.current !== 0 && bestPlantCombo.prod && calcDone)}
+                                    yScale={yScale}
+                                    bestPic={!!bestPlantCombo?.bestPic?.pic}
+                                    expDiff={expDiff}
+                                    displayPicPerc={displayPicPerc}
+                                />
                             </div>
                         </div>
 

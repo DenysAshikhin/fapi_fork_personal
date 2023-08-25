@@ -1,5 +1,5 @@
-import helper from './util/farmingHelper.js';
-import mathHelper from './util/math.js';
+import helper from '../util/farmingHelper.js';
+import mathHelper from '../util/math.js';
 
 
 // eslint-disable-next-line no-restricted-globals
@@ -51,6 +51,7 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
             let combo = combinations[i];
             dataObj.numAutos = combo;
             let result;
+
             switch (mode) {
                 case 'afk':
                     result = helper.calcHPProd(finalPlants, dataObj);

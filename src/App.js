@@ -10,7 +10,7 @@ import Weights from "./weights/weights";
 import PetComboList from "./comboList/comboList";
 import helper from './util/helper.js';
 
-import FarmingLanding from './FarmingLanding';
+import FarmingLanding from './farming/FarmingLanding.jsx';
 
 const theme = createTheme({
     palette: {

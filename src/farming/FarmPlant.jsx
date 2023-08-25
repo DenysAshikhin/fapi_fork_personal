@@ -1,14 +1,12 @@
-import helper from "./util/helper.js";
-import farmingHelper from "./util/farmingHelper.js";
-import MouseOverPopover from "./tooltip";
+import helper from "../util/helper.js";
+import farmingHelper from "../util/farmingHelper.js";
+import MouseOverPopover from "../tooltip.js";
 import ReactGA from "react-ga4";
+import { memo } from 'react';
 
 const FarmingPlant = ({ data }) => {
     let plant = data.plant;
     let index = data.index;
-    let customMultipliers = data.customMultipliers;
-    let setCustomMultipliers = data.setCustomMultipliers;
-    let allowSetMultipliers = data.allowSetMultipliers;
     let useFutureValues = data.useFutureValues;
     let modifiers = data.modifiers;
     let fake = data.fake;
@@ -19,11 +17,8 @@ const FarmingPlant = ({ data }) => {
         modifiers.numAuto = plantAutos[index]
     }
 
-
-
     if (fake) {
         plant = { created: 1 };
-        customMultipliers = []
         index = 0;
         useFutureValues = true;
     }
@@ -34,11 +29,11 @@ const FarmingPlant = ({ data }) => {
     let totalHarvest = `${plant.created.toExponential(3)}`;
     // let outMult = ` (x${helper.roundTwoDecimal(useFutureValues ? plant.futureMult : plant.currMult)})`;
     let outMult;
-    try{
+    try {
 
         outMult = ` (x${plant.futureMult.toPrecision(3).toString()})`;
     }
-    catch(err){
+    catch (err) {
         console.log(err);
         let bigsad = -1;
     }
@@ -301,4 +296,16 @@ const FarmingPlant = ({ data }) => {
 }
 
 
-export default FarmingPlant;
+export default memo(FarmingPlant, function (prev, curr) {
+
+    if (prev.data.fake !== curr.data.fake) return false;
+    if (prev.data.index !== curr.data.index) return false;
+    //No need to check modifier values since if those are diff, plant values are diff as well
+
+    if (prev.data.plantAutos[prev.data.index] !== curr.data.plantAutos[prev.data.index]) return false;
+    if (prev.data.plant?.timeToLevel !== curr.data?.plant?.timeToLevel) return false;
+
+
+    return true; //Nothing changed
+
+});
