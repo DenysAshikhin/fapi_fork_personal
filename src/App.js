@@ -41,6 +41,7 @@ export function calculateBestHours(group, hours, tokenModifiers, combo) {
 
     let clover;
     let residueToken = tokenModifiers?.residueToken ? tokenModifiers.residueToken : 0;
+    let pd_token_bonus = tokenModifiers.data.ExpeditionTokenBonuses;
 
     if (!hours) {
         hours = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
@@ -52,7 +53,8 @@ export function calculateBestHours(group, hours, tokenModifiers, combo) {
         combo = 1.0
     }
     const overall = calculateGroupScore(group);
-    const tokenHR = overall.tokenMult * (Math.pow(1 + SOUL_CLOVER_STEP, clover)) * (1 + 0.05 * residueToken) * combo;
+    // const tokenHR = overall.tokenMult * (Math.pow(1 + SOUL_CLOVER_STEP, clover)) * (1 + 0.05 * residueToken) * combo;
+    const tokenHR = overall.tokenMult * (Math.pow(1 + SOUL_CLOVER_STEP, clover)) * pd_token_bonus * combo;
     let best = { hours: -1, totalTokens: -1, floored: -1, effeciency: -1 };
     let bestArr = [];
 

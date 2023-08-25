@@ -343,7 +343,7 @@ const FarmingLanding = ({ data }) => {
             plant.futureMult = farmingHelper.futureMultBD(plant, modifiers);
             let prod = farmingHelper.calcProdOutput(plant, modifiers);
             plant.production = prod;
-            plant.timeToLevel = farmingHelper.calcTimeTillLevel(plant, { ...modifiers, numAuto: plantAutos[i] }).timeToLevel;
+            plant.timeToLevel = farmingHelper.calcTimeTillLevel(plant, { ...modifiers, numAuto: plantAutos[i] });
 
             if (plant.timeToLevel <= timeTillNextLevel) {
                 timeTillNextLevel = plant.timeToLevel;
