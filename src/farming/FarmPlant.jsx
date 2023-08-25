@@ -264,17 +264,17 @@ const FarmingPlant = ({ data }) => {
                                             if (x < 0 || x > 8) {
                                                 return;
                                             }
-
-                                            let newArr = [...plantAutos];
-                                            newArr[index] = x;
-
                                             ReactGA.event({
                                                 category: "farming_interaction",
                                                 action: `changed_plant_${index}_auto`,
                                                 label: `${x}`,
                                                 value: x
                                             })
-                                            setPlantAutos(newArr);
+                                            setPlantAutos((cur)=>{
+                                            let temp = [...cur];
+                                            temp[index] = x;;
+                                            return temp;
+                                            });
                                         }
                                         catch (err) {
                                             console.log(err);

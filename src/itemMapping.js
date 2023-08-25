@@ -323,6 +323,11 @@ const PetNames = {
         "name": "Neptune",
         "location": "7-9",
     }
+    ,
+    82: {
+        "name": "Strawberry",
+        "location": "Any",
+    }
 }
 // export default PetNames;
 export const petNames = PetNames;

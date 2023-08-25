@@ -1266,7 +1266,7 @@ const FarmingLanding = ({ data }) => {
 
 
                                     <select
-                                        style={{ maxWidth: '144px' }}
+                                        style={{ maxWidth: '144px', marginLeft: '12px' }}
                                         onChange={
                                             (e) => {
                                                 setNumThreads(Number(e.target.value));
@@ -1472,8 +1472,10 @@ const FarmingLanding = ({ data }) => {
 
                                             let min = 0.95;
                                             let max = secondsHour * futureTime;
+                                            let step_max = 0.009 * finalPlants.length;
+
                                             let nums = [];
-                                            let red = 0.05 * max;
+                                            let red = Math.floor(step_max * max - 10);
                                             for (let i = 0; i < finalPlants.length; i++) {
                                                 let timer = farmingHelper.calcGrowthTime(finalPlants[i], modifiers);
                                                 if (timer < red) {
@@ -1486,7 +1488,6 @@ const FarmingLanding = ({ data }) => {
                                             let combinations = farmingHelper.findMultipliersWithMinPercentage(max, nums, min);
 
                                             console.log(`num combinations: ${combinations.length}`);
-                                            // return;
 
                                             let splitArraysIndicies = splitArrayIndices(combinations, numThreads);
                                             if (combinations.length < numThreads) {
