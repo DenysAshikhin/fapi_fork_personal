@@ -79,12 +79,12 @@ const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, de
         }
     }
 
-
     return (
         <div
             key={petId}
             onClick={onClick}
-            className={`item-tile ${isSelected ? '' : 'unselected'}`}
+            className={`item-tile${pet.Type === 1 ? '-ground ' : '-air '} ${isSelected ? '' : 'unselected'}`}
+            // className={`item-tile ${isSelected ? '' : 'unselected'}`}
         >
             <div 
                 className="item-image-container"

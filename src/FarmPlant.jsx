@@ -349,7 +349,7 @@ const FarmingPlant = ({ data }) => {
                                         try {
                                             let x = Number(e.target.value);
                                             x = Math.floor(x);
-                                            if (x < 0 || x > 8) {
+                                            if (x < 0 || x > 12) {
                                                 return;
                                             }
 
@@ -370,7 +370,7 @@ const FarmingPlant = ({ data }) => {
                                     }}
                                 placeholder={plantAutos[index] + ''}
                                 min="0"
-                                max="8"
+                                max="12"
                             />
                         </div>
 

@@ -100,6 +100,7 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
 
             let picGained = 0;
             let picPercent = 0;
+            let temp;
 
             for (let j = 0; j < result.plants.length; j++) {
                 let picIncrease = helper.calcMaxPrestige(result.plants[j]);
@@ -129,26 +130,26 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
             }
 
             if (picGained > bestPIC) {
-                let temp = { combo: combo, result: result, plants: result.plants, potatoeProduction: result.potatoeProduction, picGain: picGained, picStats: { picLevel: picGained, picPercent: picPercent } };
+                temp = { combo: combo, result: result, plants: result.plants, potatoeProduction: result.potatoeProduction, picGain: picGained, picStats: { picLevel: picGained, picPercent: picPercent } };
                 bestPIC = picGained;
                 bestPicCombo = temp;
             }
             else if (picGained === bestPIC) {
-                if (result.potatoeProduction > bestPicCombo.potatoeProduction) {
-                    let temp = { combo: combo, result: result, plants: result.plants, potatoeProduction: result.potatoeProduction, picGain: picGained, picStats: { picLevel: picGained, picPercent: picPercent } };
+                if (result.potatoeProduction.greaterThanOrEqualTo(bestPicCombo.potatoeProduction)) {
+                    temp = { combo: combo, result: result, plants: result.plants, potatoeProduction: result.potatoeProduction, picGain: picGained, picStats: { picLevel: picGained, picPercent: picPercent } };
                     bestPIC = picGained;
                     bestPicCombo = temp;
                 }
             }
             if (picPercent > bestPICPerc) {
-                let temp = { combo: combo, result: result, plants: result.plants, potatoeProduction: result.potatoeProduction, picGain: picPercent, picStats: { picLevel: picGained, picPercent: picPercent } };
+                temp = { combo: combo, result: result, plants: result.plants, potatoeProduction: result.potatoeProduction, picGain: picPercent, picStats: { picLevel: picGained, picPercent: picPercent } };
 
                 bestPICPerc = picPercent;
                 bestPICPercCombo = temp;
             }
             else if (picPercent === bestPICPerc) {
-                if (result.potatoeProduction > bestPICPercCombo.potatoeProduction) {
-                    let temp = { combo: combo, result: result, plants: result.plants, potatoeProduction: result.potatoeProduction, picGain: picPercent, picStats: { picLevel: picGained, picPercent: picPercent } };
+                if (result.potatoeProduction.greaterThanOrEqualTo(bestPICPercCombo.potatoeProduction)) {
+                    temp = { combo: combo, result: result, plants: result.plants, potatoeProduction: result.potatoeProduction, picGain: picPercent, picStats: { picLevel: picGained, picPercent: picPercent } };
 
                     bestPICPerc = picPercent;
                     bestPICPercCombo = temp;
@@ -158,7 +159,8 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
 
             // eslint-disable-next-line no-restricted-globals
             self.postMessage({
-                update: true
+                update: true,
+                // temp: temp
             })
         }
 
