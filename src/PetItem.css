@@ -1,5 +1,15 @@
 .item-tile {
-   margin: auto;
+    margin: auto;
+}
+
+
+.item-tile-ground {
+    margin: auto auto auto auto;
+}
+
+
+.item-tile-air {
+    margin: auto auto auto auto;
 }
 
 .static-item-tile .item-image-container {
@@ -17,13 +27,16 @@
     max-width: 75px;
     max-height: 75px;
 }
+
 .item-image {
     max-width: 75px;
     max-height: 75px;
 }
+
 .unselected {
     opacity: 0.4;
 }
+
 .tooltip {
     position: absolute;
     top: 0;
@@ -33,6 +46,7 @@
     height: 100%;
     visibility: hidden;
 }
+
 .tooltip .tooltip-content {
     position: absolute;
     z-index: 2;
@@ -46,6 +60,7 @@
     top: 100px;
     left: 10px;
 }
+
 .item-tile:hover .tooltip {
     visibility: visible;
 }

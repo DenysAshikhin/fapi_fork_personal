@@ -106,7 +106,7 @@ const JSONDisplay = ({
             })
 
 
-            const groupBests = calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken }, comboSelector)[tokenSelections[index]];
+            const groupBests = calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken, data: data }, comboSelector)[tokenSelections[index]];
             totalTokensHR += groupBests.floored / groupBests.hours;
         })
 
@@ -177,7 +177,8 @@ const JSONDisplay = ({
                     let groupLabel = ``;
 
                     const groupTotal = calculateGroupScore(group, defaultRank);
-                    let tokenScore = groupTotal.tokenMult * (Math.pow(1 + SOUL_CLOVER_STEP, data.SoulGoldenClover)) * (1 + 0.05 * data.SoulGoldenClover) * comboSelector;
+                    // let tokenScore = groupTotal.tokenMult * (Math.pow(1 + SOUL_CLOVER_STEP, data.SoulGoldenClover)) * (1 + 0.05 * data.SoulGoldenClover) * comboSelector;
+                    let tokenScore = groupTotal.tokenMult * (Math.pow(1 + SOUL_CLOVER_STEP, data.SoulGoldenClover)) * comboSelector * data.ExpeditionTokenBonuses;
                     tokenScore = tokenScore.toExponential(3);
                     const score = groupTotal.groupScore;
                     const displayedDamage = (score * 5 * data.PetDamageBonuses).toExponential(3);
@@ -187,15 +188,15 @@ const JSONDisplay = ({
                     switch (groupRankCritera) {
                         case 1://damage
                             groupLabel = `Group ${index + 1} Damage: ${displayedDamage} || Token: ${tokenScore}`;
-                            tokenInfo = calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken }, comboSelector);
+                            tokenInfo = calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken, data: data }, comboSelector);
                             break;
                         case 2://token
                             groupLabel = `Group ${index + 1} Token: ${tokenScore} || Damage: ${displayedDamage}`;
-                            tokenInfo = calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken }, comboSelector);
+                            tokenInfo = calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken, data: data }, comboSelector);
                             break;
                         case 3://Advanced
                             groupLabel = `Group ${index + 1} Damage: ${displayedDamage}`;
-                            tokenInfo = calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken }, comboSelector);
+                            tokenInfo = calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken, data: data }, comboSelector);
                             break;
                         default:
                             break;
@@ -388,7 +389,7 @@ const JSONDisplay = ({
                         </div>
                         <div>
 
-                            {`Residue Token Bonus: ${1 + 0.05 * data.CowShopExpeditionToken}`}
+                            {`Token Bonuses: ${helper.roundTwoDecimal(data.ExpeditionTokenBonuses)}`}
                         </div>
                     </div>
                     <div style={{ display: 'flex', }}>

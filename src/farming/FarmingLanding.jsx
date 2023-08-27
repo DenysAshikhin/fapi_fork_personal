@@ -1839,7 +1839,6 @@ return;
                                                 splitArraysIndicies[0] = [0, combinations.length - 1];
                                             }
                                             farmTotals.current = [];
-
                                             setFarmCalcProgress((cur) => {
                                                 let temp = { ...cur };
                                                 temp.max = combinations.length;

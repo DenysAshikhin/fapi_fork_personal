@@ -86,12 +86,12 @@ const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, de
             className={`item-tile${pet.Type === 1 ? '-ground ' : '-air '} ${isSelected ? '' : 'unselected'}`}
             // className={`item-tile ${isSelected ? '' : 'unselected'}`}
         >
-            <div 
+            <div
                 className="item-image-container"
                 style={{
-                border: borderActive ? 'black 1px solid' : '',
-                position: 'relative'
-            }}>
+                    border: borderActive ? 'black 1px solid' : '',
+                    position: 'relative'
+                }}>
                 {numHighlights.map((item, index) => {
                     return (<div
                         style={{
@@ -122,7 +122,9 @@ const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, de
                         </span>
                     </span>
                 </div>
-                <img src={img} alt={name} className="item-image" />
+                {/* <div className="item-image"> */}
+                <img src={img} alt={name} className='item-image' />
+                {/* </div> */}
             </div>
         </div>
     );
@@ -132,12 +134,12 @@ const StaticPetItem = ({ petData }) => {
     const { petId, img, name } = petData;
     return (
         <div key={petId} className={`static-item-tile`}>
-            <div 
+            <div
                 className="item-image-container"
                 style={{
-                position: 'relative'
-            }}>
-                <img src={img} alt={name} className="item-image" />
+                    position: 'relative'
+                }}>
+                <img src={img} alt={name} className='item-image' />
             </div>
         </div>
     );
