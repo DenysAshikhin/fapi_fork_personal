@@ -821,7 +821,8 @@ const FarmingLanding = ({ data }) => {
         }
 
         const updateRunningBest = ({ bestProduction }) => {
-return;
+            //sounded like a good idea, leads to very jerky graphs
+            return;
             setBestRunningCombo((currBestCombo) => {
                 let bestProd = currBestCombo.prod ? currBestCombo : { prod: mathHelper.createDecimal(0) };
                 let runningProd = { prod: mathHelper.createDecimal(bestProduction.result.potatoeProduction), result: bestProduction };
@@ -1056,6 +1057,9 @@ return;
         FarmerWorker1.addEventListener('message', (event) => {
             let response = event.data;
             if (response.update) {
+                if (response.temp) {
+                    updateRunningBest({ bestProduction: response.temp })
+                }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
                     newAmount.current++;
@@ -1070,6 +1074,9 @@ return;
         FarmerWorker2.addEventListener('message', (event) => {
             let response = event.data;
             if (response.update) {
+                if (response.temp) {
+                    updateRunningBest({ bestProduction: response.temp })
+                }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
                     newAmount.current++;
@@ -1084,6 +1091,9 @@ return;
         FarmerWorker3.addEventListener('message', (event) => {
             let response = event.data;
             if (response.update) {
+                if (response.temp) {
+                    updateRunningBest({ bestProduction: response.temp })
+                }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
                     newAmount.current++;
@@ -1099,6 +1109,9 @@ return;
         FarmerWorker4.addEventListener('message', (event) => {
             let response = event.data;
             if (response.update) {
+                if (response.temp) {
+                    updateRunningBest({ bestProduction: response.temp })
+                }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
                     newAmount.current++;
@@ -1114,6 +1127,9 @@ return;
         FarmerWorker5.addEventListener('message', (event) => {
             let response = event.data;
             if (response.update) {
+                if (response.temp) {
+                    updateRunningBest({ bestProduction: response.temp })
+                }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
                     newAmount.current++;
@@ -1129,6 +1145,9 @@ return;
         FarmerWorker6.addEventListener('message', (event) => {
             let response = event.data;
             if (response.update) {
+                if (response.temp) {
+                    updateRunningBest({ bestProduction: response.temp })
+                }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
                     newAmount.current++;
@@ -1144,6 +1163,9 @@ return;
         FarmerWorker7.addEventListener('message', (event) => {
             let response = event.data;
             if (response.update) {
+                if (response.temp) {
+                    updateRunningBest({ bestProduction: response.temp })
+                }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
                     newAmount.current++;
@@ -1159,6 +1181,9 @@ return;
         FarmerWorker8.addEventListener('message', (event) => {
             let response = event.data;
             if (response.update) {
+                if (response.temp) {
+                    updateRunningBest({ bestProduction: response.temp })
+                }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
                     newAmount.current++;
@@ -1174,6 +1199,9 @@ return;
         FarmerWorker9.addEventListener('message', (event) => {
             let response = event.data;
             if (response.update) {
+                if (response.temp) {
+                    updateRunningBest({ bestProduction: response.temp })
+                }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
                     newAmount.current++;
@@ -1189,6 +1217,9 @@ return;
         FarmerWorker10.addEventListener('message', (event) => {
             let response = event.data;
             if (response.update) {
+                if (response.temp) {
+                    updateRunningBest({ bestProduction: response.temp })
+                }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
                     newAmount.current++;
@@ -1204,6 +1235,9 @@ return;
         FarmerWorker11.addEventListener('message', (event) => {
             let response = event.data;
             if (response.update) {
+                if (response.temp) {
+                    updateRunningBest({ bestProduction: response.temp })
+                }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
                     newAmount.current++;
@@ -1708,89 +1742,185 @@ return;
                             </div>
 
 
-                            <div style={{ display: 'flex', height: '100%' }}>
-                                <div style={{
-                                    maxWidth: '50%', margin: '0 6px',
-                                    border: notEnoughAuto ? '1px solid black' : '',
-                                    display: 'flex',
-                                    flexDirection: 'column'
-                                }}>
-                                    <button
-                                        disabled={notEnoughAuto || !calcDone}
-                                        onClick={(e) => {
-                                            setCalcDone(false);
-                                            setCalcedFutureTime(futureTime);
-                                            console.log(`Time start: ` + (new Date()).getTime())
-                                            ReactGA.event({
-                                                category: "farming_interaction",
-                                                action: `clicked_optomise_auto`,
-                                                label: `${futureTime}`,
-                                                value: futureTime
-                                            })
+                            <div style={{ display: 'flex', height: '100%', flexDirection: 'column' }}>
 
-                                            let combinations = generateCombinations(numSimulatedAutos, finalPlants.length);
-                                            setCalcAFK(true);
-                                            setCalcStep(false);
-                                            if (lockCustomAuto) {
-                                                let finalCombo = [];
-                                                for (let i = 0; i < combinations.length; i++) {
-                                                    let curr = combinations[i];
-                                                    let matches = true;
-                                                    for (let j = 0; j < finalPlants.length; j++) {
-                                                        //Meaning there is not enough assigned to match user's preference
-                                                        if (plantAutos[j] > curr[j]) {
-                                                            matches = false;
-                                                            break;
+                                <div style={{ display: 'flex', flex: '1' }}>
+
+                                    <div style={{
+                                        maxWidth: '50%', margin: '0 6px',
+                                        border: notEnoughAuto ? '1px solid black' : '',
+                                        display: 'flex',
+                                        flexDirection: 'column'
+                                    }}>
+                                        <button
+                                            disabled={notEnoughAuto || !calcDone}
+                                            onClick={(e) => {
+                                                setCalcDone(false);
+                                                setCalcedFutureTime(futureTime);
+                                                console.log(`Time start: ` + (new Date()).getTime())
+                                                ReactGA.event({
+                                                    category: "farming_interaction",
+                                                    action: `clicked_optomise_auto`,
+                                                    label: `${futureTime}`,
+                                                    value: futureTime
+                                                })
+
+                                                let combinations = generateCombinations(numSimulatedAutos, finalPlants.length);
+                                                setCalcAFK(true);
+                                                setCalcStep(false);
+                                                if (lockCustomAuto) {
+                                                    let finalCombo = [];
+                                                    for (let i = 0; i < combinations.length; i++) {
+                                                        let curr = combinations[i];
+                                                        let matches = true;
+                                                        for (let j = 0; j < finalPlants.length; j++) {
+                                                            //Meaning there is not enough assigned to match user's preference
+                                                            if (plantAutos[j] > curr[j]) {
+                                                                matches = false;
+                                                                break;
+                                                            }
+                                                        }
+                                                        if (matches) {
+                                                            finalCombo.push(curr);
                                                         }
                                                     }
-                                                    if (matches) {
-                                                        finalCombo.push(curr);
-                                                    }
+                                                    combinations = finalCombo;
                                                 }
-                                                combinations = finalCombo;
-                                            }
 
-                                            // const combinations = generateCombinations(3, finalPlants.length);
-                                            let splitArraysIndicies = splitArrayIndices(combinations, numThreads);
-                                            if (combinations.length < numThreads) {
-                                                splitArraysIndicies = [[0, combinations.length - 1], [], [], [], [], []];
-                                            }
-                                            farmTotals.current = [];
-                                            setFarmCalcProgress((cur) => {
-                                                let temp = { ...cur };
-                                                temp.max = combinations.length;
-                                                temp.current = 0;
-                                                return temp;
-                                            })
-                                            for (let i = 0; i < numThreads; i++) {
-                                                if (farmCalcStarted.current[i]) {
-                                                    continue;
+                                                // const combinations = generateCombinations(3, finalPlants.length);
+                                                let splitArraysIndicies = splitArrayIndices(combinations, numThreads);
+                                                if (combinations.length < numThreads) {
+                                                    splitArraysIndicies = [[0, combinations.length - 1], [], [], [], [], []];
                                                 }
-                                                if (splitArraysIndicies[i].length === 0) continue;
-                                                let worker = workers[i];
-                                                worker.postMessage({
-                                                    data: {
-                                                        combinations: combinations,
-                                                        start: splitArraysIndicies[i][0],
-                                                        end: splitArraysIndicies[i][1],
-                                                        time: futureTime,
-                                                        modifiers: { ...modifiers, },
-                                                        finalPlants: finalPlants,
-                                                        mode: 'afk',
-                                                    },
-                                                    id: i
+                                                farmTotals.current = [];
+                                                setFarmCalcProgress((cur) => {
+                                                    let temp = { ...cur };
+                                                    temp.max = combinations.length;
+                                                    temp.current = 0;
+                                                    return temp;
                                                 })
-                                                farmCalcStarted.current[i] = true;
-                                            }
-                                        }}>Calculate AFK
-                                    </button>
-                                    {notEnoughAuto && (
-                                        <div>
-                                            Not enough autos remaining!
-                                        </div>
-                                    )}
+                                                for (let i = 0; i < numThreads; i++) {
+                                                    if (farmCalcStarted.current[i]) {
+                                                        continue;
+                                                    }
+                                                    if (splitArraysIndicies[i].length === 0) continue;
+                                                    let worker = workers[i];
+                                                    worker.postMessage({
+                                                        data: {
+                                                            combinations: combinations,
+                                                            start: splitArraysIndicies[i][0],
+                                                            end: splitArraysIndicies[i][1],
+                                                            time: futureTime,
+                                                            modifiers: { ...modifiers, },
+                                                            finalPlants: finalPlants,
+                                                            mode: 'afk',
+                                                        },
+                                                        id: i
+                                                    })
+                                                    farmCalcStarted.current[i] = true;
+                                                }
+                                            }}>Calculate AFK
+                                        </button>
+                                        {notEnoughAuto && (
+                                            <div>
+                                                Not enough autos remaining!
+                                            </div>
+                                        )}
+                                    </div>
+
+
+                                    <div style={{
+                                        maxWidth: '50%', margin: '0 6px',
+                                        border: futureTime < 1 ? '1px solid black' : '',
+                                        display: 'flex',
+                                        flexDirection: 'column'
+                                    }}>
+                                        <button
+
+                                            disabled={futureTime < 1 || !calcDone}
+                                            onClick={(e) => {
+                                                setCalcDone(false);
+                                                setCalcedFutureTime(futureTime);
+                                                console.log(`Time start: ` + (new Date()).getTime())
+                                                ReactGA.event({
+                                                    category: "farming_interaction",
+                                                    action: `clicked_optomise_step`,
+                                                    label: `${futureTime}`,
+                                                    value: futureTime
+                                                })
+
+                                                setCalcAFK(false);
+                                                setCalcStep(true);
+
+
+                                                let min = 0.94;
+                                                let max = secondsHour * futureTime;
+                                                let step_max = 0.009 * finalPlants.length;
+
+                                                let nums = [];
+                                                let red = Math.floor(step_max * max);
+                                                for (let i = 0; i < finalPlants.length; i++) {
+                                                    let timer = farmingHelper.calcGrowthTime(finalPlants[i], modifiers);
+                                                    if (timer < red) {
+                                                        timer = red;
+                                                    }
+                                                    nums.push(timer);
+                                                }
+
+                                                nums.reverse();
+                                                let combinations = farmingHelper.findMultipliersWithMinPercentage(max, nums, min);
+
+                                                console.log(`num combinations: ${combinations.length}`);
+
+                                                let splitArraysIndicies = splitArrayIndices(combinations, numThreads);
+                                                if (combinations.length < numThreads) {
+                                                    splitArraysIndicies = Array(12).fill([]);
+                                                    splitArraysIndicies[0] = [0, combinations.length - 1];
+                                                }
+                                                farmTotals.current = [];
+                                                setFarmCalcProgress((cur) => {
+                                                    let temp = { ...cur };
+                                                    temp.max = combinations.length;
+                                                    temp.current = 0;
+                                                    return temp;
+                                                })
+                                                for (let i = 0; i < numThreads; i++) {
+                                                    if (farmCalcStarted.current[i]) {
+                                                        continue;
+                                                    }
+                                                    if (splitArraysIndicies[i].length === 0) continue;
+                                                    let worker = workers[i];
+                                                    worker.postMessage({
+                                                        data: {
+                                                            baseTimers: nums,
+                                                            combinations: combinations,
+                                                            start: splitArraysIndicies[i][0],
+                                                            end: splitArraysIndicies[i][1],
+                                                            time: futureTime,
+                                                            modifiers: { ...modifiers, },
+                                                            finalPlants: finalPlants,
+                                                            mode: 'step',
+                                                            numSimulatedAutos: numSimulatedAutos
+                                                        },
+                                                        id: i
+                                                    })
+                                                    farmCalcStarted.current[i] = true;
+                                                }
+
+
+                                            }}>Calculate Step</button>
+                                        {futureTime < 1 && false && (
+                                            <div>
+                                                Minimum 1 future hour!
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                                <div style={{
+
+
+
+                                {/* monte carlo */}
+                                {/* <div style={{
                                     maxWidth: '50%', margin: '0 6px',
                                     border: futureTime < 1 ? '1px solid black' : '',
                                     display: 'flex',
@@ -1798,50 +1928,82 @@ return;
                                 }}>
                                     <button
 
-                                        disabled={futureTime < 1 || !calcDone}
+                                        // disabled={futureTime < 1 || !calcDone}
                                         onClick={(e) => {
+
+                                            let numSimulations = 75000;
+                                            let numSteps = 10;
+                                            let sims = [];
+                                            const maxTime = futureTime * secondsHour;
+
+
+
+                                            //     steps.push({
+                                            //         time: runTime,
+                                            //         autos: autos
+                                            //     })
+                                            // }
+                                            // result = helper.calcStepHPProd(finalPlants, { ...dataObj, steps: steps });
+                                            // break;
+
+                                            for (let i = 0; i < numSimulations; i++) {
+                                                //create references to each object, so its the same obj
+                                                // let steps = Array(numSteps).fill({ time: 0, autos: Array(numSimulatedAutos).fill(0) });
+                                                let steps = [];
+                                                for (let j = 0; j < numSteps; j++) {
+                                                    steps.push({ time: 0, autos: Array(numSimulatedAutos).fill(0) })
+                                                }
+
+
+                                                //populate plant autos first
+                                                for (let k = 0; k < numSteps; k++) {
+                                                    let remainingAuto = numSimulatedAutos;
+                                                    while (remainingAuto > 0) {
+                                                        // let numAuto = Math.floor(Math.random() * remainingAuto);
+                                                        let numAuto = 1;
+                                                        let index = Math.floor(Math.random() * finalPlants.length);
+                                                        steps[k].autos[index] += numAuto;
+                                                        remainingAuto -= numAuto;
+                                                    }
+                                                }
+
+
+                                                //Generate timings for each step
+                                                let curTime = maxTime;
+                                                let step = 0.01 * maxTime;
+
+                                                while (curTime > 0) {
+                                                    let index = Math.floor(Math.random() * numSteps);
+                                                    steps[index].time += step;
+                                                    curTime -= step;
+                                                }
+                                                sims.push(steps);
+                                            }
+
+                                            
                                             setCalcDone(false);
                                             setCalcedFutureTime(futureTime);
                                             console.log(`Time start: ` + (new Date()).getTime())
                                             ReactGA.event({
                                                 category: "farming_interaction",
-                                                action: `clicked_optomise_step`,
+                                                action: `clicked_optomise_carlo`,
                                                 label: `${futureTime}`,
                                                 value: futureTime
                                             })
 
                                             setCalcAFK(false);
-                                            setCalcStep(true);
+                                            setCalcStep(false);
 
 
-                                            let min = 0.94;
-                                            let max = secondsHour * futureTime;
-                                            let step_max = 0.005 * finalPlants.length;
-
-                                            let nums = [];
-                                            let red = Math.floor(step_max * max);
-                                            for (let i = 0; i < finalPlants.length; i++) {
-                                                let timer = farmingHelper.calcGrowthTime(finalPlants[i], modifiers);
-                                                if (timer < red) {
-                                                    timer = red;
-                                                }
-                                                nums.push(timer);
-                                            }
-
-                                            nums.reverse();
-                                            let combinations = farmingHelper.findMultipliersWithMinPercentage(max, nums, min);
-
-                                            console.log(`num combinations: ${combinations.length}`);
-
-                                            let splitArraysIndicies = splitArrayIndices(combinations, numThreads);
-                                            if (combinations.length < numThreads) {
+                                            let splitArraysIndicies = splitArrayIndices(sims, numThreads);
+                                            if (sims.length < numThreads) {
                                                 splitArraysIndicies = Array(12).fill([]);
-                                                splitArraysIndicies[0] = [0, combinations.length - 1];
+                                                splitArraysIndicies[0] = [0, sims.length - 1];
                                             }
                                             farmTotals.current = [];
                                             setFarmCalcProgress((cur) => {
                                                 let temp = { ...cur };
-                                                temp.max = combinations.length;
+                                                temp.max = sims.length;
                                                 temp.current = 0;
                                                 return temp;
                                             })
@@ -1853,14 +2015,13 @@ return;
                                                 let worker = workers[i];
                                                 worker.postMessage({
                                                     data: {
-                                                        baseTimers: nums,
-                                                        combinations: combinations,
+                                                        combinations: sims,
                                                         start: splitArraysIndicies[i][0],
                                                         end: splitArraysIndicies[i][1],
                                                         time: futureTime,
                                                         modifiers: { ...modifiers, },
                                                         finalPlants: finalPlants,
-                                                        mode: 'step',
+                                                        mode: 'carlo',
                                                         numSimulatedAutos: numSimulatedAutos
                                                     },
                                                     id: i
@@ -1869,14 +2030,14 @@ return;
                                             }
 
 
-                                        }}>Calculate Step</button>
-                                    {futureTime < 1 && (
+                                        }}>Calculate Monte Carlo</button>
+                                    {futureTime < 1 && false && (
                                         <div>
                                             Minimum 1 future hour!
                                         </div>
                                     )}
                                 </div>
-
+ */}
 
                             </div>
                             {(farmCalcProgress.current > 0) && (
@@ -2379,6 +2540,7 @@ return;
                                     expDiff={expDiff}
                                     displayPicPerc={displayPicPerc}
                                     calcDone={calcDone}
+                                    calcAFK={calcAFK}
                                 />
                             </div>
                         </div>

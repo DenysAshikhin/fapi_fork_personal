@@ -56,6 +56,9 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
                 case 'afk':
                     result = helper.calcHPProd(finalPlants, dataObj);
                     break;
+                case 'carlo':
+                    result = helper.calcStepHPProd(finalPlants, { ...dataObj, steps: combo });
+                    break;
                 case 'step':
 
                     let steps = [];
@@ -92,7 +95,7 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
                             autos: autos
                         })
                     }
-                    result = helper.calcStepHPProd(finalPlants, { ...dataObj, steps: steps, numSteps: numSteps });
+                    result = helper.calcStepHPProd(finalPlants, { ...dataObj, steps: steps });
                     break;
                 default:
                     result = helper.calcHPProd(finalPlants, dataObj);
@@ -161,7 +164,7 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
             // eslint-disable-next-line no-restricted-globals
             self.postMessage({
                 update: true,
-                // temp: temp
+                temp: temp
             })
         }
 

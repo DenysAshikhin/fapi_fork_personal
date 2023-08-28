@@ -11,10 +11,11 @@ function Graph({
     showCalc,
     bestPic,
     displayPicPerc,
-    calcDone
+    calcDone,
+    calcAFK
 }) {
     let showRunning = false;
-    if (!!runningGraphObjects?.runningProd?.prod && !calcDone) {
+    if (!!runningGraphObjects?.runningProd?.prod && !calcDone && !calcAFK) {
         showRunning = true;
     }
 
