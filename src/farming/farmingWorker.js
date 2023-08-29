@@ -1,5 +1,6 @@
 import helper from '../util/farmingHelper.js';
 import mathHelper from '../util/math.js';
+import generalHelper from '../util/helper.js';
 
 
 // eslint-disable-next-line no-restricted-globals
@@ -54,15 +55,17 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
 
             switch (mode) {
                 case 'afk':
+
                     result = helper.calcHPProd(finalPlants, dataObj);
                     break;
                 case 'carlo':
                     result = helper.calcStepHPProd(finalPlants, { ...dataObj, steps: combo });
                     break;
                 case 'step':
-
+                    if (combo[0] === 0 && combo[1] === 0 && combo[2] === 0 && combo[3] === 0 && combo[4] === 0) {
+                        let bigsad = -1;
+                    }
                     let steps = [];
-                    let runningTime = 0;
 
                     let curStep = 0;
                     let numSteps = 0;
@@ -84,14 +87,33 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
                         autos[j] = numSimulatedAutos;
                         autos.reverse();
                         let runTime = combo[j] * data.baseTimers[j];
-                        runningTime += runTime;
 
+                        //If its the last plant that will be grown, give the remaining time to it
                         if (curStep === numSteps && combo[j] > 0) {
                             runTime += remaining;
                         }
+                        //otherwise, round off time from other plants
+                        else if (combo[j] > 0) {
+                            let curPlant = finalPlants[finalPlants.length - 1 - j];
+                            let remainder = runTime % curPlant.growthTime;
+                            //Round down, add run time
+                            if (remainder <= curPlant.growthTime * 0.5) {
+                                runTime -= remainder;
+                                remaining += remainder;
+                            }
+                            //Round up, reduce run time
+                            else {
+                                let diff = curPlant.growthTime - remainder;
+                                //Only subtract time from final plant IF there is enough remaining time
+                                if (remaining >= diff) {
+                                    runTime += diff;
+                                    remaining -= diff
+                                }
+                            }
+                        }
 
                         steps.push({
-                            time: runTime,
+                            time: generalHelper.roundInt(runTime),
                             autos: autos
                         })
                     }

@@ -147,11 +147,21 @@ var farmingHelper = {
         let remainingTime = modifiers.time;
         let numAutos = modifiers.numAuto || modifiers?.numAuto === 0 ? modifiers.numAuto : 1;
 
+        if (numAutos === 0) {
+            let newOutPut = this.calcProdOutput(plant, modifiers);
+
+            plant.production = newOutPut;
+            return plant;
+        }
+
+
         let expTick = plant.prestigeBonus * modifiers.expBonus;
         plant.growthTime = Math.floor(plant.TimeNeeded / plant.prestigeBonus / (1 + 0.05 * modifiers.shopGrowingSpeed) / modifiers.petPlantCombo / modifiers.contagionPlantGrowth);
         if (plant.growthTime < 10) {
             plant.growthTime = 10;
         }
+
+
 
         while (remainingTime > 0) {
 
@@ -198,8 +208,11 @@ var farmingHelper = {
                 }
                 plant.elapsedTime = plant.elapsedTime % plant.growthTime;
             }
+
         }
+
         let newOutPut = this.calcProdOutput(plant, modifiers);
+
         plant.production = newOutPut;
         return plant;
     },
@@ -207,6 +220,7 @@ var farmingHelper = {
         let plant = plant_input;
         let modifiers = modifiers_input;
         let numAutos = modifiers.numAuto || modifiers?.numAuto === 0 ? modifiers.numAuto : 1;
+        if (numAutos === 0) return Infinity;
 
         let remExp = plant.reqExp - plant.curExp;
         let expBonus = plant.prestigeBonus * modifiers.expBonus * numAutos;
@@ -242,10 +256,11 @@ var farmingHelper = {
         let runningHarvests = 0;
         let flag = true;
         while (flag) {
-            let requiredHarvests = runningHarvests + (10 * Math.pow(2, start));
+            let requiredPerPic = 10 * Math.pow(2, start);
+            let requiredHarvests = runningHarvests + requiredPerPic;
             if (plant_input.created.greaterThanOrEqualTo(requiredHarvests)) {
                 start++;
-                runningHarvests += requiredHarvests;
+                runningHarvests += requiredPerPic;
             }
             else {
                 flag = false;
@@ -264,10 +279,6 @@ var farmingHelper = {
         let runningHarvests = 0;
         let expTick = plant.prestigeBonus * modifiers.expBonus;
 
-        if (plant.ID === 7) {
-            let bigsad = -1;
-        }
-
         while (!prestiged) {
             let timeToLevel = this.calcTimeTillLevel(plant, modifiers);
             let requiredPerPic = 10 * Math.pow(2, plant.prestige);
@@ -283,7 +294,11 @@ var farmingHelper = {
                 ).ceil().toNumber()
                 ;
 
-            if (timeTillPrestige <= 0) {
+            if (numAutos === 0 && remainingHarvests.greaterThan(0)) {
+                prestiged = true;
+                totalTime = Infinity;
+            }
+            else if (timeTillPrestige <= 0) {
                 prestiged = true;
 
                 if (totalTime <= 0) {
@@ -495,6 +510,7 @@ var farmingHelper = {
         let dataPointThreshold = (modifiers_input.time / tickRate) < dataPointsMax ? 1 : helper.roundInt((modifiers_input.time / tickRate) / dataPointsMax);
 
         for (let i = 0; i < steps.length; i++) {
+            if(steps[i].time === 0) continue;
             res = this.calcHPProd(plants, {
                 ...modifiers,
                 numAutos: steps[i].autos,

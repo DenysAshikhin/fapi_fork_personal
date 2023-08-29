@@ -147,7 +147,6 @@ const FarmingLanding = ({ data }) => {
         let shopRankEXP = 1 + data.FarmingShopPlantRankExpEarned * 0.1;
         let picPlants = data.FarmingShopPlantImprovement;
         let plants = data.PlantCollection;
-        let finalPlants = [];
         let assemblyPlantExp = 1;
 
         if (data?.AssemblerCollection[0].BonusList[1].StartingLevel <= data?.AssemblerCollection[0].Level) {
@@ -1884,6 +1883,28 @@ const FarmingLanding = ({ data }) => {
                                                     temp.current = 0;
                                                     return temp;
                                                 })
+
+
+                                                // let tempResp1 = farmingHelper.calcHPProd(finalPlants, { ...modifiers, time: 1818, numAutos: [1, 2, 1, 1, 1, 0] });
+                                                // let tempResp2 = farmingHelper.calcHPProd(finalPlants, { ...modifiers, time: 3636, numAutos: [1, 2, 1, 1, 1, 0] });
+                                                // let tempResp3 = farmingHelper.calcStepHPProd(finalPlants, { ...modifiers, time: 3636, steps: [{ time: 0, autos: [1, 2, 1, 1, 1, 0] }, { time: 3636, autos: [1, 2, 1, 1, 1, 0] }] });
+                                                // let tempResp4 = farmingHelper.calcStepHPProd(finalPlants, { ...modifiers, time: 3636, steps: [{ time: 1818, autos: [1, 2, 1, 1, 1, 0] }, { time: 1818, autos: [1, 2, 1, 1, 1, 0] }] });
+                                                // let tempResp5 = farmingHelper.calcStepHPProd(finalPlants, {
+                                                //     ...modifiers, time: 3636,
+                                                //     steps: [
+                                                //         { time: 909, autos: [1, 2, 1, 1, 1, 0] }, { time: 909, autos: [1, 2, 1, 1, 1, 0] },
+                                                //         { time: 909, autos: [1, 2, 1, 1, 1, 0] }, { time: 909, autos: [1, 2, 1, 1, 1, 0] }
+                                                //     ]
+                                                // });
+                                                // let tempResp6 = farmingHelper.calcStepHPProd(finalPlants, {
+                                                //     ...modifiers, time: 3636,
+                                                //     steps: [
+                                                //         { time: 909, autos: [1, 2, 1, 1, 1, 0] }, { time: 909, autos: [1, 2, 1, 1, 1, 0] },
+                                                //         { time: 0, autos: [1, 2, 1, 1, 1, 0] }, { time: 0, autos: [1, 2, 1, 1, 1, 0] },
+                                                //         { time: 909, autos: [1, 2, 1, 1, 1, 0] }, { time: 909, autos: [1, 2, 1, 1, 1, 0] }
+                                                //     ]
+                                                // });
+                                                // return;
                                                 for (let i = 0; i < numThreads; i++) {
                                                     if (farmCalcStarted.current[i]) {
                                                         continue;
@@ -1980,7 +2001,7 @@ const FarmingLanding = ({ data }) => {
                                                 sims.push(steps);
                                             }
 
-                                            
+
                                             setCalcDone(false);
                                             setCalcedFutureTime(futureTime);
                                             console.log(`Time start: ` + (new Date()).getTime())
@@ -2036,8 +2057,8 @@ const FarmingLanding = ({ data }) => {
                                             Minimum 1 future hour!
                                         </div>
                                     )}
-                                </div>
- */}
+                                </div> */}
+
 
                             </div>
                             {(farmCalcProgress.current > 0) && (
