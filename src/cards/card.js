@@ -5,7 +5,7 @@ import Grid2 from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
 import Box from '@mui/material/Box';
-import {calculateGroupScore} from "../App";
+import petHelper from '../util/petHelper.js';
 import ReactGA from "react-ga4";
 
 const PREFIX = 'card';
@@ -198,7 +198,7 @@ export function ExpeditionCardComponent({ data, weightMap, applyWeights, default
             const teamPetIds = [...team.ExpeditionTeamID]
                 .filter(id => id)
                 .map(id => data.PetsCollection[id]);
-            const score = calculateGroupScore(teamPetIds, defaultRank);
+            const score = petHelper.calculateGroupScore(teamPetIds, defaultRank);
             return {
                 ...team, ...score
             }
