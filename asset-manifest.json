@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/fapi_fork_personal/static/css/main.614e79c1.css",
-    "main.js": "/fapi_fork_personal/static/js/main.0a045835.js",
+    "main.js": "/fapi_fork_personal/static/js/main.a21d56c9.js",
     "static/js/21.4deb0902.chunk.js": "/fapi_fork_personal/static/js/21.4deb0902.chunk.js",
     "static/js/520.86f693b4.chunk.js": "/fapi_fork_personal/static/js/520.86f693b4.chunk.js",
     "static/js/942.65467993.chunk.js": "/fapi_fork_personal/static/js/942.65467993.chunk.js",
@@ -21,7 +21,7 @@
     "static/media/x_icon.svg": "/fapi_fork_personal/static/media/x_icon.e6091a530d75adde1df68129a099b94d.svg",
     "index.html": "/fapi_fork_personal/index.html",
     "main.614e79c1.css.map": "/fapi_fork_personal/static/css/main.614e79c1.css.map",
-    "main.0a045835.js.map": "/fapi_fork_personal/static/js/main.0a045835.js.map",
+    "main.a21d56c9.js.map": "/fapi_fork_personal/static/js/main.a21d56c9.js.map",
     "21.4deb0902.chunk.js.map": "/fapi_fork_personal/static/js/21.4deb0902.chunk.js.map",
     "520.86f693b4.chunk.js.map": "/fapi_fork_personal/static/js/520.86f693b4.chunk.js.map",
     "942.65467993.chunk.js.map": "/fapi_fork_personal/static/js/942.65467993.chunk.js.map",
@@ -40,6 +40,6 @@
   },
   "entrypoints": [
     "static/css/main.614e79c1.css",
-    "static/js/main.0a045835.js"
+    "static/js/main.a21d56c9.js"
   ]
 }
