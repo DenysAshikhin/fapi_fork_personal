@@ -268,6 +268,11 @@ const FarmingLanding = ({ data }) => {
         assemblyPlantExp = Math.pow(1 + data?.AssemblerCollection[0].BonusList[1].Gain, data?.AssemblerCollection[0].Level - data?.AssemblerCollection[0].BonusList[1].StartingLevel);
     }
 
+    let assemblyPlantharvest = 1;
+    if (data?.AssemblerCollection[7].BonusList[1].StartingLevel <= data?.AssemblerCollection[0].Level) {
+        assemblyPlantharvest = Math.pow(1 + data?.AssemblerCollection[7].BonusList[0].Gain, data?.AssemblerCollection[7].Level - data?.AssemblerCollection[7].BonusList[0].StartingLevel);
+    }
+
     const currFries = helper.calcPOW(data.FrenchFriesTotal);
 
     let timeTillNextLevel = Number.MAX_SAFE_INTEGER;
@@ -298,7 +303,7 @@ const FarmingLanding = ({ data }) => {
             contagionPlantGrowth: contagionPlantGrowth,
             soulPlantEXP: soulPlantEXP,
             assemblyPlantExp: assemblyPlantExp,
-
+            assemblyPlantharvest: assemblyPlantharvest,
             shopProdBonus: mathHelper.pow(1.25, data.FarmingShopPlantTotalProduction),
             shopProdLevel: data.FarmingShopPlantTotalProduction,
             contagionPlantProd: contagionPlantProd,
@@ -308,12 +313,13 @@ const FarmingLanding = ({ data }) => {
             totalPotatoes: mathHelper.createDecimal(data.HealthyPotatoTotal),
             expBonus: shopRankEXP * soulPlantEXP * contagionPlantEXP * assemblyPlantExp,
             autoBuyPBC: autoBuyPBC,
-            tickRate: Math.floor((futureTime * secondsHour) * 0.0015) < 1 ? 1 : Math.floor((futureTime * secondsHour) * 0.0015),
+            // tickRate: Math.floor((futureTime * secondsHour) * 0.0015) < 1 ? 1 : Math.floor((futureTime * secondsHour) * 0.0015),
+            tickRate: Math.floor((futureTime * secondsHour) * 0.01) < 1 ? 1 : Math.floor((futureTime * secondsHour) * 0.01),
         }
     },
         [
             shopGrowingSpeed, manualHarvestFormula, contagionHarvest, shopRankEXP, shopRankLevel, picPlants, Number(petPlantCombo),
-            contagionPlantEXP, contagionPlantGrowth, soulPlantEXP, assemblyPlantExp, contagionPlantProd,
+            contagionPlantEXP, contagionPlantGrowth, soulPlantEXP, assemblyPlantExp, contagionPlantProd, assemblyPlantharvest,
             data, currHP, totalHP, autoBuyPBC, futureTime
         ]
     )
@@ -1884,27 +1890,6 @@ const FarmingLanding = ({ data }) => {
                                                     return temp;
                                                 })
 
-
-                                                // let tempResp1 = farmingHelper.calcHPProd(finalPlants, { ...modifiers, time: 1818, numAutos: [1, 2, 1, 1, 1, 0] });
-                                                // let tempResp2 = farmingHelper.calcHPProd(finalPlants, { ...modifiers, time: 3636, numAutos: [1, 2, 1, 1, 1, 0] });
-                                                // let tempResp3 = farmingHelper.calcStepHPProd(finalPlants, { ...modifiers, time: 3636, steps: [{ time: 0, autos: [1, 2, 1, 1, 1, 0] }, { time: 3636, autos: [1, 2, 1, 1, 1, 0] }] });
-                                                // let tempResp4 = farmingHelper.calcStepHPProd(finalPlants, { ...modifiers, time: 3636, steps: [{ time: 1818, autos: [1, 2, 1, 1, 1, 0] }, { time: 1818, autos: [1, 2, 1, 1, 1, 0] }] });
-                                                // let tempResp5 = farmingHelper.calcStepHPProd(finalPlants, {
-                                                //     ...modifiers, time: 3636,
-                                                //     steps: [
-                                                //         { time: 909, autos: [1, 2, 1, 1, 1, 0] }, { time: 909, autos: [1, 2, 1, 1, 1, 0] },
-                                                //         { time: 909, autos: [1, 2, 1, 1, 1, 0] }, { time: 909, autos: [1, 2, 1, 1, 1, 0] }
-                                                //     ]
-                                                // });
-                                                // let tempResp6 = farmingHelper.calcStepHPProd(finalPlants, {
-                                                //     ...modifiers, time: 3636,
-                                                //     steps: [
-                                                //         { time: 909, autos: [1, 2, 1, 1, 1, 0] }, { time: 909, autos: [1, 2, 1, 1, 1, 0] },
-                                                //         { time: 0, autos: [1, 2, 1, 1, 1, 0] }, { time: 0, autos: [1, 2, 1, 1, 1, 0] },
-                                                //         { time: 909, autos: [1, 2, 1, 1, 1, 0] }, { time: 909, autos: [1, 2, 1, 1, 1, 0] }
-                                                //     ]
-                                                // });
-                                                // return;
                                                 for (let i = 0; i < numThreads; i++) {
                                                     if (farmCalcStarted.current[i]) {
                                                         continue;

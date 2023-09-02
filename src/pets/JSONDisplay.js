@@ -80,6 +80,7 @@ const JSONDisplay = ({
     const [hoveredBonus, setHoveredBonus] = useState(0);
     const [enabledBonusHighlight, setEnabledBonusHighlight] = useState({});
     const [showAllBonusTally, setShowAllBonusTally] = useState(false);
+    const [activePet, setActivePet] = useState(-1);
 
     useEffect(() => {
         ReactGA.send({ hitType: "pageview", page: "/expeditions", title: "Expedition Calculator Page" });
@@ -284,7 +285,7 @@ const JSONDisplay = ({
                                     onClick={() => { }}
                                     weightMap={weightMap}
                                     defaultRank={defaultRank}
-                                    borderActive={petData.BonusList.find((a) => a.ID === hoveredBonus)}
+                                    borderActive={petData.BonusList.find((a) => a.ID === hoveredBonus) || ID === activePet}
                                     enabledBonusHighlight={enabledBonusHighlight}
                                 />
                             );
@@ -1134,7 +1135,7 @@ const JSONDisplay = ({
                                 onSelect={(e) => {
                                     setPetWhiteList((curr) => {
                                         let temp = [...curr];
-                                        temp.push({ ...e, placement: 'blacklist', parameters: 'null' });
+                                        temp.push({ ...e, placement: 'blacklist', parameters: { team: 0 } });
                                         return temp;
                                     })
                                     setRefreshGroups(true);
@@ -1158,7 +1159,8 @@ const JSONDisplay = ({
                                     // boxShadow: `0 2px 1px -1px #ecf0f5`,
                                     // boxShadow: `0 0 0 1px #ecf0f5`,
                                     backgroundColor: '#fbfafc',
-                                    justifyContent: 'center'
+                                    justifyContent: 'center',
+                                    alignItems: 'center'
                                 }}
                             >
                                 Pet
@@ -1172,7 +1174,8 @@ const JSONDisplay = ({
                                     display: 'flex',
                                     boxShadow: `0 0 0 1px #ecf0f5`,
                                     backgroundColor: '#fbfafc',
-                                    justifyContent: 'center'
+                                    justifyContent: 'center',
+                                    alignItems: 'center'
                                 }}
                             >
                                 <MouseOverPopover tooltip={
@@ -1181,10 +1184,10 @@ const JSONDisplay = ({
                                             Determines the order in which the pets are slotted in:
                                         </div>
                                         <div>
-                                            Exact: Tries to place pet in the exact team
+                                            Blacklist: Omits this pet from any group
                                         </div>
                                         <div>
-                                            Bottom: Tries to place pet on the bottom most teams
+                                            Group: Forces the pet to go into a certain group
                                         </div>
                                     </div>
                                 }>
@@ -1201,13 +1204,16 @@ const JSONDisplay = ({
                                     width: '30%',
                                     display: 'flex',
                                     // boxShadow: `0 0 0 1px #ecf0f5`,
-                                    justifyContent: 'center'
+                                    justifyContent: 'center',
+                                    alignItems: 'center'
                                 }}
                             >
                                 <MouseOverPopover tooltip={
                                     <div style={{ padding: '6px' }}>
                                         <div>
-                                            Placeholder
+                                            <div>
+                                                In Placement=Group, determines which group the pet is placed in
+                                            </div>
                                         </div>
                                     </div>
                                 }>
@@ -1229,14 +1235,32 @@ const JSONDisplay = ({
                                         }}
                                     >
                                         {/* Pet name + delete */}
-                                        <div style={{ width: '40%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <div>
+                                        <div style={{ width: 'calc(40% - 1px)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
+                                         boxShadow: `2px 0 2px -1px #ecf0f5` 
+                                        }}
+                                            onMouseEnter={() => {
+                                                setActivePet(pet.id)
+                                            }}
+                                            onMouseLeave={() => {
+                                                setActivePet(-1);
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    position: 'absolute',
+                                                    width: '100%',
+                                                    display: 'flex',
+                                                    justifyContent: 'center',
+                                                    zIndex: '-1'
+                                                }}
+
+                                            >
                                                 {pet.label}
                                             </div>
                                             <img
                                                 style={{
                                                     maxHeight: '12px',
-                                                    margin: '0 12px 0 12px'
+                                                    margin: '0 12px 0 auto'
                                                 }}
                                                 onClick={(e) => {
                                                     setPetWhiteList((curr) => {
@@ -1251,7 +1275,7 @@ const JSONDisplay = ({
                                                 src={xIcon}
                                             />
                                         </div>
-                                        <div style={{ width: '30%', boxShadow: `2px 0 2px -1px #ecf0f5`, }}>
+                                        <div style={{ width: 'calc(30% + 1px)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `2px 0 2px -1px #ecf0f5`, }}>
 
                                             <select
                                                 style={{ maxWidth: '144px' }}
@@ -1270,7 +1294,7 @@ const JSONDisplay = ({
                                                 }
                                             >
                                                 <option value={'blacklist'}>Blacklist</option>
-                                                <option value={'team'}>Team</option>
+                                                <option value={'team'}>Group</option>
                                                 {/*   <option value={'max'} disabled>Maximum</option> */}
                                             </select>
 
@@ -1278,9 +1302,37 @@ const JSONDisplay = ({
                                         {/* parameters */}
                                         <div
                                             disabled={pet.placement === 'blacklist'}
-                                            style={{ width: '30%', opacity: pet.placement === 'blacklist' ? '0.4' : '' }}
+                                            style={{ width: '30%', opacity: pet.placement === 'blacklist' ? '0.4' : '', display: 'flex', justifyContent: 'center' }}
                                         >
-                                            Temp
+                                            {pet.placement === 'team' && (
+                                                <div>
+                                                    <select
+                                                        style={{ maxWidth: '144px' }}
+                                                        value={pet.parameters.team}
+                                                        onChange={
+                                                            (choice) => {
+                                                                setPetWhiteList((curr) => {
+                                                                    let temp = [...curr];
+                                                                    let tempPet = temp.find((inner_pet) => inner_pet.id === pet.id);
+                                                                    tempPet.parameters.team = Number(choice.target.value);
+                                                                    return temp;
+                                                                })
+                                                                setRefreshGroups(true);
+                                                            }
+                                                        }
+                                                    >
+                                                        {Array(numTeams).fill(numTeams).map((e, index) => {
+                                                            return <option value={index}>{index + 1}</option>
+                                                        })}
+
+
+                                                    </select>
+
+                                                </div>
+                                            )}
+                                            {pet.placement === 'blacklist' && (
+                                                <>Unavailable</>
+                                            )}
                                         </div>
                                     </div>
                                 )

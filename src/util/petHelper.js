@@ -373,15 +373,20 @@ var helper = {
         };
 
         let blackList = {};
+        let whitelist = {};
 
-        if (other.petWhiteList) {
+        if (other?.petWhiteList) {
             for (let i = 0; i < other.petWhiteList.length; i++) {
                 let cur = other.petWhiteList[i];
                 if (cur.placement === 'blacklist') {
                     blackList[cur.id] = cur;
                 }
+                else if (cur.placement === 'team') {
+                    whitelist[cur.id] = cur;
+                }
             }
         }
+
 
         const getCombinationsInner = (array, k, bonusList) => {
 
@@ -398,8 +403,31 @@ var helper = {
                     for (let i = 0; i < bonusList.length; i++) {
                         let bonus = bonusList[i];
                         let pass = false;
+
+                        //Pet being forcefull included, needs to be here
+                        if (bonus.placement === 'team') {
+                            let currCount = 0;
+                            for (let j = 0; j < prevCombination.length; j++) {
+                                let pet = prevCombination[j];
+
+                                if (pet.ID === bonus.pet.ID) {
+                                    currCount++;
+                                }
+                            }
+
+                            if (currCount > 0) {
+                                // console.log(`we good`);
+                                pass = true;
+                            }
+                            else {
+                                // console.log(`we not good`);
+                                validTeam = false;
+                                pass = false;
+                                break;
+                            }
+                        }
                         //Meaning there are required pets that have to be in the comp
-                        if (bonus.requiredNumber > 0) {
+                        else if (bonus.requiredNumber > 0) {
                             let currCount = 0;
 
                             for (let j = 0; j < prevCombination.length; j++) {
@@ -493,9 +521,10 @@ var helper = {
                             for (let j = 0; j < prevCombination.length; j++) {
                                 let pet = prevCombination[j];
 
-                                if (pet.BonusList.find((a) => a.ID === bonus.bonus.id)) {
+                                if (bonus.pets.find((a) => a.ID === pet.ID)) {
                                     currCount++;
                                 }
+
                             }
 
                             if (currCount <= bonus.tempMax) {
@@ -571,7 +600,12 @@ var helper = {
 
         let bestGroups = [];
 
-        let petsCollection = PETSCOLLECTION.filter((inner_pet) => { return !(inner_pet.ID in blackList) });
+        let petsCollection = PETSCOLLECTION.filter((inner_pet) => {
+            if (inner_pet.ID in whitelist) {
+                whitelist[inner_pet.ID].pet = inner_pet;
+            }
+            return !(inner_pet.ID in blackList) && !(inner_pet.ID in whitelist)
+        });
 
 
         for (let g = 0; g < numGroups; g++) {
@@ -583,6 +617,16 @@ var helper = {
 
             let requiredPetBonusMap = {};
             let requiredPetsByBonus = [];
+
+            let whiteListReqPets = [];
+
+            for (const [key, value] of Object.entries(whitelist)) {
+                if (value.parameters.team === g) {
+                    whiteListReqPets.push(value);
+                    petsCollection.push(value.pet);
+                    requiredPetsOverall.push(value.pet);
+                }
+            }
 
             if (activeBonuses.length > 0) {
                 //NOTE later need to add logic to determine if a bonus met its criteria or not before adding!! (in the case of early termination like theres only enough for 2 teams, and its fully used)
@@ -675,6 +719,22 @@ var helper = {
                         }
                         //If it's not time yet, check to see if we need to put a limit on a certain subset of pets from being slotted in
                         else {
+                            let finalBonusPets = [];
+                            //Need to ensure we don't reserve pets that are whitelisted to go into a certain team, if that team is now
+                            for (let x = 0; x < requiredPetBonusMap[currBonus.bonus.id].pets.length; x++) {
+                                let temp_curr = requiredPetBonusMap[currBonus.bonus.id].pets[x];
+                                if (temp_curr.ID in whitelist) {
+                                    if (whitelist[temp_curr.ID].placement === `team`) {
+                                        if (whitelist[temp_curr.ID].parameters.team === g) {
+                                            continue;
+                                        }
+                                    }
+                                }
+                                finalBonusPets.push(temp_curr);
+                            }
+                            requiredPetBonusMap[currBonus.bonus.id].pets = finalBonusPets;
+
+
                             requiredPetBonusMap[currBonus.bonus.id].active = false;//Only prevents enforcing the required pets pet team
                             requiredPetBonusMap[currBonus.bonus.id].tempMax = remainder;
                             requiredPetBonusMap[currBonus.bonus.id].disabled = disabled;
@@ -750,7 +810,12 @@ var helper = {
 
 
             time1 = new Date();
-            let combinations = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length), Object.values(requiredPetBonusMap));
+            let bonusList = Object.values(requiredPetBonusMap);
+            for (let j = 0; j < whiteListReqPets.length; j++) {
+                bonusList.push(whiteListReqPets[j]);
+                // finalPetsCollection.push(whiteListReqPets[j].pet)
+            }
+            let combinations = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length), bonusList);
             time2 = new Date();
             console.log(`time to get combinations ${combinations.length}: ${(time2 - time1) / 1000} seconds`);
 
