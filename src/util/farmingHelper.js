@@ -388,20 +388,23 @@ var farmingHelper = {
         let finalPass = false;
         // tickRate = 2;
         let prodMult = 1;
-        // if (tickRate > 2) {
-        //     if (tickRate >= 2592) {
-        //         prodMult = 0.95;
-        //     }
-        //     else if (tickRate >= 1728) {
-        //         prodMult = 0.95;
-        //     }
-        //     else if (tickRate >= 864) {
-        //         prodMult = 0.95;
-        //     }
-        //     else {
-        //         prodMult = 0.95;
-        //     }
-        // }
+        if (tickRate > 2) {
+            if (tickRate >= 2592) {
+                prodMult = 0.95;
+            }
+            else if (tickRate >= 1728) {
+                prodMult = 0.95;
+            }
+            else if (tickRate >= 864) {
+                prodMult = 0.95;
+            }
+            else if (tickRate >= 140) {
+                prodMult = 0.95;
+            }
+            else {
+                prodMult = 0.95;
+            }
+        }
         //Iterate over each second
         for (; i < simulationTime / tickRate || finalPass; i++) {
             //Calculate new values for each plant

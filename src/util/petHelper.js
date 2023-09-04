@@ -610,7 +610,6 @@ var helper = {
 
         for (let g = 0; g < numGroups; g++) {
 
-
             let remainingGroups = numGroups - g;
             let requiredPetsOverall = [];
             let requiredBonuses = {};
@@ -810,14 +809,32 @@ var helper = {
 
 
             time1 = new Date();
+            let ignoreCustomBonuses = false;//In the case whitelist is possible, but only with customs ignored
+            let skipChecks = false;//If it fails no matter what, don't bother adding bonuses in for subsequent best team generation
             let bonusList = Object.values(requiredPetBonusMap);
             for (let j = 0; j < whiteListReqPets.length; j++) {
                 bonusList.push(whiteListReqPets[j]);
-                // finalPetsCollection.push(whiteListReqPets[j].pet)
             }
             let combinations = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length), bonusList);
             time2 = new Date();
             console.log(`time to get combinations ${combinations.length}: ${(time2 - time1) / 1000} seconds`);
+
+            //Check if we can create valid teams with only whitelist pets
+            if (combinations === -1 && whiteListReqPets.length > 0) {
+
+                bonusList = [];
+                for (let j = 0; j < whiteListReqPets.length; j++) {
+                    bonusList.push(whiteListReqPets[j]);
+                }
+                combinations = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length), bonusList);
+                if (combinations === -1) {
+                    skipChecks = true;
+                }
+                else {
+                    ignoreCustomBonuses = true;
+                }
+            }
+
 
             let allPassed = true;
             //Check if any of the filters failed, and explain which + why
@@ -845,7 +862,8 @@ var helper = {
                 }
             }
 
-            if (combinations === -1) {
+            //Meaning there are just no possible combinations
+            if (skipChecks) {
                 if (Object.values(requiredPetBonusMap).length > 0) {
                     if (!(`generic` in failedFiltersObj)) {
                         failedFiltersObj[`generic`] = `Individual filters all succeeded, but the combination of all is impossible starting group ${g + 1}`;
@@ -853,7 +871,8 @@ var helper = {
                 }
                 break;
             }
-            else {
+            //Only try rel, if it's possible (meaning don't skip custom bonuses)
+            else if (!ignoreCustomBonuses) {
 
                 let bestCurrTeamScore = this.calculateGroupScore(combinations.team, defaultRank);
                 let score = bestCurrTeamScore.groupScore;
@@ -944,18 +963,45 @@ var helper = {
                     if (added) {
                         // finalPetsCollection = this.getBestDamagePets(petsCollection, defaultRank, { requiredPets: requiredPetsOverall });
                         time1 = new Date();
-                        combinations = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length), Object.values(requiredPetBonusMap));
+                        let bonusList = Object.values(requiredPetBonusMap);
+                        for (let j = 0; j < whiteListReqPets.length; j++) {
+                            bonusList.push(whiteListReqPets[j]);
+                        }
+                        let combinations_rel = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length), bonusList);
                         console.log(`got new combinations after the rel calcs`)
 
-                        if (combinations === -1) {
+                        //Only hard crash in case of no backup team that is possible
+                        if (combinations_rel === -1 && whiteListReqPets.length === 0) {
+
                             if (!(`generic` in failedFiltersObj)) {
                                 failedFiltersObj[`generic`] = `Individual filters all succeeded, but the combination of all is impossible starting group ${g + 1}`;
                             }
                             break;
                         }
+                        else if (combinations_rel !== -1) {
+
+                            combinations = combinations_rel;
+                        }
                     }
                 }
 
+                bestGroups.push(combinations.team);
+                petsCollection = petsCollection.filter((pet) => {
+
+                    let res = true;
+                    for (let i = 0; i < combinations.team.length; i++) {
+                        if (combinations.team[i].ID === pet.ID) {
+                            res = false;
+                            break;
+                        }
+                    }
+
+                    return res;
+                }
+                );
+            }
+            //Just use the whitelisted pets above
+            else {
                 bestGroups.push(combinations.team);
                 petsCollection = petsCollection.filter((pet) => {
 

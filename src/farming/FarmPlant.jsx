@@ -25,18 +25,12 @@ const FarmingPlant = ({ data }) => {
 
     let plantTitle = `P${index + 1}`;
     let harvestTime = `${helper.secondsToStringWithS(plant.growthTime)}`;
-    let harvestAmount = `${helper.roundTwoDecimal(plant.perHarvest)}`;
-    let totalHarvest = `${plant.created.toExponential(3)}`;
+    let harvestAmount = `${plant.perHarvest.toExponential(2)}`;
+    let totalHarvest = `${plant.created.toExponential(2)}`;
+    let totalMade = `${plant.totalMade.toExponential(2)}`;
     // let outMult = ` (x${helper.roundTwoDecimal(useFutureValues ? plant.futureMult : plant.currMult)})`;
-    let outMult;
-    try {
+    let outMult = ` (x${plant.futureMult.toPrecision(3).toString()})`;
 
-        outMult = ` (x${plant.futureMult.toPrecision(3).toString()})`;
-    }
-    catch (err) {
-        console.log(err);
-        let bigsad = -1;
-    }
     let pic = `${plant.prestige}`;
     let futurePic = `${plant.nextPrestige}`
     let picTime = useFutureValues && !fake ? `${plant.timeToPrestige > 3600 ? helper.secondsToString(plant.timeToPrestige) : helper.secondsToStringWithS(plant.timeToPrestige)}` : ``;
@@ -93,22 +87,9 @@ const FarmingPlant = ({ data }) => {
                 </MouseOverPopover>
             </div>
 
-            {/* total harvest */}
-            <div style={{ background: 'black', borderRadius: '6px', fontSize: '12px', padding: '0 1px 0 1px', color: 'white', top: '10%', right: '1%', display: 'flex', position: 'absolute' }}>
-
-                <MouseOverPopover tooltip={
-                    <div>
-                        <div>Total Harvest</div>
-                    </div>
-                }>
-                    <div style={{ fontSize: '12px', fontFamily: 'sans-serif' }}>
-                        {totalHarvest}
-                    </div>
-                </MouseOverPopover>
-            </div>
 
             {/* output mult */}
-            <div style={{ background: 'black', borderRadius: '6px', fontSize: '12px', padding: '0 1px 0 1px', color: 'white', top: '20%', right: '3%', display: 'flex', position: 'absolute' }}>
+            <div style={{ background: 'black', borderRadius: '6px', fontSize: '12px', padding: '0 1px 0 1px', color: 'white', top: '10%', right: '3%', display: 'flex', position: 'absolute' }}>
 
                 <MouseOverPopover tooltip={
                     <div>
@@ -120,6 +101,22 @@ const FarmingPlant = ({ data }) => {
                     </div>
                 </MouseOverPopover>
             </div>
+
+            {/* total harvest */}
+            <div style={{ background: 'black', borderRadius: '6px', fontSize: '12px', padding: '0 1px 0 1px', color: 'white', top: '20%', right: '1%', display: 'flex', position: 'absolute' }}>
+
+                <MouseOverPopover tooltip={
+                    <div>
+                        <div>Total Harvest</div>
+                    </div>
+                }>
+                    <div style={{ fontSize: '12px', fontFamily: 'sans-serif' }}>
+                        {totalMade + ` (${totalHarvest})`}
+                    </div>
+                </MouseOverPopover>
+            </div>
+
+
 
 
             {/* Rank */}
@@ -270,10 +267,10 @@ const FarmingPlant = ({ data }) => {
                                                 label: `${x}`,
                                                 value: x
                                             })
-                                            setPlantAutos((cur)=>{
-                                            let temp = [...cur];
-                                            temp[index] = x;;
-                                            return temp;
+                                            setPlantAutos((cur) => {
+                                                let temp = [...cur];
+                                                temp[index] = x;;
+                                                return temp;
                                             });
                                         }
                                         catch (err) {
@@ -299,6 +296,7 @@ const FarmingPlant = ({ data }) => {
 export default memo(FarmingPlant, function (prev, curr) {
 
     if (prev.data.fake !== curr.data.fake) return false;
+    // if (curr.data.fake) return true;
     if (prev.data.index !== curr.data.index) return false;
     //No need to check modifier values since if those are diff, plant values are diff as well
 

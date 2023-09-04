@@ -1593,6 +1593,7 @@ const FarmingLanding = ({ data }) => {
 
                 {/* Future plants */}
                 <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                    {/* <FarmingPlant data={{ fake: true }} /> */}
                     {customFuturePlants.map((plant, index) => {
                         return <FarmingPlant key={'future' + index} data={
                             {

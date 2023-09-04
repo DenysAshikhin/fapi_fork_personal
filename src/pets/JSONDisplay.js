@@ -10,6 +10,8 @@ import Typography from "@mui/material/Typography";
 
 import helper from '../util/helper.js'
 import xIcon from "../assets/images/x_icon.svg"
+import pinIcon from "../assets/images/pin-line-icon.svg"
+import trashIcon from "../assets/images/trash-can-icon.svg"
 
 import ReactGA from "react-ga4";
 import SearchBox from '../util/search.jsx';
@@ -132,7 +134,7 @@ const JSONDisplay = ({
 
 
     let filterablePets = [];
-    if (groupRankCritera === 3) {
+    if (groupRankCritera === 1) {
         selectedPets.map((pet) => {
             let found;
             try {
@@ -255,6 +257,8 @@ const JSONDisplay = ({
                         </div>
                         {/* )} */}
                     </div>
+
+
                     let GroupIcons = <Grid2
                         container
                         spacing={1}
@@ -276,18 +280,98 @@ const JSONDisplay = ({
                             }
 
                             return (
-                                <PetItem
-                                    key={ID}
-                                    petData={staticPetData}
-                                    fullPetData={petData}
-                                    data={data}
-                                    isSelected={true}
-                                    onClick={() => { }}
-                                    weightMap={weightMap}
-                                    defaultRank={defaultRank}
-                                    borderActive={petData.BonusList.find((a) => a.ID === hoveredBonus) || ID === activePet}
-                                    enabledBonusHighlight={enabledBonusHighlight}
-                                />
+                                <div
+                                    style={{
+                                        position: 'relative',
+                                        display: 'flex',
+                                        flex: '1',
+                                        width: 'auto',
+                                        height: 'auto',
+                                    }}
+                                >
+                                    <PetItem
+                                        key={ID}
+                                        petData={staticPetData}
+                                        fullPetData={petData}
+                                        data={data}
+                                        isSelected={true}
+                                        onClick={() => { }}
+                                        weightMap={weightMap}
+                                        defaultRank={defaultRank}
+                                        borderActive={petData.BonusList.find((a) => a.ID === hoveredBonus) || ID === activePet}
+                                        enabledBonusHighlight={enabledBonusHighlight}
+                                    />
+                                    <div
+                                        className="hover"
+                                        style={{
+                                            position: 'absolute', top: '0', right: '0',
+                                            // width: '20px',
+                                            // height: '20px'
+                                        }}
+                                        onClick={(e) => {
+
+                                            setPetWhiteList((curr) => {
+                                                let temp = [...curr];
+
+                                                let pet_inner = temp.find((sample_pet) => sample_pet.id === petData.ID);
+                                                if (!pet_inner) {
+                                                    temp.push({ label: staticPetData.name, id: staticPetData.petId, placement: 'team', parameters: { team: index } });
+                                                }
+                                                else {
+                                                    pet_inner.placement = 'team';
+                                                    pet_inner.parameters = { team: index }
+                                                }
+
+
+                                                return temp;
+                                            })
+
+                                            setRefreshGroups(true);
+                                            return;
+
+                                        }}
+                                    >
+
+                                        <img
+                                            style={{ width: '20px' }}
+                                            src={pinIcon} />
+                                    </div>
+                                    <div
+                                        className="hover"
+                                        style={{
+                                            position: 'absolute', bottom: '0', right: '0',
+                                            // width: '20px',
+                                            // height: '20px'
+                                        }}
+                                        onClick={(e) => {
+
+                                            setPetWhiteList((curr) => {
+                                                let temp = [...curr];
+
+                                                let pet_inner = temp.find((sample_pet) => sample_pet.id === petData.ID);
+                                                if (!pet_inner) {
+                                                    temp.push({ label: staticPetData.name, id: staticPetData.petId, placement: 'blacklist', parameters: { team: 0 } });
+                                                }
+                                                else {
+                                                    pet_inner.placement = 'blacklist';
+                                                    pet_inner.parameters = { team: 0 }
+                                                }
+
+                                                return temp;
+                                            })
+
+                                            setRefreshGroups(true);
+                                            return;
+
+                                        }}
+                                    >
+
+                                        <img
+                                            style={{ width: '20px' }}
+                                            src={trashIcon} />
+                                    </div>
+                                </div>
+
                             );
                         })}
                     </Grid2>
@@ -369,7 +453,7 @@ const JSONDisplay = ({
                         >
                             <option value="damage">Max Damage</option>
                             <option value="token">Max Tokens {`->`} Damage</option>
-                            <option value="advanced">Advanced</option>
+                            {/* <option value="advanced">Advanced</option> */}
                         </select>
                     </div>
                     <div style={{ display: 'flex' }}>
@@ -527,7 +611,7 @@ const JSONDisplay = ({
 
 
                 )}
-                {groupRankCritera === 3 && (
+                {groupRankCritera === 1 && (
                     <div style={{ display: 'flex', marginTop: '12px' }}>
 
                         <div>{`Show all bonus totals`}</div>
@@ -537,7 +621,7 @@ const JSONDisplay = ({
                     </div>
                 )}
                 {/* Advanced filter table */}
-                {groupRankCritera === 3 && (
+                {groupRankCritera === 1 && (
                     <div
                         style={{
                             margin: '0px 0 12px 0',
@@ -550,17 +634,21 @@ const JSONDisplay = ({
                     >
                         <div
                             style={{
-                                display: 'flex'
+                                display: 'flex',
+                                alignItems: 'center',
+                                margin: '6px 0 6px 0',
+                                paddingLeft: '6px'
                             }}
                         >
-                            <div>
+                            {/* <div>
                                 Custom Bonuses
-                            </div>
+                            </div> */}
 
 
                             <div
                                 style={{
-                                    margin: '0 12px 0 auto'
+                                    // margin: '6px 12px 0 12px'
+                                    marginRight: '6px'
                                 }}
                             >
                                 Available bonuses:
@@ -729,7 +817,8 @@ const JSONDisplay = ({
                                             margin: '0 6px 0 auto'
                                         }}
                                         onClick={() => {
-                                            deleteActiveCustomBonuses(e)
+                                            deleteActiveCustomBonuses(e);
+                                            setHoveredBonus(-1);
                                             // setActiveCustomBonuses(activeCustomBonuses.filter((bonus) => bonus.id === e.id));
                                             // setAvailableCustomBonuses([...availableCustomBonuses, e])
                                         }}
@@ -749,6 +838,9 @@ const JSONDisplay = ({
                                         type='number'
                                         className='prepNumber'
                                         value={currentBonus.amount}
+                                        style={{
+                                            maxWidth: `calc(100% - 30px)`
+                                        }}
                                         onChange={
                                             (num) => {
                                                 try {
@@ -1235,8 +1327,9 @@ const JSONDisplay = ({
                                         }}
                                     >
                                         {/* Pet name + delete */}
-                                        <div style={{ width: 'calc(40% - 1px)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
-                                         boxShadow: `2px 0 2px -1px #ecf0f5` 
+                                        <div style={{
+                                            width: 'calc(40% - 1px)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
+                                            boxShadow: `2px 0 2px -1px #ecf0f5`
                                         }}
                                             onMouseEnter={() => {
                                                 setActivePet(pet.id)
