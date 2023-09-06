@@ -103,7 +103,7 @@ const JSONDisplay = ({
     // if (groups && groupRankCritera === 2)
     if (groups.length > 0)
         groups.map((group, index) => {
-            damageTotal += petHelper.calculateGroupScore(group, defaultRank).groupScore;
+            damageTotal += (petHelper.calculateGroupScore(group, defaultRank).groupScore) * 5 * data.PetDamageBonuses;
             group.forEach((pet) => {
                 pet.BonusList.forEach((bon) => {
                     if (bon.ID in bonusTotals) bonusTotals[bon.ID]++;
@@ -112,6 +112,8 @@ const JSONDisplay = ({
 
 
             const groupBests = petHelper.calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken, data: data }, comboSelector)[tokenSelections[index]];
+            // totalTokensHR += groupBests.tokenHR;
+            // totalTokensHR += groupBests.totalTokens / groupBests.hours;
             totalTokensHR += groupBests.floored / groupBests.hours;
         })
 
@@ -183,12 +185,15 @@ const JSONDisplay = ({
 
                     const groupTotal = petHelper.calculateGroupScore(group, defaultRank);
                     // let tokenScore = groupTotal.tokenMult * (Math.pow(1 + petHelper.SOUL_CLOVER_STEP, data.SoulGoldenClover)) * (1 + 0.05 * data.SoulGoldenClover) * comboSelector;
-                    let tokenScore = groupTotal.tokenMult * (Math.pow(1 + petHelper.SOUL_CLOVER_STEP, data.SoulGoldenClover)) * comboSelector * data.ExpeditionTokenBonuses;
-                    tokenScore = tokenScore.toExponential(3);
+                    // let tokenScore = groupTotal.tokenMult * (Math.pow(1 + petHelper.SOUL_CLOVER_STEP, data.SoulGoldenClover)) * comboSelector * data.ExpeditionTokenBonuses;
+                    // tokenScore = tokenScore.toExponential(3);
+                    let tempTokenScore = petHelper.calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken, data: data }, comboSelector)[tokenSelections[index]]
+                    let tokenScore = (tempTokenScore.floored / tempTokenScore.hours).toExponential(3);
                     const score = groupTotal.groupScore;
                     const displayedDamage = (score * 5 * data.PetDamageBonuses).toExponential(3);
 
                     let tokenInfo = ``;
+
 
                     switch (groupRankCritera) {
                         case 1://damage
@@ -249,8 +254,8 @@ const JSONDisplay = ({
                             >
                                 {tokenInfo.map((value, indexInner) => {
                                     return <option value={indexInner} key={indexInner}>
-                                        {/* {`${value.hours} hours creating ${value.floored} (${value.totalTokens}) tokens at ${helper.roundTwoDecimal(value.effeciency * 100)}%`} */}
-                                        {`${value.hours} hours creating ${value.floored} (${helper.roundTwoDecimal(value.totalTokens)}) tokens wasting ${helper.roundTwoDecimal(value.wasted)} tokens`}
+                                        {/* {`${value.hours} hours creating ${value.floored} (${helper.roundTwoDecimal(value.totalTokens)}) tokens wasting ${value.wastedHR.toExponential(3)}/hr`} */}
+                                        {`${value.hours} hours creating ${value.floored} (${helper.roundTwoDecimal(value.totalTokens)}) tokens wasting ${helper.roundThreeDecimal(value.wastedHR)}/hr`}
                                     </option>
                                 })}
                             </select>

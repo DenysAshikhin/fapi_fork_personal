@@ -148,10 +148,23 @@ const FarmingLanding = ({ data }) => {
         let picPlants = data.FarmingShopPlantImprovement;
         let plants = data.PlantCollection;
         let assemblyPlantExp = 1;
+        let assemblyProduction = 1;
+        let assemblyPlantharvest = 1;
+
 
         if (data?.AssemblerCollection[0].BonusList[1].StartingLevel <= data?.AssemblerCollection[0].Level) {
-            assemblyPlantExp += data?.AssemblerCollection[0].BonusList[1].Gain * (data?.AssemblerCollection[0].Level - data?.AssemblerCollection[0].BonusList[1].StartingLevel);
+            assemblyPlantExp *= farmingHelper.calcAssembly(data, 0, 1);
         }
+        if (data?.AssemblerCollection[3].BonusList[2].StartingLevel <= data?.AssemblerCollection[3].Level) {
+            assemblyProduction *= farmingHelper.calcAssembly(data, 3, 2);
+        }
+        if (data?.AssemblerCollection[7].BonusList[1].StartingLevel <= data?.AssemblerCollection[7].Level) {
+            assemblyProduction *= farmingHelper.calcAssembly(data, 7, 1);
+        }
+        if (data?.AssemblerCollection[7].BonusList[0].StartingLevel <= data?.AssemblerCollection[7].Level) {
+            assemblyPlantharvest *= farmingHelper.calcAssembly(data, 7, 0);
+        }
+
 
         const currFries = helper.calcPOW(data.FrenchFriesTotal);
 
@@ -263,14 +276,20 @@ const FarmingLanding = ({ data }) => {
     let plants = data.PlantCollection;
 
     let assemblyPlantExp = 1;
-
+    let assemblyProduction = 1;
     if (data?.AssemblerCollection[0].BonusList[1].StartingLevel <= data?.AssemblerCollection[0].Level) {
-        assemblyPlantExp = Math.pow(1 + data?.AssemblerCollection[0].BonusList[1].Gain, data?.AssemblerCollection[0].Level - data?.AssemblerCollection[0].BonusList[1].StartingLevel);
+        assemblyPlantExp *= farmingHelper.calcAssembly(data, 0, 1);
+    }
+    if (data?.AssemblerCollection[3].BonusList[2].StartingLevel <= data?.AssemblerCollection[3].Level) {
+        assemblyProduction *= farmingHelper.calcAssembly(data, 3, 2);
+    }
+    if (data?.AssemblerCollection[7].BonusList[1].StartingLevel <= data?.AssemblerCollection[7].Level) {
+        assemblyProduction *= farmingHelper.calcAssembly(data, 7, 1);
     }
 
     let assemblyPlantharvest = 1;
-    if (data?.AssemblerCollection[7].BonusList[1].StartingLevel <= data?.AssemblerCollection[0].Level) {
-        assemblyPlantharvest = Math.pow(1 + data?.AssemblerCollection[7].BonusList[0].Gain, data?.AssemblerCollection[7].Level - data?.AssemblerCollection[7].BonusList[0].StartingLevel);
+    if (data?.AssemblerCollection[7].BonusList[0].StartingLevel <= data?.AssemblerCollection[7].Level) {
+        assemblyPlantharvest *= farmingHelper.calcAssembly(data, 7, 0);
     }
 
     const currFries = helper.calcPOW(data.FrenchFriesTotal);
@@ -303,6 +322,7 @@ const FarmingLanding = ({ data }) => {
             contagionPlantGrowth: contagionPlantGrowth,
             soulPlantEXP: soulPlantEXP,
             assemblyPlantExp: assemblyPlantExp,
+            assemblyProduction: assemblyProduction,
             assemblyPlantharvest: assemblyPlantharvest,
             shopProdBonus: mathHelper.pow(1.25, data.FarmingShopPlantTotalProduction),
             shopProdLevel: data.FarmingShopPlantTotalProduction,
@@ -319,7 +339,7 @@ const FarmingLanding = ({ data }) => {
     },
         [
             shopGrowingSpeed, manualHarvestFormula, contagionHarvest, shopRankEXP, shopRankLevel, picPlants, Number(petPlantCombo),
-            contagionPlantEXP, contagionPlantGrowth, soulPlantEXP, assemblyPlantExp, contagionPlantProd, assemblyPlantharvest,
+            contagionPlantEXP, contagionPlantGrowth, soulPlantEXP, assemblyPlantExp, assemblyProduction, contagionPlantProd, assemblyPlantharvest,
             data, currHP, totalHP, autoBuyPBC, futureTime
         ]
     )
@@ -1050,7 +1070,9 @@ const FarmingLanding = ({ data }) => {
                 }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
-                    newAmount.current++;
+                    // newAmount.current++;
+                    // return newAmount;
+                    newAmount.current += response.updateAmount;
                     return newAmount;
                 })
             }
@@ -1067,7 +1089,9 @@ const FarmingLanding = ({ data }) => {
                 }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
-                    newAmount.current++;
+                    // newAmount.current++;
+                    // return newAmount;
+                    newAmount.current += response.updateAmount;
                     return newAmount;
                 })
             }
@@ -1084,7 +1108,9 @@ const FarmingLanding = ({ data }) => {
                 }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
-                    newAmount.current++;
+                    // newAmount.current++;
+                    // return newAmount;
+                    newAmount.current += response.updateAmount;
                     return newAmount;
                 })
             }
@@ -1101,7 +1127,9 @@ const FarmingLanding = ({ data }) => {
                 }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
-                    newAmount.current++;
+                    // newAmount.current++;
+                    // return newAmount;
+                    newAmount.current += response.updateAmount;
                     return newAmount;
                 })
             }
@@ -1119,7 +1147,9 @@ const FarmingLanding = ({ data }) => {
                 }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
-                    newAmount.current++;
+                    // newAmount.current++;
+                    // return newAmount;
+                    newAmount.current += response.updateAmount;
                     return newAmount;
                 })
             }
@@ -1137,7 +1167,9 @@ const FarmingLanding = ({ data }) => {
                 }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
-                    newAmount.current++;
+                    // newAmount.current++;
+                    // return newAmount;
+                    newAmount.current += response.updateAmount;
                     return newAmount;
                 })
             }
@@ -1155,7 +1187,9 @@ const FarmingLanding = ({ data }) => {
                 }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
-                    newAmount.current++;
+                    // newAmount.current++;
+                    // return newAmount;
+                    newAmount.current += response.updateAmount;
                     return newAmount;
                 })
             }
@@ -1173,7 +1207,9 @@ const FarmingLanding = ({ data }) => {
                 }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
-                    newAmount.current++;
+                    // newAmount.current++;
+                    // return newAmount;
+                    newAmount.current += response.updateAmount;
                     return newAmount;
                 })
             }
@@ -1191,7 +1227,9 @@ const FarmingLanding = ({ data }) => {
                 }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
-                    newAmount.current++;
+                    // newAmount.current++;
+                    // return newAmount;
+                    newAmount.current += response.updateAmount;
                     return newAmount;
                 })
             }
@@ -1209,7 +1247,9 @@ const FarmingLanding = ({ data }) => {
                 }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
-                    newAmount.current++;
+                    // newAmount.current++;
+                    // return newAmount;
+                    newAmount.current += response.updateAmount;
                     return newAmount;
                 })
             }
@@ -1227,7 +1267,9 @@ const FarmingLanding = ({ data }) => {
                 }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
-                    newAmount.current++;
+                    // newAmount.current++;
+                    // return newAmount;
+                    newAmount.current += response.updateAmount;
                     return newAmount;
                 })
             }
@@ -1245,7 +1287,9 @@ const FarmingLanding = ({ data }) => {
                 }
                 return setFarmCalcProgress((curr) => {
                     let newAmount = { ...curr };
-                    newAmount.current++;
+                    // newAmount.current++;
+                    // return newAmount;
+                    newAmount.current += response.updateAmount;
                     return newAmount;
                 })
             }

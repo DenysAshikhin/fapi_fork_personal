@@ -48,7 +48,7 @@ var farmingHelper = {
         let shovel = modifiers_input.manualHarvestFormula;
         let shopProdBonus = modifiers_input.shopProdBonus;
         //note bigsad = -1 -> need to take into account assumbly in the future
-        const assemblyBonus = 1;
+        const assemblyBonus = modifiers_input.assemblyProduction;
         let prestige = plant_input.prestige;
         // GM.PD.PlantTotalProductionBonus = 1 * BigDouble.Pow(1.25, GM.PD.FarmingShopPlantTotalProduction) * GM.ASMA.GetAssemblerBonus(26) * GM.GHLM.GetBonus(3) * Math.Pow(1.01, Math.Max(0, GM.PD.CurrentEventPoint - 75));
         let PlantTotalProductionBonus = mathHelper.multiplyDecimal(mathHelper.multiplyDecimal(shopProdBonus, assemblyBonus), modifiers_input.contagionPlantProd);
@@ -568,6 +568,17 @@ var farmingHelper = {
         if (data?.AssemblerCollection[0].BonusList[0].StartingLevel <= data?.AssemblerCollection[0].Level) {
             let gain = data?.AssemblerCollection[0].BonusList[0].Gain;
             let level = (data?.AssemblerCollection[0].Level - data?.AssemblerCollection[0].BonusList[0].StartingLevel)
+            bonus = Math.pow(1 + gain, level);
+        }
+
+        return bonus;
+    },
+    calcAssembly: function (data, line_num, bonus_num) {
+        let bonus = 1;
+
+        if (data?.AssemblerCollection[line_num].BonusList[bonus_num].StartingLevel <= data?.AssemblerCollection[line_num].Level) {
+            let gain = data?.AssemblerCollection[line_num].BonusList[bonus_num].Gain;
+            let level = Math.max(0, data.AssemblerCollection[line_num].Level - (data.AssemblerCollection[line_num].BonusList[bonus_num].StartingLevel - 1));
             bonus = Math.pow(1 + gain, level);
         }
 

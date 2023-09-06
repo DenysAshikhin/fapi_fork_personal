@@ -47,8 +47,12 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
         let top10DataPointsPotatoes = [];
         let top10DataPointsFries = [];
 
-        for (let i = data.start; i <= data.end; i++) {
+        let counter = 0;
+        let counterMax = data.end - data.start;
 
+        for (let i = data.start; i <= data.end; i++) {
+            counterMax--;
+            counter++;
             let combo = combinations[i];
             dataObj.numAutos = combo;
             let result;
@@ -182,13 +186,20 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
                 }
             }
 
-
-            // eslint-disable-next-line no-restricted-globals
-            self.postMessage({
-                update: true,
-                temp: temp
-            })
+            if (counter % 250 === 0) {
+                // eslint-disable-next-line no-restricted-globals
+                self.postMessage({
+                    update: true,
+                    temp: temp,
+                    updateAmount: 250
+                })
+            }
         }
+        // eslint-disable-next-line no-restricted-globals
+        self.postMessage({
+            update: true,
+            updateAmount: counterMax
+        })
 
         // eslint-disable-next-line no-restricted-globals
         self.postMessage({

@@ -39,7 +39,8 @@ var helper = {
             let floored = Math.floor(totalTokens);
             let effeciency = floored / totalTokens;
             let wasted = totalTokens - floored;
-            let temp = { tokenHR: tokenHR, wasted: wasted, hours: h, totalTokens: totalTokens, floored: floored, effeciency: effeciency };
+            let wastedHR = wasted / h;
+            let temp = {wastedHR:wastedHR, tokenHR: tokenHR, wasted: wasted, hours: h, totalTokens: totalTokens, floored: floored, effeciency: effeciency };
             bestArr.push(temp);
 
             // if (effeciency > best.effeciency) {
@@ -53,7 +54,8 @@ var helper = {
             // }
         }
 
-        bestArr.sort((a, b) => { return a.wasted - b.wasted })
+        // bestArr.sort((a, b) => { return a.wasted - b.wasted })
+        bestArr.sort((a, b) => { return a.wastedHR - b.wastedHR })
 
         return bestArr;
     },
