@@ -186,12 +186,12 @@ self.onmessage = ({ data: { data, id, data1 } }) => {
                 }
             }
 
-            if (counter % 250 === 0) {
+            if (counter % 100 === 0) {
                 // eslint-disable-next-line no-restricted-globals
                 self.postMessage({
                     update: true,
                     temp: temp,
-                    updateAmount: 250
+                    updateAmount: 100
                 })
             }
         }

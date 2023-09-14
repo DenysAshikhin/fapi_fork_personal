@@ -11,6 +11,73 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
-.hover:hover{
+
+.hover:hover {
   cursor: pointer;
+}
+
+.greenDot {
+  height: 7px;
+  width: 7px;
+  background-color: green;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+
+.redDot {
+  height: 7px;
+  width: 7px;
+  background-color: red;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.greenStripes {
+  background: repeating-linear-gradient(45deg,
+      #ffffff,
+      #ffffff 10px,
+      #42bb5d 10px,
+      #42bb5d 20px);
+}
+
+.grayStripes {
+  background:
+    /* On "top" */
+    repeating-linear-gradient(45deg,
+      transparent,
+      transparent 10px,
+      #ccc 10px,
+      #ccc 20px),
+    /* on "bottom" */
+    linear-gradient(to bottom,
+      #eee,
+      #999);
+  /* background: repeating-linear-gradient(45deg,
+      #ffffff,
+      #ffffff 10px,
+      #42bb5d 10px,
+      #42bb5d 20px); */
+}
+
+.whiteBackground {
+  background-color: white;
+}
+
+.redBorder {
+  border: 1px solid red;
+  box-sizing: border-box;
+}
+
+.tooltip-custom {
+  /* margin: 10px; */
+  /* border-radius: 5px; */
+  /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
+  min-width: 200px;
+  max-width: 400px;
+  white-space: nowrap;
+}
+
+.tooltip {
+  background-color: red !important;
 }

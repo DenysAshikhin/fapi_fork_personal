@@ -12,6 +12,8 @@ import helper from './util/helper.js';
 import petHelper from './util/petHelper.js';
 
 import FarmingLanding from './farming/FarmingLanding.jsx';
+import useLocalStorage from "use-local-storage";
+
 
 const theme = createTheme({
     palette: {
@@ -41,34 +43,42 @@ function setGroupCache(newCache) {
 function App() {
     const [data, setData] = useState(null);
     const [groups, setGroups] = useState([]);
-    const [defaultRank, setDefaultRank] = useState(1);
+    // const [defaultRank, setDefaultRank] = useState(1);
+    const [defaultRank, setDefaultRank] = useLocalStorage("defaultRank", 1);
     const [includeLocked, setIncludeLocked] = useState(false);
     const [selectedItems, setSelectedItems] = useState(defaultPetSelection);
     const [tabSwitch, setTabSwitch] = useState(0);
     const [weightMap, setWeightMap] = useState(DefaultWeightMap);
     const [refreshGroups, setRefreshGroups] = useState(false);
-    const [groupRankCritera, setGroupRankCriteria] = useState(1);//1 = overall damage + modifiers, 2 = token/hr + (damage and modifiers), 3 = advanced/custom
-    const [comboSelector, setComboSelector] = useState(1);
-    const [numTeams, setNumTeams] = useState(-1);
+    // const [groupRankCritera, setGroupRankCriteria] = useState(1);//1 = overall damage + modifiers, 2 = token/hr + (damage and modifiers), 3 = advanced/custom
+    const [groupRankCritera, setGroupRankCriteria] = useLocalStorage("groupRankCriteria", 1);//1 = overall damage + modifiers, 2 = token/hr + (damage and modifiers), 3 = advanced/custom
+    // const [comboSelector, setComboSelector] = useState(1);
+    const [comboSelector, setComboSelector] = useLocalStorage("comboSelector", 1);
+    // const [numTeams, setNumTeams] = useState(-1);
+    const [numTeams, setNumTeams] = useLocalStorage("numTeams", -1);
     const [tokenDamageBias, setTokenDamageBias] = useState(15);
     const [availableCustomBonuses, setAvailableCustomBonuses] = useState(
         [
-            { id: 1001, label: "POTATO GAIN" },
-            { id: 1002, label: "CLASS EXP GAIN" },
-            { id: 1003, label: "SKULL GAIN" },
-            { id: 1009, label: "RESIDUE GAIN" },
-            { id: 1012, label: "DUNGEON TIME GAIN" },
-            { id: 1013, label: "DUNGEON DMG" },
-            { id: 1014, label: "CARD EXP" },
-            { id: 1015, label: "REINC PTS GAIN" },
-            { id: 1016, label: "EXPE TOKEN GAIN" },
+            // { id: 1001, label: "POTATO GAIN" },
+            // { id: 1002, label: "CLASS EXP GAIN" },
+            // { id: 1003, label: "SKULL GAIN" },
+            { id: 1009, label: "Residue Gain" },
+            { id: 1010, label: "Card Power Gain" },
+            { id: 1011, label: "Expedition Reward" },
+            { id: 1012, label: "Expedition Time Gain" },
+            { id: 1013, label: "Expedition Damage" },
+            { id: 1014, label: "Card EXP" },
+            { id: 1015, label: "Reinc Pts Gain" },
+            { id: 1016, label: "Token Gain" },
         ]
     );
-    const [activeCustomBonuses, setActiveCustomBonuses] = useState([]);
+    // const [activeCustomBonuses, setActiveCustomBonuses] = useState([]);
+    const [activeCustomBonuses, setActiveCustomBonuses] = useLocalStorage("activeCustomBonuses", []);
     const [selectedPets, setSelectedPets] = useState([]);
     const [failedFilters, setFailedFilters] = useState([]);
     const [originalPets, setOriginalPets] = useState([]);
-    const [petWhiteList, setPetWhiteList] = useState([]);
+    // const [petWhiteList, setPetWhiteList] = useState([]);
+    const [petWhiteList, setPetWhiteList] = useLocalStorage("petWhiteList", []);
 
     const handleItemSelected = (items) => {
         setSelectedItems(items);

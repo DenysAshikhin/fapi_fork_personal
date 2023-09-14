@@ -66,7 +66,7 @@ const SearchBox = ({ data, onSelect }) => {
     }
 
     return (
-        <div style={{ width: data?.width ? data.width : '288px', minHeight: '0px', height: '24px', }}>
+        <div style={{ width: data?.width ? data.width : '288px', minHeight: '0px', height: '36px', }}>
             <AutoComplete
                 // sx={{ height: '22px', padding: '1px' }}
                 options={data.list}

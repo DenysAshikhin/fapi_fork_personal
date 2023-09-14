@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import useLocalStorage from "use-local-storage";
 import MouseOverPopover from "../tooltip";
 import FarmingPlant from './FarmPlant';
 import helper from "../util/helper.js";
@@ -101,23 +102,25 @@ const FarmingLanding = ({ data }) => {
     // const [numAuto, setNumAuto] = useState(1);
     const [password, setPassword] = useState('');
     const [futureGrasshopper, setFutureGrasshopper] = useState(1);
-    const [plantAutos, setPlantAutos] = useState([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
+    const [plantAutos, setPlantAutos] = useLocalStorage("plantAutos", [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
     const secondsHour = 3600;
     const farmCalcStarted = useRef({});
     const farmTotals = useRef([]);
-    const [numThreads, setNumThreads] = useState(8);
-    const [yScale, setYScale] = useState('auto');
+    // const [numThreads, setNumThreads] = useState(8);
+    const [numThreads, setNumThreads] = useLocalStorage("numThreads", 8);
+    // const [yScale, setYScale] = useState('log');
+    const [yScale, setYScale] = useLocalStorage("yScale", 'log');
     const [calcedFutureTime, setCalcedFutureTime] = useState(futureTime);//Used to lock in for pic displaying what future time what used when calculating
 
-    const [numSimulatedAutos, setNumSimulatedAutos] = useState(data.FarmingShopAutoPlotBought);
+    const [numSimulatedAutos, setNumSimulatedAutos] = useLocalStorage("numSimulatedAutos", data.FarmingShopAutoPlotBought);
 
 
     const [farmCalcProgress, setFarmCalcProgress] = useState({ current: 0, max: 0 });
     const [bestPlantCombo, setBestPlantCombo] = useState([]);//holds the best production, total made, pic and pic% after a calculation
     const [bestRunningCombo, setBestRunningCombo] = useState({});//same as above, but used to make the graph update during the loading
     const [forceGraphUpdate, setForceGraphUpdate] = useState(false);
-    const [autoBuyPBC, setAutoBuyPBC] = useState(data.ASCFarmingShopAutoPage1 === 1);
-    const [lockCustomAuto, setLockCustomAuto] = useState(false);
+    const [autoBuyPBC, setAutoBuyPBC] = useLocalStorage("autoBuyPBC", data.ASCFarmingShopAutoPage1 === 1);
+    const [lockCustomAuto, setLockCustomAuto] = useLocalStorage("lockCustomAuto", false);
     const [calcAFK, setCalcAFK] = useState(false);
     const [calcStep, setCalcStep] = useState(false);
 
@@ -255,12 +258,7 @@ const FarmingLanding = ({ data }) => {
         contagionHarvest = Math.pow(1 + base * 0.01, level);
     }
 
-    //data.FarmingShopUniqueHealthy -> each index is a multiplier of x(1 + arr[i])
 
-    let currentHPBonus = helper.calcPOW(data.HealthyPotatoBonus);
-    let tempCalcBonus = mathHelper.createDecimal(data.HealthyPotatoBonus);
-    // let calcedBonus = farmingHelper.calcHPBonus(data);
-    let calcedBonus = mathHelper.createDecimal(data.HealthyPotatoBonus);
     let currHP = helper.calcPOW(data.HealthyPotatoCurrent);
     let totalHP = helper.calcPOW(data.HealthyPotatoTotal);
 
@@ -292,7 +290,6 @@ const FarmingLanding = ({ data }) => {
         assemblyPlantharvest *= farmingHelper.calcAssembly(data, 7, 0);
     }
 
-    const currFries = helper.calcPOW(data.FrenchFriesTotal);
 
     let timeTillNextLevel = Number.MAX_SAFE_INTEGER;
 
@@ -347,12 +344,26 @@ const FarmingLanding = ({ data }) => {
     const finalPlants = useMemo(() => {
         console.log(`generating inter plants`);
         let tempArr = [];
-
+        //
         for (let i = 0; i < plants.length; i++) {
             let plant = plants[i];
             if (plant.Locked === 0) continue;
 
+
+
             plant.prestige = picPlants[i];
+
+            //             if (plant.ID === 4) {
+            //                 plant.prestige += 0;
+            //             }
+            //             if (plant.ID === 5) {
+            //                 plant.prestige += 0;
+            //             }
+            //             if (plant.ID === 6) {
+            //                 plant.prestige += 40;
+            //             }
+            // //
+
             plant.prestigeBonus = Math.pow(1.02, plant.prestige)
             plant.growthTime = Math.floor(plant.TimeNeeded / plant.prestigeBonus / (1 + 0.05 * shopGrowingSpeed) / petPlantCombo / contagionPlantGrowth);
             if (plant.growthTime < 10) {
@@ -695,7 +706,7 @@ const FarmingLanding = ({ data }) => {
 
                             for (let k = 0; k < cur_top.data.length; k++) {
                                 let cur_data = cur_top.data[k];
-                                cur_data.production = mathHelper.createDecimal(cur_data.production);
+                                cur_data.production = cur_data.originalProduction ? mathHelper.createDecimal(cur_data.originalProduction) : mathHelper.createDecimal(cur_data.production);
                                 cur_data.time = helper.roundInt(cur_data.time);
                             }
                         }
@@ -715,7 +726,7 @@ const FarmingLanding = ({ data }) => {
 
                         for (let j = 0; j < cur.bestPicCombo.result.dataPointsPotatoes.length; j++) {
                             let cur_data = cur.bestPicCombo.result.dataPointsPotatoes[j];
-                            cur_data.production = mathHelper.createDecimal(cur_data.production);
+                            cur_data.production = cur_data.originalProduction ? mathHelper.createDecimal(cur_data.originalProduction) : mathHelper.createDecimal(cur_data.production);
                             cur_data.time = helper.roundInt(cur_data.time);
                         }
                         for (let j = 0; j < cur.bestPicCombo.result.dataPointsFries.length; j++) {
@@ -725,7 +736,7 @@ const FarmingLanding = ({ data }) => {
                         }
                         for (let j = 0; j < cur.bestPICPercCombo.result.dataPointsPotatoes.length; j++) {
                             let cur_data = cur.bestPICPercCombo.result.dataPointsPotatoes[j];
-                            cur_data.production = mathHelper.createDecimal(cur_data.production);
+                            cur_data.production = cur_data.originalProduction ? mathHelper.createDecimal(cur_data.originalProduction) : mathHelper.createDecimal(cur_data.production);
                             cur_data.time = helper.roundInt(cur_data.time);
                         }
                         for (let j = 0; j < cur.bestPICPercCombo.result.dataPointsFries.length; j++) {
@@ -840,6 +851,9 @@ const FarmingLanding = ({ data }) => {
 
                         setCalcDone(true);
                         return finalBests;
+                    }
+                    else {
+                        return currBestCombo;
                     }
                 })
             }
@@ -1091,6 +1105,7 @@ const FarmingLanding = ({ data }) => {
                     let newAmount = { ...curr };
                     // newAmount.current++;
                     // return newAmount;
+                    // console.log(`sm1 adding: ${response.updateAmount}`)
                     newAmount.current += response.updateAmount;
                     return newAmount;
                 })
@@ -1509,151 +1524,42 @@ const FarmingLanding = ({ data }) => {
 
 
             <div style={{
-                display: 'flex', flex: 1, flexDirection: 'column', width: '100%'
+                display: 'flex', flex: 1,
+                flexDirection: 'column',
+                width: '100%'
             }}>
-                <h3 style={{ margin: '12px 0' }}>Future Calculations</h3>
-                <div style={{ display: 'flex' }}>
 
-                    {/* Hours to calc */}
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <MouseOverPopover tooltip={
-                            <div>
-                                How many hours into the future to calculate for each plant
-                            </div>
-                        }>
-                            <div>Hours to calculate</div>
+                <div
+                    style={{ display: 'flex', marginLeft: '-6px' }}
+                >
 
-                        </MouseOverPopover>
 
-                        <input
-                            style={{
-                                // width: '48px'
-                                // , WebkitAppearance: 'none' 
-                            }}
-                            type='number'
-                            className='prepNumber'
-                            value={futureTime}
-                            onChange={
-                                (e) => {
-                                    try {
-                                        let x = Number(e.target.value);
-                                        // x = Math.floor(x);
-                                        if (x < 0.01 || x > 99999999) {
-                                            return;
-                                        }
-                                        setFutureTime(x);
+                    {/* Future plants */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                        {/* <FarmingPlant data={{ fake: true }} /> */}
+                        {customFuturePlants.map((plant, index) => {
+                            return <FarmingPlant key={'future' + index} data={
+                                {
+                                    setPlantAutos: setPlantAutos, plantAutos: plantAutos,
+                                    plant: plant,
+                                    index: index,
+                                    customMultipliers: customMultipliers,
+                                    setCustomMultipliers: setCustomMultipliers,
+                                    allowSetMultipliers: false,
+                                    useFutureValues: true,
+                                    modifiers: modifiers
+                                }
+                            } />
+                        }
+                        )}
 
-                                        ReactGA.event({
-                                            category: "farming_interaction",
-                                            action: `changed_futureHours`,
-                                            label: `${x}`,
-                                            value: x
-                                        })
 
-                                    }
-                                    catch (err) {
-                                        console.log(err);
-                                    }
-                                }}
-                            placeholder={futureTime + ''}
-                            min="0.01"
-                            max="99999999"
-                        />
-                    </div>
-
-                    {/* Max autos */}
-                    <div style={{ display: 'flex', alignItems: 'center', marginLeft: '12px' }}>
-                        <MouseOverPopover tooltip={
-                            <div>
-                                How many autos to consider for calculations as the max
-                            </div>
-                        }>
-                            <div style={{ marginRight: '6px' }}>Max Autos</div>
-                        </MouseOverPopover>
-
-                        <input
-                            style={{
-                                // width: '48px'
-                                // , WebkitAppearance: 'none' 
-                            }}
-                            type='number'
-                            className='prepNumber'
-                            value={numSimulatedAutos}
-                            onChange={
-                                (e) => {
-                                    try {
-                                        let x = Number(e.target.value);
-                                        // x = Math.floor(x);
-                                        if (x < 0 || x > 12) {
-                                            return;
-                                        }
-                                        setNumSimulatedAutos(x);
-
-                                        ReactGA.event({
-                                            category: "farming_interaction",
-                                            action: `changed_maxAutos`,
-                                            label: `${x}`,
-                                            value: x
-                                        })
-
-                                    }
-                                    catch (err) {
-                                        console.log(err);
-                                    }
-                                }}
-                            placeholder={numSimulatedAutos + ''}
-                            min="1"
-                            max="12"
-                        />
-                    </div>
-
-                    {/* Max all autos */}
-                    <div style={{ display: 'flex', alignItems: 'center', margin: '0 12px' }}>
-                        {/* <div>Max All Autos</div> */}
-                        <button onClick={(e) => {
-                            let temp = Array(20).fill(numSimulatedAutos);
-                            setPlantAutos(temp);
-                            ReactGA.event({
-                                category: "farming_interaction",
-                                action: `max_auto`,
-                                label: `max_auto`,
-                            })
-                        }}>Max Autos</button>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        {/* <div>Clear All Autos</div> */}
-                        <button onClick={(e) => {
-                            let temp = Array(20).fill(0);
-                            setPlantAutos(temp);
-                            ReactGA.event({
-                                category: "farming_interaction",
-                                action: `clear_auto`,
-                                label: `clear_auto`,
-                            })
-                        }}>Clear Autos</button>
                     </div>
                 </div>
 
 
-                {/* Future plants */}
-                <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                    {/* <FarmingPlant data={{ fake: true }} /> */}
-                    {customFuturePlants.map((plant, index) => {
-                        return <FarmingPlant key={'future' + index} data={
-                            {
-                                setPlantAutos: setPlantAutos, plantAutos: plantAutos,
-                                plant: plant,
-                                index: index,
-                                customMultipliers: customMultipliers,
-                                setCustomMultipliers: setCustomMultipliers,
-                                allowSetMultipliers: false,
-                                useFutureValues: true,
-                                modifiers: modifiers
-                            }
-                        } />
-                    }
-                    )}
-                </div>
+
+
 
 
                 <div style={{
@@ -1663,7 +1569,152 @@ const FarmingLanding = ({ data }) => {
                     // height: '100%'
                     //  height: '-webkit-fill-available' 
                 }}>
-                    <div style={{ color: 'black', width: '650px', display: 'flex', flexDirection: 'column' }}>
+                    <div
+                        style={{
+                            color: 'black', width: '650px', display: 'flex', flexDirection: 'column',
+
+                        }}
+                    >
+                        {/* <h3 style={{ margin: '12px 0' }}>Future Calculations</h3> */}
+                        <div style={{
+                            display: 'flex',
+                            width: '526px',
+                            margin: '0 0 6px 0',
+                            border: '2px solid purple',
+                            borderRadius: '5px',
+                            padding: '3px'
+                            // flex: '1',
+                            // flexDirection: 'column',
+                            //  width: '172px'
+                        }}>
+
+                            {/* Hours to calc */}
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <MouseOverPopover tooltip={
+                                    <div>
+                                        How many hours into the future to calculate for each plant
+                                    </div>
+                                }>
+                                    <div>Hours to calculate</div>
+
+                                </MouseOverPopover>
+
+                                <input
+                                    style={{
+                                        marginLeft: '6px',
+                                        width: '48px'
+                                        // , WebkitAppearance: 'none' 
+                                    }}
+                                    type='number'
+                                    className='prepNumber'
+                                    value={futureTime}
+                                    onChange={
+                                        (e) => {
+                                            try {
+                                                let x = Number(e.target.value);
+                                                // x = Math.floor(x);
+                                                if (x < 0.01 || x > 99999999) {
+                                                    return;
+                                                }
+                                                setFutureTime(x);
+
+                                                ReactGA.event({
+                                                    category: "farming_interaction",
+                                                    action: `changed_futureHours`,
+                                                    label: `${x}`,
+                                                    value: x
+                                                })
+
+                                            }
+                                            catch (err) {
+                                                console.log(err);
+                                            }
+                                        }}
+                                    placeholder={futureTime + ''}
+                                    min="0.01"
+                                    max="99999999"
+                                />
+                            </div>
+
+                            {/* Max autos */}
+                            <div style={{
+                                display: 'flex', alignItems: 'center',
+                                marginLeft: '12px'
+                            }}>
+                                <MouseOverPopover tooltip={
+                                    <div>
+                                        How many autos to consider for calculations as the max
+                                    </div>
+                                }>
+                                    <div style={{ marginRight: '6px' }}>Max Autos</div>
+                                </MouseOverPopover>
+
+                                <input
+                                    style={{
+                                        width: '48px'
+                                        // , WebkitAppearance: 'none' 
+                                    }}
+                                    type='number'
+                                    className='prepNumber'
+                                    value={numSimulatedAutos}
+                                    onChange={
+                                        (e) => {
+                                            try {
+                                                let x = Number(e.target.value);
+                                                // x = Math.floor(x);
+                                                if (x < 0 || x > 12) {
+                                                    return;
+                                                }
+                                                setNumSimulatedAutos(x);
+
+                                                ReactGA.event({
+                                                    category: "farming_interaction",
+                                                    action: `changed_maxAutos`,
+                                                    label: `${x}`,
+                                                    value: x
+                                                })
+
+                                            }
+                                            catch (err) {
+                                                console.log(err);
+                                            }
+                                        }}
+                                    placeholder={numSimulatedAutos + ''}
+                                    min="1"
+                                    max="12"
+                                />
+                            </div>
+
+                            {/* Max all autos */}
+                            <div style={{
+                                display: 'flex', alignItems: 'center',
+                                margin: '0 12px'
+                            }}>
+                                {/* <div>Max All Autos</div> */}
+                                <button onClick={(e) => {
+                                    let temp = Array(20).fill(numSimulatedAutos);
+                                    setPlantAutos(temp);
+                                    ReactGA.event({
+                                        category: "farming_interaction",
+                                        action: `max_auto`,
+                                        label: `max_auto`,
+                                    })
+                                }}>Max Autos</button>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                {/* <div>Clear All Autos</div> */}
+                                <button onClick={(e) => {
+                                    let temp = Array(20).fill(0);
+                                    setPlantAutos(temp);
+                                    ReactGA.event({
+                                        category: "farming_interaction",
+                                        action: `clear_auto`,
+                                        label: `clear_auto`,
+                                    })
+                                }}>Clear Autos</button>
+                            </div>
+                        </div>
+                        {/* Various settings */}
                         <div style={{ display: 'flex' }}>
 
                             <div>
@@ -1782,10 +1833,10 @@ const FarmingLanding = ({ data }) => {
                                     </div>
                                     <button
                                         onClick={(e) => {
-                                            setYScale(yScale === 'auto' ? `log` : 'auto')
+                                            setYScale(yScale === 'auto' ? `Log` : 'auto')
                                         }}
                                     >
-                                        {yScale === 'auto' ? `Log` : 'Default'}
+                                        {yScale === 'Log' ? `Log` : 'Linear'}
                                     </button>
 
                                 </div>
@@ -1903,7 +1954,7 @@ const FarmingLanding = ({ data }) => {
                                                 setCalcStep(true);
 
 
-                                                let min = 0.94;
+                                                let min = 0.92;
                                                 let max = secondsHour * futureTime;
                                                 let step_max = 0.009 * finalPlants.length;
 
@@ -1921,7 +1972,6 @@ const FarmingLanding = ({ data }) => {
                                                 let combinations = farmingHelper.findMultipliersWithMinPercentage(max, nums, min);
 
                                                 console.log(`num combinations: ${combinations.length}`);
-
                                                 let splitArraysIndicies = splitArrayIndices(combinations, numThreads);
                                                 if (combinations.length < numThreads) {
                                                     splitArraysIndicies = Array(12).fill([]);
@@ -2201,12 +2251,18 @@ const FarmingLanding = ({ data }) => {
                                                     Best Potatoe Generation, {`${100}% Fries`}:
                                                 </div>
                                                 {bestPlantCombo.pot.map((val, index) => {
-                                                    return <div className='bestSuggestion'>{`P${index + 1}: ${val} autos`} </div>
-                                                })}
+                                                    return <div
+                                                        className='bestSuggestion' style={{
+                                                            display: 'flex',
+                                                            justifyContent: 'center'
+                                                        }}>
+                                                        {`P${index + 1}: ${val} autos`}
+                                                    </div>
+                                                }).reverse()}
                                             </div>
                                             {/* best raw pic levels */}
                                             <div style={{ display: 'flex', marginTop: '6px', alignItems: 'center' }}>
-                                                <div style={{ minWidth: '270px' }}>
+                                                <div style={{ minWidth: '270px', marginRight: '2px' }}>
                                                     <div className='calcInfo' >
                                                         <div>
                                                             Most PIC (+{`${bestPlantCombo.bestPic.result.picStats.picLevel} -> ${helper.roundTwoDecimal(bestPlantCombo.bestPic.result.picStats.picPercent * 100)}%`})
@@ -2229,30 +2285,63 @@ const FarmingLanding = ({ data }) => {
                                                 </div>
                                                 {bestPlantCombo.pic.map((val, index) => {
                                                     return (
-
-                                                        <MouseOverPopover key={'popover' + index} tooltip={
-                                                            <div>
+                                                        <div className='suggestionHolder'>
+                                                            <MouseOverPopover key={'popover' + index} tooltip={
                                                                 <div>
                                                                     <div>
-                                                                        Show how many PIC levels are gained (if any) and the time to hit the NEXT pic with your MAX num autos used
+                                                                        <div>
+                                                                            Show how many PIC levels are gained (if any) and the time to hit the NEXT pic with your MAX num autos used
+                                                                        </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
-                                                        }>
-                                                            <div className='suggestionHolder'>
+                                                            }>
+
                                                                 <div className='autoPicSuggestion'>
-                                                                    <div>
+                                                                    <div
+                                                                        style={{
+                                                                            display: 'flex',
+                                                                            justifyContent: 'center'
+                                                                        }}
+                                                                    >
                                                                         {`P${index + 1}: ${val} autos`}
                                                                     </div>
                                                                     {bestPlantCombo.bestPic.result.plants[index].picIncrease > 0 && (
-                                                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', }}>
 
-                                                                            <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
-                                                                            <div> {bestPlantCombo.bestPic.result.plants[index].prestige}</div>
-                                                                            <img style={{ height: '24px' }} src={`/fapi_fork_personal/right_arrow.svg`} />
-                                                                            <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
-                                                                            <div> {bestPlantCombo.bestPic.result.plants[index].prestige + bestPlantCombo.bestPic.result.plants[index].picIncrease}</div>
+                                                                            {/* <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} /> */}
+                                                                            <div
+                                                                                style={{
+                                                                                    margin: '-6px 0 -2px -3px',
+                                                                                    fontSize: '22px'
+                                                                                }}
+                                                                            >
+                                                                                +
+                                                                            </div>
+                                                                            <div
+                                                                                style={{
+                                                                                    margin: '-6px 2px -2px 0',
+                                                                                    fontSize: '22px',
+                                                                                    display: 'flex',
+                                                                                    alignContent: 'center'
+                                                                                }}
+                                                                            >
+                                                                                {
+                                                                                    (bestPlantCombo.bestPic.result.plants[index].prestige + bestPlantCombo.bestPic.result.plants[index].picIncrease)
+                                                                                    - bestPlantCombo.bestPic.result.plants[index].prestige
+                                                                                }
+                                                                            </div>
+                                                                            {/* <img style={{ height: '24px' }} src={`/fapi_fork_personal/right_arrow.svg`} /> */}
+                                                                            <img style={{ height: '24px', marginTop: '-4px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
+                                                                            {/* <div> {bestPlantCombo.bestPic.result.plants[index].prestige + bestPlantCombo.bestPic.result.plants[index].picIncrease}</div> */}
                                                                         </div>
+                                                                        // <div style={{ display: 'flex', alignItems: 'center' }}>
+
+                                                                        //     <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
+                                                                        //     <div> {bestPlantCombo.bestPic.result.plants[index].prestige}</div>
+                                                                        //     <img style={{ height: '24px' }} src={`/fapi_fork_personal/right_arrow.svg`} />
+                                                                        //     <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
+                                                                        //     <div> {bestPlantCombo.bestPic.result.plants[index].prestige + bestPlantCombo.bestPic.result.plants[index].picIncrease}</div>
+                                                                        // </div>
                                                                     )}
 
                                                                 </div>
@@ -2267,22 +2356,36 @@ const FarmingLanding = ({ data }) => {
                                                                         }
                                                                     ).remainingTime)
                                                                         }`}
-                                                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                                    {/* <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                                        <div>
+                                                                            +
+                                                                        </div>
+                                                                        <div>
+
+                                                                        </div>
                                                                         <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
                                                                         <div> {bestPlantCombo.bestPic.result.plants[index].prestige + bestPlantCombo.bestPic.result.plants[index].picIncrease}</div>
                                                                         <img style={{ height: '24px' }} src={`/fapi_fork_personal/right_arrow.svg`} />
                                                                         <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
                                                                         <div> {bestPlantCombo.bestPic.result.plants[index].prestige + bestPlantCombo.bestPic.result.plants[index].picIncrease + 1}</div>
-                                                                    </div>
+                                                                    </div> */}
+                                                                    {/* <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                                        <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
+                                                                        <div> {bestPlantCombo.bestPic.result.plants[index].prestige + bestPlantCombo.bestPic.result.plants[index].picIncrease}</div>
+                                                                        <img style={{ height: '24px' }} src={`/fapi_fork_personal/right_arrow.svg`} />
+                                                                        <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
+                                                                        <div> {bestPlantCombo.bestPic.result.plants[index].prestige + bestPlantCombo.bestPic.result.plants[index].picIncrease + 1}</div>
+                                                                    </div> */}
 
                                                                 </div>
-                                                            </div>
-                                                        </MouseOverPopover>
+
+                                                            </MouseOverPopover>
+                                                        </div>
                                                     )
-                                                })}
+                                                }).reverse()}
                                             </div>
                                             {/* best pic % increase */}
-                                            {displayPicPerc && (
+                                            {/* {displayPicPerc && (
                                                 <div style={{ display: 'flex', marginTop: '6px', alignItems: 'center' }}>
                                                     <div style={{ minWidth: '270px' }}>
                                                         <div className='calcInfo' >
@@ -2356,9 +2459,9 @@ const FarmingLanding = ({ data }) => {
                                                                 </div>
                                                             </MouseOverPopover>
                                                         )
-                                                    })}
+                                                    }).reverse()}
                                                 </div>
-                                            )}
+                                            )} */}
                                         </>
                                     </div>
                                 )}
@@ -2370,7 +2473,7 @@ const FarmingLanding = ({ data }) => {
                                         <>
                                             <div style={{ display: 'flex' }}>
 
-                                                <div style={{ minWidth: '270px', display: 'flex', justifyContent: 'flex-end' }}>Best order, 100% Fries</div>
+                                                <div style={{ minWidth: '270px', display: 'flex', justifyContent: 'flex-end', marginRight: '2px' }}>Best order, 100% Fries</div>
                                                 {bestPlantCombo.bestPot.result.result.steps.map((val, index) => {
 
                                                     return <div className='bestSuggestion' >{
@@ -2418,19 +2521,34 @@ const FarmingLanding = ({ data }) => {
                                                                     </div>
                                                                 </div>
                                                             }>
+
+
                                                                 <div className='suggestionHolder'>
                                                                     <div className='autoPicSuggestion'>
                                                                         {
                                                                             `P${bestPlantCombo.bestPic.result.result.steps.length - index} for ${val.time > secondsHour ? helper.secondsToString(val.time) : helper.secondsToStringWithS(val.time)}`
                                                                         }
                                                                         {bestPlantCombo.bestPic.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].picIncrease > 0 && (
-                                                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-
-                                                                                <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
+                                                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', }}>
+                                                                                <div
+                                                                                    style={{
+                                                                                        margin: '-6px 0 -2px -3px',
+                                                                                        fontSize: '22px'
+                                                                                    }}
+                                                                                >
+                                                                                    +
+                                                                                </div>
+                                                                                <div>
+                                                                                    {
+                                                                                        (bestPlantCombo.bestPic.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].prestige + bestPlantCombo.bestPic.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].picIncrease)
+                                                                                        - bestPlantCombo.bestPic.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].prestige
+                                                                                    }
+                                                                                </div>
+                                                                                {/* <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
                                                                                 <div> {bestPlantCombo.bestPic.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].prestige}</div>
                                                                                 <img style={{ height: '24px' }} src={`/fapi_fork_personal/right_arrow.svg`} />
                                                                                 <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
-                                                                                <div> {bestPlantCombo.bestPic.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].prestige + bestPlantCombo.bestPic.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].picIncrease}</div>
+                                                                                <div> {bestPlantCombo.bestPic.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].prestige + bestPlantCombo.bestPic.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].picIncrease}</div> */}
                                                                             </div>
                                                                         )}
                                                                     </div>
@@ -2447,13 +2565,13 @@ const FarmingLanding = ({ data }) => {
                                                                         ).remainingTime)
                                                                             }`}
 
-                                                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                                        {/* <div style={{ display: 'flex', alignItems: 'center' }}>
                                                                             <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
                                                                             <div> {bestPlantCombo.bestPic.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].prestige + bestPlantCombo.bestPic.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].picIncrease}</div>
                                                                             <img style={{ height: '24px' }} src={`/fapi_fork_personal/right_arrow.svg`} />
                                                                             <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
                                                                             <div> {bestPlantCombo.bestPic.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].prestige + bestPlantCombo.bestPic.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].picIncrease + 1}</div>
-                                                                        </div>
+                                                                        </div> */}
 
                                                                     </div>
                                                                 </div>
@@ -2465,7 +2583,7 @@ const FarmingLanding = ({ data }) => {
 
 
                                             {/* Best PIC Percentage */}
-                                            {displayPicPerc > 0 && (
+                                            {/* {displayPicPerc > 0 && (
                                                 <div style={{ display: 'flex', marginTop: '6px', alignItems: 'center' }}>
                                                     <div style={{ minWidth: '270px' }}>
 
@@ -2546,7 +2664,7 @@ const FarmingLanding = ({ data }) => {
                                                         )
                                                     })}
                                                 </div>
-                                            )}
+                                            )} */}
                                         </>
 
                                     </div>

@@ -40,7 +40,7 @@ var helper = {
             let effeciency = floored / totalTokens;
             let wasted = totalTokens - floored;
             let wastedHR = wasted / h;
-            let temp = {wastedHR:wastedHR, tokenHR: tokenHR, wasted: wasted, hours: h, totalTokens: totalTokens, floored: floored, effeciency: effeciency };
+            let temp = { wastedHR: wastedHR, tokenHR: tokenHR, wasted: wasted, hours: h, totalTokens: totalTokens, floored: floored, effeciency: effeciency };
             bestArr.push(temp);
 
             // if (effeciency > best.effeciency) {
@@ -360,6 +360,11 @@ var helper = {
         numGroups = numGroups ? numGroups : 7;
         const memo = {};
         let failedFiltersObj = {};
+        let petsMap = {};
+
+        for (let i = 0; i < PETSCOLLECTION.length; i++) {
+            petsMap[PETSCOLLECTION[i].ID] = JSON.parse(JSON.stringify(PETSCOLLECTION[i]))
+        }
 
         let activeBonuses = other?.activeBonuses;
         if (!activeBonuses) activeBonuses = [];
@@ -376,6 +381,7 @@ var helper = {
 
         let blackList = {};
         let whitelist = {};
+        let whitelistRel = {};
 
         if (other?.petWhiteList) {
             for (let i = 0; i < other.petWhiteList.length; i++) {
@@ -385,6 +391,9 @@ var helper = {
                 }
                 else if (cur.placement === 'team') {
                     whitelist[cur.id] = cur;
+                }
+                else if (cur.placement === 'rel') {
+                    whitelistRel[cur.id] = cur;
                 }
             }
         }
@@ -515,6 +524,9 @@ var helper = {
                                 pass = false;
                                 break;
                             }
+                        }
+                        else if (bonus.placement === `relative`) {
+
                         }
                         //`eq` or `min` isn't active, but needs to reserve certain pets
                         if (bonus.tempMax || (bonus.tempMax === 0 && !bonus.disabled && bonus.disabled !== undefined)) {
@@ -836,6 +848,9 @@ var helper = {
                     ignoreCustomBonuses = true;
                 }
             }
+            if (combinations === -1) {
+                skipChecks = true;
+            }
 
 
             let allPassed = true;
@@ -879,8 +894,74 @@ var helper = {
                 let bestCurrTeamScore = this.calculateGroupScore(combinations.team, defaultRank);
                 let score = bestCurrTeamScore.groupScore;
 
-                if (activeBonuses.length > 0) {
+                let individualRel = Object.values(whitelistRel);
+
+                if (activeBonuses.length > 0 || individualRel.length > 0) {
                     let added = false;
+
+                    for (let j = 0; j < individualRel.length; j++) {
+                        let curBonus = individualRel[j];
+                        let mult = curBonus.parameters.damageBias / 100;
+                        let cutOff = score * mult;
+
+                        let tmLength = combinations.team.length;
+                        let amountToAdd = 0;
+                        let bonusPet = petsMap[curBonus.id];
+                        let dmg = this.calculatePetBaseDamage(bonusPet, defaultRank);
+
+                        if (!bonusPet) continue;
+
+                        bonusPet.BonusList.forEach((e) => {
+                            let modifiedAddition = 0;
+                            //Dng dmg
+                            if (e.ID === 1013) {
+                                dmg *= (1 + this.EXP_DMG_MOD);
+                                if (tmLength > 1) {
+                                    //Get avg base group score, then remove 1, apply mult (iplier), apply modifier, add it
+                                    modifiedAddition += ((bestCurrTeamScore.baseGroupScore / tmLength) * (tmLength - 1) * mult * (this.EXP_DMG_MOD));
+                                    // modifiedAddition += (this.calculatePetBaseDamage(bonusPet, defaultRank) * 3 * mult * (this.EXP_DMG_MOD));
+                                }
+                                else {
+                                    modifiedAddition = bestCurrTeamScore.baseGroupScore * mult * (this.EXP_DMG_MOD);
+                                }
+                                amountToAdd += modifiedAddition;
+                            }
+                            else if (e.ID === 1012) {
+                                dmg *= (1 + this.EXP_TIME_MOD);
+                                if (tmLength > 1) {
+                                    //Get avg base group score, then remove 1, apply mult (iplier), apply modifier, add it
+                                    modifiedAddition += (this.calculatePetBaseDamage(bonusPet, defaultRank) * 3 * mult * (this.EXP_TIME_MOD));
+                                }
+                                else {
+                                    modifiedAddition = bestCurrTeamScore.baseGroupScore * mult * (this.EXP_TIME_MOD);
+                                }
+                                amountToAdd += modifiedAddition;
+                            }
+                        })
+
+                        dmg += amountToAdd;
+
+                        if (dmg > cutOff) {
+                            added = true;
+
+                            let newBonus = JSON.parse(JSON.stringify(curBonus));
+                            // newBonus.placement = 'relative';
+                            newBonus.placement = 'team';
+                            newBonus.parameters.team = g;
+                            newBonus.pet = bonusPet;
+                            newBonus.parameters.fake = true;
+                            //Since it is a single pet, and it *has* to be inserted now, we can hitchike off of the built in `whilteListReqPets` system
+                            whiteListReqPets.push(newBonus)
+                            //Add pet into list of pets to combine, if it's not already there
+                            let exists = finalPetsCollection.find((a) => a.ID === bonusPet.ID);
+
+                            if (!exists) {
+                                finalPetsCollection.push(bonusPet);
+                            }
+                        }
+
+                    }
+
                     for (let j = 0; j < activeBonuses.length; j++) {
                         let curBonus = activeBonuses[j];
                         let mult = curBonus.relThresh / 100;
@@ -906,10 +987,11 @@ var helper = {
                                         dmg *= (1 + this.EXP_DMG_MOD);
                                         if (tmLength > 1) {
                                             //Get avg base group score, then remove 1, apply mult (iplier), apply modifier, add it
-                                            modifiedAddition += ((bestCurrTeamScore.baseGroupScore / tmLength) * (tmLength - 1) * mult * (1 + this.EXP_DMG_MOD));
+                                            modifiedAddition += ((bestCurrTeamScore.baseGroupScore / tmLength) * (tmLength - 1) * mult * (this.EXP_DMG_MOD));
+                                            // modifiedAddition += (this.calculatePetBaseDamage(bonusPet, defaultRank) * 3 * mult * (this.EXP_DMG_MOD));
                                         }
                                         else {
-                                            modifiedAddition = bestCurrTeamScore.baseGroupScore * mult * (1 + this.EXP_DMG_MOD);
+                                            modifiedAddition = bestCurrTeamScore.baseGroupScore * mult * (this.EXP_DMG_MOD);
                                         }
                                         amountToAdd += modifiedAddition;
                                     }
@@ -917,10 +999,10 @@ var helper = {
                                         dmg *= (1 + this.EXP_TIME_MOD);
                                         if (tmLength > 1) {
                                             //Get avg base group score, then remove 1, apply mult (iplier), apply modifier, add it
-                                            modifiedAddition += ((bestCurrTeamScore.baseGroupScore / tmLength) * (tmLength - 1) * mult * (1 + this.EXP_TIME_MOD));
+                                            modifiedAddition += ((bestCurrTeamScore.baseGroupScore / tmLength) * (tmLength - 1) * mult * (this.EXP_TIME_MOD));
                                         }
                                         else {
-                                            modifiedAddition = bestCurrTeamScore.baseGroupScore * mult * (1 + this.EXP_TIME_MOD);
+                                            modifiedAddition = bestCurrTeamScore.baseGroupScore * mult * (this.EXP_TIME_MOD);
                                         }
                                         amountToAdd += modifiedAddition;
                                     }
@@ -967,8 +1049,14 @@ var helper = {
                         time1 = new Date();
                         let bonusList = Object.values(requiredPetBonusMap);
                         for (let j = 0; j < whiteListReqPets.length; j++) {
+                            // if (whiteListReqPets[j].placement === `relative`) {
+                            //     // finalPetsCollection.push(whiteListReqPets[j].pet)
+                            // }
+                            // else {
                             bonusList.push(whiteListReqPets[j]);
+                            // }
                         }
+                        whiteListReqPets = whiteListReqPets.filter((e) => !e.parameters.fake)
                         let combinations_rel = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length), bonusList);
                         console.log(`got new combinations after the rel calcs`)
 
@@ -976,18 +1064,33 @@ var helper = {
                         if (combinations_rel === -1 && whiteListReqPets.length === 0) {
 
                             if (!(`generic` in failedFiltersObj)) {
-                                failedFiltersObj[`generic`] = `Individual filters all succeeded, but the combination of all is impossible starting group ${g + 1}`;
+                                failedFiltersObj[`generic`] = `Individual filters all succeeded, but the combination of all is impossible starting group ${g + 1} (too many relative pets in one team)`;
                             }
                             break;
                         }
                         else if (combinations_rel !== -1) {
 
                             combinations = combinations_rel;
+
+                            //Also need to delete all the rel whitelists from future teams
+                            for (let x = 0; x < bonusList.length; x++) {
+                                if (bonusList[x].id in whitelistRel) {
+                                    delete whitelistRel[bonusList[x].id]
+                                }
+                            }
                         }
                     }
                 }
 
                 bestGroups.push(combinations.team);
+
+                //remove whitelisted relative 
+                for (let i = 0; i < combinations.team.length; i++) {
+                    if (combinations.team[i].ID in whitelistRel) {
+                        delete whitelistRel[combinations.team[i].ID]
+                    }
+                }
+
                 petsCollection = petsCollection.filter((pet) => {
 
                     let res = true;
@@ -1002,9 +1105,20 @@ var helper = {
                 }
                 );
             }
-            //Just use the whitelisted pets above
+            //Just use the best combination above
             else {
+
                 bestGroups.push(combinations.team);
+
+                //remove whitelisted relative 
+                for (let i = 0; i < combinations.team.length; i++) {
+                    if (combinations.team[i].ID in whitelistRel) {
+                        delete whitelistRel[combinations.team[i].ID]
+                    }
+                }
+
+
+                //Remove the pets
                 petsCollection = petsCollection.filter((pet) => {
 
                     let res = true;

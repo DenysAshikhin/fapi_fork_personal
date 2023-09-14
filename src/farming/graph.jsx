@@ -243,7 +243,9 @@ export default memo(Graph, function (prev, current) {
     if (prev.showCalc !== current.showCalc) return false
 
     //Otherwise, if the user's total potatoes changed (meaning they updated something else) update graph
-    else if (prev.graphObjects.customProduction.totalPotatoes.toNumber() !== current.graphObjects.customProduction.totalPotatoes.toNumber()) return false;
+    else if (prev.graphObjects.customProduction.totalPotatoes.notEquals(current.graphObjects.customProduction.totalPotatoes)) {
+        return false;
+    }
     //or if the y-axis scale is changed
     else if (prev.yScale !== current.yScale) return false;
 

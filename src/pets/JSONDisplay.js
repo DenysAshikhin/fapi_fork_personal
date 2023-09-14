@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Grid2 from '@mui/material/Unstable_Grid2';
-
+import useLocalStorage from "use-local-storage";
 import './JSONDisplay.css'; // Add this line to import the CSS file
 import { BonusMap, petNameArray, petNames } from '../itemMapping';
 import PetItem from './PetItem';
@@ -80,8 +80,10 @@ const JSONDisplay = ({
 
     const [tokenSelections, setTokenSelections] = useState({ 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 });
     const [hoveredBonus, setHoveredBonus] = useState(0);
-    const [enabledBonusHighlight, setEnabledBonusHighlight] = useState({});
-    const [showAllBonusTally, setShowAllBonusTally] = useState(false);
+    // const [enabledBonusHighlight, setEnabledBonusHighlight] = useState({});
+    const [enabledBonusHighlight, setEnabledBonusHighlight] = useLocalStorage("enabledBonusHighlight", {});
+    // const [showAllBonusTally, setShowAllBonusTally] = useState(false);
+    const [showAllBonusTally, setShowAllBonusTally] = useLocalStorage("showAllBonusTally", false);
     const [activePet, setActivePet] = useState(-1);
 
     useEffect(() => {
@@ -95,9 +97,30 @@ const JSONDisplay = ({
     let totalTokensHR = 0;
     let damageTotal = 0;
 
-    let bonusTotals = { 1001: 0, 1002: 0, 1003: 0, 1009: 0, 1012: 0, 1013: 0, 1014: 0, 1015: 0, 1016: 0 };
+    let bonusTotals = {
+        // 1001: 0, //potatoe gain
+        // 1002: 0, //class exp gain
+        // 1003: 0, //skull gain
+        1009: 0, // residue gain
+        1010: 0, //card power gain
+        1011: 0, // expedition reward
+        1012: 0, //dungeon time gain
+        1013: 0, //dungeon damage
+        1014: 0, //card exp
+        1015: 0, //reinc pts gain
+        1016: 0 // token gain
+    };
     let bonusPets = {};
     let totalMessages = [];
+
+    let relWhiteListMap = {};
+
+    for (let i = 0; i < petWhiteList.length; i++) {
+        let cur = petWhiteList[i];
+        if (cur.placement === `rel`) {
+            relWhiteListMap[cur.id] = { ...cur };
+        }
+    }
 
 
     // if (groups && groupRankCritera === 2)
@@ -105,6 +128,11 @@ const JSONDisplay = ({
         groups.map((group, index) => {
             damageTotal += (petHelper.calculateGroupScore(group, defaultRank).groupScore) * 5 * data.PetDamageBonuses;
             group.forEach((pet) => {
+
+                if (pet.ID in relWhiteListMap) {
+                    relWhiteListMap[pet.ID].finalGroup = index;
+                }
+
                 pet.BonusList.forEach((bon) => {
                     if (bon.ID in bonusTotals) bonusTotals[bon.ID]++;
                 })
@@ -292,6 +320,8 @@ const JSONDisplay = ({
                                         flex: '1',
                                         width: 'auto',
                                         height: 'auto',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
                                     }}
                                 >
                                     <PetItem
@@ -320,7 +350,7 @@ const JSONDisplay = ({
 
                                                 let pet_inner = temp.find((sample_pet) => sample_pet.id === petData.ID);
                                                 if (!pet_inner) {
-                                                    temp.push({ label: staticPetData.name, id: staticPetData.petId, placement: 'team', parameters: { team: index } });
+                                                    temp.push({ label: staticPetData.name, id: staticPetData.petId, placement: 'team', parameters: { team: index, damageBias: 17 } });
                                                 }
                                                 else {
                                                     pet_inner.placement = 'team';
@@ -355,7 +385,7 @@ const JSONDisplay = ({
 
                                                 let pet_inner = temp.find((sample_pet) => sample_pet.id === petData.ID);
                                                 if (!pet_inner) {
-                                                    temp.push({ label: staticPetData.name, id: staticPetData.petId, placement: 'blacklist', parameters: { team: 0 } });
+                                                    temp.push({ label: staticPetData.name, id: staticPetData.petId, placement: 'blacklist', parameters: { team: 0, damageBias: 17 } });
                                                 }
                                                 else {
                                                     pet_inner.placement = 'blacklist';
@@ -455,6 +485,7 @@ const JSONDisplay = ({
                                         throw new Error('invalid dropdown selector');
                                 }
                             }}
+                            value={groupRankCritera === 1 ? 'damage' : 'token'}
                         >
                             <option value="damage">Max Damage</option>
                             <option value="token">Max Tokens {`->`} Damage</option>
@@ -671,9 +702,10 @@ const JSONDisplay = ({
                                 }
                                 value={''}
                             >
-                                {[<option value='' selected>Select Bonus</option>, ...availableCustomBonuses.map((e) => {
-                                    return <option value={e.id} key={e.id}> {e.label}</option>
-                                })]
+                                {
+                                    [<option value='' selected>Select Bonus</option>, ...availableCustomBonuses.map((e) => {
+                                        return <option value={e.id} key={e.id}> {e.label}</option>
+                                    })]
                                 }
                                 {/* <option
                                     value="1">1.0</option>
@@ -1225,19 +1257,70 @@ const JSONDisplay = ({
                             })}
                         </div>
 
-                        <div style={{ margin: '24px 0 6px 0' }}>
+                        {/* Pet whitelist stuff */}
+                        <div style={{ margin: '24px 0 0 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '36px' }}>
                             <SearchBox data={{
                                 list: filterablePets
                             }}
                                 onSelect={(e) => {
                                     setPetWhiteList((curr) => {
                                         let temp = [...curr];
-                                        temp.push({ ...e, placement: 'blacklist', parameters: { team: 0 } });
+                                        temp.push({ ...e, placement: 'blacklist', parameters: { team: 0, damageBias: 17 } });
                                         return temp;
                                     })
                                     setRefreshGroups(true);
                                 }}
                             />
+                            <div
+                                style={{ display: 'flex' }}
+                            >
+                                <div
+                                    style={{ marginRight: '6px' }}
+                                >
+                                    Team Presets
+                                </div>
+                                <select
+                                    style={{ maxWidth: '144px', }}
+                                    onChange={
+                                        (e) => {
+
+                                            let selectedTeam = data.PetsLoadout[Number(e.target.value)]
+                                            console.log(selectedTeam);
+
+                                            setPetWhiteList((curr) => {
+                                                let temp = [...curr];
+                                                // temp.push({ ...e, placement: 'blacklist', parameters: { team: 0, damageBias: 17 } });
+
+                                                for (let x = 0; x < selectedTeam.IDs.length; x++) {
+                                                    let selected = selectedTeam.IDs[x];
+                                                    if (selected > 0) {
+                                                        let base = { id: selected, label: petNames[selected].name, placement: 'rel', parameters: { team: 0, damageBias: 17 } }
+                                                        if (!temp.find((inner_find) => inner_find.id === base.id)) {
+                                                            temp.push(base);
+                                                        }
+                                                    }
+                                                }
+                                                return temp;
+                                            })
+                                            setRefreshGroups(true);
+
+                                        }
+                                    }
+                                    value={''}
+                                >
+                                    {
+                                        [<option value='' selected>Select Team</option>, ...data.PetsLoadout.map((cur, index) => {
+
+                                            if (cur.Locked === 0) return;
+
+                                            return (
+                                                <option
+                                                    value={index}>{cur.Name}</option>
+                                            )
+                                        })]
+                                    }
+                                </select>
+                            </div>
                         </div>
                         {/* Pet white/black list */}
                         <div
@@ -1286,6 +1369,9 @@ const JSONDisplay = ({
                                         <div>
                                             Group: Forces the pet to go into a certain group
                                         </div>
+                                        <div>
+                                            Relative: Tries to find optimal placement automatically based on `damage bias`
+                                        </div>
                                     </div>
                                 }>
                                     <div>
@@ -1311,6 +1397,9 @@ const JSONDisplay = ({
                                             <div>
                                                 In Placement=Group, determines which group the pet is placed in
                                             </div>
+                                            <div>
+                                                In Placement=Relative, determines which group the pet is placed in based on the bias number (higher means more damage necessary to placed in)
+                                            </div>
                                         </div>
                                     </div>
                                 }>
@@ -1322,6 +1411,13 @@ const JSONDisplay = ({
                         </div>
                         <div style={{ margin: '0 1px 0 1px', boxShadow: `0 0 0 1px #ecf0f5`, }}>
                             {petWhiteList.map((pet, index) => {
+                                let petLabel = pet.label;
+                                let petGroup = ``
+                                if (pet.id in relWhiteListMap) {
+                                    // petLabel += ` (Group: ${relWhiteListMap[pet.id].finalGroup + 1})`
+                                    petGroup += `(Group: ${relWhiteListMap[pet.id].finalGroup + 1})`
+                                }
+
                                 return (
                                     <div
                                         key={pet.label}
@@ -1348,12 +1444,26 @@ const JSONDisplay = ({
                                                     position: 'absolute',
                                                     width: '100%',
                                                     display: 'flex',
-                                                    justifyContent: 'center',
+                                                    justifyContent: 'space-between',
+                                                    // alignContent: 'space-between',
                                                     zIndex: '-1'
                                                 }}
 
                                             >
-                                                {pet.label}
+                                                <div
+                                                    style={{
+                                                        marginLeft: '6px'
+                                                    }}
+                                                >
+                                                    {petLabel}
+                                                </div>
+                                                <div
+                                                    style={{
+                                                        marginRight: '34px'
+                                                    }}
+                                                >
+                                                    {petGroup}
+                                                </div>
                                             </div>
                                             <img
                                                 style={{
@@ -1373,6 +1483,7 @@ const JSONDisplay = ({
                                                 src={xIcon}
                                             />
                                         </div>
+                                        {/* Pet Placement */}
                                         <div style={{ width: 'calc(30% + 1px)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `2px 0 2px -1px #ecf0f5`, }}>
 
                                             <select
@@ -1393,7 +1504,7 @@ const JSONDisplay = ({
                                             >
                                                 <option value={'blacklist'}>Blacklist</option>
                                                 <option value={'team'}>Group</option>
-                                                {/*   <option value={'max'} disabled>Maximum</option> */}
+                                                <option value={`rel`}>Relative</option>
                                             </select>
 
                                         </div>
@@ -1428,6 +1539,39 @@ const JSONDisplay = ({
 
                                                 </div>
                                             )}
+                                            {pet.placement === `rel` && (
+                                                <div>
+                                                    <input
+                                                        type='number'
+                                                        // className='prepNumber'
+                                                        value={pet.parameters.damageBias}
+                                                        onChange={
+                                                            (e) => {
+                                                                try {
+                                                                    let x = Number(e.target.value);
+                                                                    x = Math.floor(x);
+                                                                    if (x < 0 || x > 100) {
+                                                                        return;
+                                                                    }
+
+                                                                    setPetWhiteList((curr) => {
+                                                                        let temp = [...curr];
+                                                                        let tempPet = temp.find((inner_pet) => inner_pet.id === pet.id);
+                                                                        tempPet.parameters.damageBias = Number(x);
+                                                                        return temp;
+                                                                    })
+                                                                    setRefreshGroups(true);
+                                                                }
+                                                                catch (err) {
+                                                                    console.log(err);
+                                                                }
+                                                            }}
+                                                        placeholder={pet.parameters.damageBias + ''}
+                                                        min="0"
+                                                        max="100"
+                                                    />
+                                                </div>
+                                            )}
                                             {pet.placement === 'blacklist' && (
                                                 <>Unavailable</>
                                             )}
@@ -1447,6 +1591,18 @@ const JSONDisplay = ({
                                 {failedFilters['generic']}
                             </div>
                         )}
+
+                        {false && (
+                            <div
+                                style={{ display: 'flex', width: '100%', justifyContent: "center" }}
+                            >
+
+                                <div>
+                                    Leftover Pets
+                                </div>
+                            </div>
+                        )}
+
 
 
                     </div>

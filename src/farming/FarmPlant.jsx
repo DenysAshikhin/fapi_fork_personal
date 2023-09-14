@@ -1,5 +1,4 @@
 import helper from "../util/helper.js";
-import farmingHelper from "../util/farmingHelper.js";
 import MouseOverPopover from "../tooltip.js";
 import ReactGA from "react-ga4";
 import { memo } from 'react';

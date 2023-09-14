@@ -16,7 +16,9 @@ function MouseOverPopover({ tooltip, children }) {
     const open = Boolean(anchorEl);
 
     return (
-        <div>
+        <div
+
+        >
             <Typography
                 // aria-owns={open ? 'mouse-over-popover' : undefined}
                 component={'span'}
@@ -42,11 +44,26 @@ function MouseOverPopover({ tooltip, children }) {
                     horizontal: 'left',
                 }}
                 onClose={handlePopoverClose}
+                marginThreshold={32}
                 disableRestoreFocus
+                // PaperProps={{
+                //     style: {
+                //       backgroundColor: "transparent",
+                //       boxShadow: "none"
+                //     },
+                //   }}
+                slotProps={{
+                    paper: {
+                        style: {
+                            backgroundColor: "rgba(255,255,255,0.9)",
+                            padding: '6px'
+                        }
+                    }
+                }}
             >
                 {tooltip}
             </Popover>
-        </div>
+        </div >
     );
 }
 

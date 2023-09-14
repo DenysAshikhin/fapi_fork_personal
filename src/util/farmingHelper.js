@@ -247,8 +247,16 @@ var farmingHelper = {
         prodCost = prodLevel > 50 ? temp4 : mathHelper.multiplyDecimal(100000000, mathHelper.pow(100, prodLevel));
 
 
-        growthCost = 10000000000 * Math.pow(500, growthLevel);
-        expCost = 1000000000000000 * Math.pow(250, expLevel);
+        growthCost = mathHelper.multiplyDecimal(
+            mathHelper.pow(500, growthLevel),
+            10000000000
+        );
+        expCost =
+            mathHelper.multiplyDecimal(
+                mathHelper.pow(250, expLevel),
+                1000000000000000
+            );
+
         return { prodCost, growthCost, expCost };
     },
     calcMaxPrestige: function (plant_input) {
@@ -493,9 +501,25 @@ var farmingHelper = {
                 if (curTime > (simulationTime + runningTime)) {
 
                     let timeIncrease = curTime - dataPointsPotatoes[dataPointsPotatoes.length - 1].time;
-                    let increase = (totalPotatoes - dataPointsPotatoes[dataPointsPotatoes.length - 1].production) / timeIncrease;
+                    let increase = mathHelper.divideDecimal(
+                        (mathHelper.subtractDecimal(
+                            totalPotatoes,
+                            dataPointsPotatoes[dataPointsPotatoes.length - 1].production
+                        )
+                        ),
+                        timeIncrease
+                    );
+
+
+                    // let temp_increase =  mathHelper.multiplyDecimal(mathHelper.addDecimal(HPInitial, plants[0].production), 0.5 * tickRate * prodMult);
+
+
+
                     let trueTimeIncrease = (simulationTime + runningTime) - dataPointsPotatoes[dataPointsPotatoes.length - 1].time;
-                    let finalPotatoes = mathHelper.addDecimal(dataPointsPotatoes[dataPointsPotatoes.length - 1].production, increase * trueTimeIncrease);
+                    let finalPotatoes = mathHelper.addDecimal(
+                        dataPointsPotatoes[dataPointsPotatoes.length - 1].production,
+                        mathHelper.multiplyDecimal(increase, trueTimeIncrease)
+                    );
 
                     let newObj = { time: dataPointsPotatoes[dataPointsPotatoes.length - 1].time + trueTimeIncrease, production: finalPotatoes };
                     dataPointsPotatoes.push(newObj);

@@ -18,13 +18,38 @@ var helper = {
     },
     secondsToStringWithS: function (seconds) {
         let string = ``;
+
+        let numDays = 0;
+
         let numHours = 0;
         let numMinutes = 0;
         let numSeconds = 0;
 
-        numHours = Math.floor(seconds / 3600);
+        numDays = Math.floor(seconds / (3600 * 24));
+        numHours = Math.floor((seconds % (3600 * 24)) / 3600);
         numMinutes = Math.floor((seconds % 3600) / 60);
-        numSeconds = this.roundInt((seconds % 3600) % 60);
+        numSeconds = this.roundInt((seconds % (3600 * 24)) % 60);
+        
+        if (numDays == Number.POSITIVE_INFINITY || numDays == Number.NEGATIVE_INFINITY) {
+            return `` + numDays;
+        }
+        
+        if (numSeconds === 60) {
+            numSeconds = 0;
+            numMinutes++;
+        }
+        if (numMinutes === 60) {
+            numMinutes = 0;
+            numHours++;
+        }
+        if (numHours === 24) {
+            numHours = 0;
+            numDays++;
+        }
+
+        if (numDays > 0) {
+            string = string + `${numDays < 10 ? `0` + numDays : numDays}d:`
+        }
         if (numHours > 0) {
             string = string + `${numHours < 10 ? `0` + numHours : numHours}h:`
         }
@@ -42,29 +67,51 @@ var helper = {
     },
     secondsToString: function (seconds) {
         let string = ``;
+        let numDays = 0;
         let numHours = 0;
         let numMinutes = 0;
 
-        numHours = Math.floor(seconds / 3600);
+        numDays = Math.floor(seconds / (3600 * 24));
+        numHours = Math.floor((seconds % (3600 * 24)) / 3600);
         numMinutes = this.roundInt((seconds % 3600) / 60);
 
+        if (numMinutes === 60) {
+            numMinutes = 0;
+            numHours++;
+        }
+        if (numHours === 24) {
+            numHours = 0;
+            numDays++;
+        }
+
+        if (numDays == Number.POSITIVE_INFINITY || numDays == Number.NEGATIVE_INFINITY) {
+            return `` + numDays;
+        }
+
+        if (numDays > 0) {
+            string = string + `${numDays < 10 ? `0` + numDays : numDays}d:`
+        }
         if (numHours > 0) {
-            string = string + `${numHours < 10 ? `0` + numHours : numHours}h:`
+            string = string + `${numHours < 10 ? `0` + numHours : numHours}h`
         }
-        if (numMinutes > 0) {
-            string = string + `${numMinutes < 10 ? `0` + numMinutes : numMinutes}m`
-        }
-        else {
-            string = string + `0s`;
+        if (numDays === 0) {
+            if (numMinutes > 0) {
+                string = string + ':' + `${numMinutes < 10 ? `0` + numMinutes : numMinutes}m`
+            }
+            else {
+                string = string + ':' + `0s`;
+            }
         }
 
         return string;
     },
     bonusColorMap: {
-        1001: { color: 'maroon' },
-        1002: { color: 'orange' },
-        1003: { color: 'purple' },
+        // 1001: { color: 'maroon' },
+        // 1002: { color: 'orange' },
+        // 1003: { color: 'purple' },
         1009: { color: 'cyan' },
+        1010: { color: 'maroon' },
+        1011: { color: 'purple' },
         1012: { color: 'yellow' },
         1013: { color: 'red' },
         1014: { color: 'blue' },

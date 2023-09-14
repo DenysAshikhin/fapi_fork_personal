@@ -2,6 +2,7 @@ import React from 'react';
 import './PetItem.css';
 import helper from '../util/helper.js'
 
+import MouseOverPopover from "../tooltip";
 import { BonusMap } from "../itemMapping";
 
 const filterBonuses = (bonuses, filterFn) => {
@@ -11,7 +12,7 @@ const filterBonuses = (bonuses, filterFn) => {
 
 const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, defaultRank, borderActive, enabledBonusHighlight, fullPetData }) => {
     if (!!data === false) return <div></div>;
-    const { petId, img, name } = petData;
+    const { petId, location, img, name } = petData;
 
     // Find the pet from the data.PetsCollection
     const pet = data.PetsCollection.find(p => p.ID === petId);
@@ -36,13 +37,15 @@ const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, de
     const weightedActiveScore = petScoreFn ? petScoreFn(pet) : 0;
 
     const section1Bonuses = (
-        <ul>
+        <ul
+            style={{ margin: '0 0 0 0' }}
+        >
             {filterBonuses(pet.BonusList, (bonus) => {
                 return bonus.ID < 1000;
             }).map((activePetBonus, i) => {
                 const bonusBase = Number(1.0 + activePetBonus.Gain);
-                const bonusPower = Number(defaultRank ? defaultRank : pet.Level);
-                const result = (Math.pow(bonusBase, bonusPower) - 1) * (1 + .02 * Number(rank));
+                const bonusPower = Number(pet.Level === 0 ? 1 : pet.Level);
+                const result = (Math.pow(bonusBase, bonusPower) - 1) * (1 + .02 * Number(pet.Rank));
 
                 return (
                     <li key={i}>
@@ -54,7 +57,9 @@ const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, de
     );
 
     const section2Bonuses = (
-        <ul>
+        <ul
+            style={{ margin: '0 0 0 0' }}
+        >
             {filterBonuses(pet.BonusList, (bonus) => bonus.ID >= 1000 && bonus.ID < 5000)
                 .map((activePetBonus, i) => {
                     return (
@@ -80,58 +85,114 @@ const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, de
     }
 
     return (
-        <div
-            key={petId}
-            onClick={onClick}
-            className={`item-tile${pet.Type === 1 ? '-ground ' : '-air '} ${isSelected ? '' : 'unselected'}`}
-        // className={`item-tile ${isSelected ? '' : 'unselected'}`}
-        >
-            <div
-                className="item-image-container"
-                style={{
-                    border: borderActive ? 'black 1px solid' : '',
-                    position: 'relative'
-                }}>
-                {numHighlights.map((item, index) => {
-                    return (<div
-                        style={{
-                            background: helper.bonusColorMap[item].color,
-                            position: 'absolute',
-                            top: '0%',
-                            left: `${(100 / numHighlights.length) * index}%`,
-                            height: '100%',
-                            width: `${100 / numHighlights.length}%`,
-                            zIndex: -1
-                        }}
-                    >
 
-                    </div>)
-                })}
-                <div className="tooltip">
-                    <span className="tooltip-content">
-                        <h3>
-                            {name} (Level: {level}) (Rank: {rank}) ({totalScore})
-                        </h3>
-                        <span>
-                            <h4>Active Bonuses</h4>
-                            {section1Bonuses}
-                        </span>
-                        <span>
-                            <h4>Expedition Bonuses:</h4>
-                            {section2Bonuses}
-                        </span>
-                    </span>
+        <MouseOverPopover
+            tooltip={
+                <div
+                    className="tooltip-custom "
+                >
+                    <h3
+                        style={{ marginTop: '0' }}
+                    >
+                        <div>
+
+                            {name}  ({totalScore})
+                        </div>
+                        <div>
+                            (Level: {level}) (Rank: {rank})  ({location})
+
+                        </div>
+                    </h3>
+                    <div>
+                        <h4
+                            style={{ margin: '6px 0 6px 0' }}
+                        >Active Bonuses</h4>
+                        {section1Bonuses}
+                    </div>
+                    <div>
+                        <h4
+                            style={{ margin: '6px 0 6px 0' }}
+                        >Expedition Bonuses:</h4>
+                        {section2Bonuses}
+                    </div>
                 </div>
-                {/* <div className="item-image"> */}
-                <img src={img} alt={name} className='item-image' />
-                {/* </div> */}
+            }>
+            <div
+                key={petId}
+                onClick={onClick}
+                className={`item-tile${pet.Type === 1 ? '-ground ' : '-air '} ${isSelected ? '' : 'unselected'}`}
+            // className={`item-tile ${isSelected ? '' : 'unselected'}`}
+            >
+                <div
+                    className="item-image-container"
+                    style={{
+                        border: borderActive ? 'black 1px solid' : '',
+                        position: 'relative'
+                    }}>
+                    {numHighlights.map((item, index) => {
+                        return (<div
+                            style={{
+                                background: helper.bonusColorMap[item].color,
+                                position: 'absolute',
+                                top: '0%',
+                                left: `${(100 / numHighlights.length) * index}%`,
+                                height: '100%',
+                                width: `${100 / numHighlights.length}%`,
+                                zIndex: -1
+                            }}
+                        >
+
+                        </div>)
+                    })}
+                    {/* <div className="item-image"> */}
+                    <img src={img} alt={name} className='item-image' />
+                    {/* </div> */}
+                </div>
             </div>
-        </div>
+        </MouseOverPopover>
     );
 };
 
-const StaticPetItem = ({ petData }) => {
-    const { petId, img, name } = petData;
+const StaticPetItem = ({ petData, highlight }) => {
+    const { petId, location, img, name, pet } = petData;
+    //ss
+
+    const section1Bonuses = (
+        <ul
+            style={{ margin: '0 0 0 0' }}
+        >
+            {filterBonuses(pet.BonusList, (bonus) => {
+                return bonus.ID < 1000;
+            }).map((activePetBonus, i) => {
+                const bonusBase = Number(1.0 + activePetBonus.Gain);
+                const bonusPower = Number(pet.Level === 0 ? 1 : pet.Level);
+                const result = (Math.pow(bonusBase, bonusPower) - 1) * (1 + .02 * Number(pet.Rank));
+
+                return (
+                    <li key={i}>
+                        {BonusMap[activePetBonus.ID]?.label}: {result.toExponential(2)}
+                    </li>
+                );
+            })}
+        </ul>
+    );
+
+    const section2Bonuses = (
+        <ul
+            style={{ margin: '0 0 0 0' }}
+        >
+            {filterBonuses(pet.BonusList, (bonus) => bonus.ID >= 1000 && bonus.ID < 5000)
+                .map((activePetBonus, i) => {
+                    return (
+                        <li key={i}>
+                            {BonusMap[activePetBonus.ID]?.label}: {Number(activePetBonus.Power).toExponential(2)}
+                        </li>
+                    );
+                })}
+        </ul>
+    );
+
+
     return (
         // <div key={petId} className={`static-item-tile`}>
         // <div
@@ -139,7 +200,35 @@ const StaticPetItem = ({ petData }) => {
         //     style={{
         //         position: 'relative'
         //     }}>
-        <img src={img} alt={name} className='item-image' />
+
+        <MouseOverPopover
+            tooltip={
+                <div
+                    className="tooltip-custom "
+                >
+                    <h3
+                        style={{ marginTop: '0' }}
+                    >
+                        {`${name} -> ${location}`}
+                    </h3>
+                    <div>
+                        <h4
+                            style={{ margin: '6px 0 6px 0' }}
+                        >Active Bonuses</h4>
+                        {section1Bonuses}
+                    </div>
+                    <div>
+                        <h4
+                            style={{ margin: '6px 0 6px 0' }}
+                        >Expedition Bonuses:</h4>
+                        {section2Bonuses}
+                    </div>
+                </div>
+            }>
+            <img src={img} alt={name} className='item-image' />
+        </MouseOverPopover>
+
+
         //  </div> 
         // </div>
     );
