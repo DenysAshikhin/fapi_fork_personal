@@ -1,4 +1,4 @@
-
+import general_helper from './helper.js';
 
 var helper = {
     EXP_DMG_MOD: .1,
@@ -55,7 +55,14 @@ var helper = {
         }
 
         // bestArr.sort((a, b) => { return a.wasted - b.wasted })
-        bestArr.sort((a, b) => { return a.wastedHR - b.wastedHR })
+        bestArr.sort((a, b) => {
+            let a_waste = general_helper.roundThreeDecimal(a.wastedHR)
+            let b_waste = general_helper.roundThreeDecimal(b.wastedHR)
+            if (a_waste === b_waste) {
+                return a.hours - b.hours;
+            }
+            return a_waste - b_waste;
+        })
 
         return bestArr;
     },

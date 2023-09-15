@@ -8,6 +8,7 @@ import mathHelper from '../util/math.js';
 import './FarmingLanding.css';
 import ReactGA from "react-ga4";
 import Graph from './graph.jsx';
+import Timer from './Timer.jsx';
 
 const FarmerWorker = new Worker(new URL('./farmingWorker.js', import.meta.url))
 // const FarmerWorker = new Worker('./farmingWorker.js', { type: "module" })
@@ -123,6 +124,8 @@ const FarmingLanding = ({ data }) => {
     const [lockCustomAuto, setLockCustomAuto] = useLocalStorage("lockCustomAuto", false);
     const [calcAFK, setCalcAFK] = useState(false);
     const [calcStep, setCalcStep] = useState(false);
+
+    const [timeCompleted, setTimeCompleted] = useState(null);
 
     useEffect(() => {
 
@@ -657,7 +660,7 @@ const FarmingLanding = ({ data }) => {
                 }
             }
             if (finished) {
-
+                setTimeCompleted(new Date());
                 setBestPlantCombo((currBestCombo) => {
                     console.log(`Time end: ` + (new Date()).getTime())
                     setFarmCalcProgress((curr) => {
@@ -1348,191 +1351,16 @@ const FarmingLanding = ({ data }) => {
 
     let displayPicPerc = bestPlantCombo.pic != bestPlantCombo.picPerc;
 
-    // console.log(`exp compare: ${modifiers.expBonus} VS ${helper.calcPOW(data.PlantRankExpBonus)}`)
-
-
-
-
     return (
         <div style={{ height: '100%', display: 'flex', flex: 1, flexDirection: 'column' }}>
-
-            {/* <div style={{ display: 'flex', height: '148px' }}> */}
-            {/* <div style={{ minWidth: '256px' }}>
-                    <div>Shop Growing Speed: x{helper.roundTwoDecimal(Math.pow(1.05, shopGrowingSpeed))}</div>
-                    <div>Shop Rank EXP: x{helper.roundTwoDecimal(shopRankEXP)}</div>
-                    <div>Soul Shop Rank EXP: x{helper.roundTwoDecimal(soulPlantEXP)}</div>
-                    <div>Improve Harvest Formula: x{helper.roundTwoDecimal(1 + manualHarvestFormula * 0.02)}</div>
-                    <div>Pet Plant Growth Combo: x{helper.roundTwoDecimal(petPlantCombo)}</div>
-
-                    <div style={{ margin: '0 12px 0 0', display: 'flex', alignContent: 'center' }}>
-                        <img style={{ height: '36px', margin: '0 6px 0 0' }} src={`/fapi_fork_personal/farming/fries.png`} />
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                            {currFries.toExponential(3)}
-                        </div>
-                    </div>
-                </div> */}
-            {/* grasshopper */}
-            {/* 
-            <div style={{ display: 'flex', position: 'relative', margin: '0 24px 0 12px' }}>
-                <div>
-                    <FarmingPlant data={{ fake: true }} />
-                </div>
-                {/* <div style={{ display: 'flex', maxHeight: '24px' }}>
-                        <div style={{ margin: '0 6px 0 0' }}>{`Next grasshopper breakpoint ${helper.roundInt(dataGrassHopper)} +`}</div>
-                        <input
-                            style={{
-                                width: '30px'
-                                // , WebkitAppearance: 'none' 
-                            }}
-                            step={`1`}
-                            type='number'
-                            className='prepNumber'
-                            value={futureGrasshopper}
-                            onChange={
-                                (e) => {
-                                    try {
-                                        let x = Number(e.target.value);
-                                        x = Math.floor(x);
-                                        if (x < 0 || x > 99999999) {
-                                            return;
-                                        }
-
-                                        ReactGA.event({
-                                            category: "farming_interaction",
-                                            action: `changed_grassHopper`,
-                                            label: `${x}`,
-                                            value: x
-                                        })
-
-                                        setFutureGrasshopper(x);
-                                    }
-                                    catch (err) {
-                                        console.log(err);
-                                    }
-                                }}
-                            placeholder={futureGrasshopper + ''}
-                            min="0"
-                            max="99999999"
-                        />
-                        <div style={{ margin: '0 0 0 5px' }}>{` = ${helper.roundInt(dataGrassHopper + futureGrasshopper)}`}</div>
-                    </div>
-                    <div style={{ position: 'absolute', top: '24px', height: `90%`, width: '100%', display: 'flex', justifyContent: 'center' }}>
-                        <img style={{ height: '88.9%' }} src={`/fapi_fork_personal/farming/grasshopper.png`} />
-                        <div style={{
-                            position: 'absolute',
-                            // border: '1px solid white',
-                            color: 'white', bottom: `16%`, left: 0,
-                            width: '100%', display: 'flex', justifyContent: 'center',
-                            fontSize: '12px'
-                        }}> +{(grassHopperAmount - currFries).toExponential(2)} ({grassHopperAmount.toExponential(2)})</div>
-                    </div> */}
-            {/* <div>Grasshopper Amount: +{helper.roundTwoDecimal(grassHopperAmount - currFries)} ({helper.roundTwoDecimal(grassHopperAmount)})</div> 
-            </div> */}
-
-            {/* Contagion */}
-
-            {/* <div style={{ minWidth: '160px', display: 'flex', margin: '0 24px 0 0' }}>
-                    <div style={{ position: 'relative', display: 'flex', width: '160px' }}>
-                        <img style={{ height: '95%', position: 'absolute' }} src={`/fapi_fork_personal/farming/contagion.png`} />
-
-                        {/* Rank EXP */}
-            {/* <div style={{ position: 'absolute', height: '40%', width: '100%' }}>
-                            <img style={{ position: 'absolute', height: '60%', left: '3%', top: '9%' }} src={`/fapi_fork_personal/farming/rank3.png`} />
-                            <div style={{ position: 'absolute', color: 'white', background: 'black', borderRadius: '6px', height: '12px', fontSize: '12px', top: '60%', left: '4%', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0 3px 0 3px' }}>
-                                x{helper.roundTwoDecimal(contagionPlantEXP)}
-                            </div>
-                        </div> */}
-            {/* Growth  */}
-            {/* <div style={{ position: 'absolute', height: '40%', width: '70%', bottom: '1px' }}>
-                            <img style={{ position: 'absolute', height: '70%', bottom: '15%' }} src={`/fapi_fork_personal/farming/growth.png`} />
-                            <div style={{
-                                position: 'absolute',
-                                background: 'black',
-                                borderRadius: '6px',
-                                height: '12px',
-                                bottom: '15%',
-                                left: '8%',
-                                color: 'white',
-                                fontSize: '12px',
-                                display: 'flex',
-                                justifyContent: 'center', alignItems: 'center', width: 'calc(40% - 10px)'
-                            }}>x{helper.roundTwoDecimal(contagionPlantGrowth)} </div>
-                        </div> */}
-
-            {/* Shovel 
-                        <div style={{ position: 'absolute', height: '40%', width: '100%' }}>
-                            <img style={{ position: 'absolute', height: '60%', right: '3%', top: '9%' }} src={`/fapi_fork_personal/farming/shovel.png`} />
-                            <div style={{ position: 'absolute', color: 'white', background: 'black', borderRadius: '6px', height: '12px', fontSize: '12px', top: '60%', right: '4.75%', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0 3px 0 3px' }}>
-                                x{helper.roundTwoDecimal(contagionHarvest)}
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                    </div>
-
-                </div> */}
-            {/* Assembly */}
-            {/* <div style={{ width: '340px', background: '#c9c9c9', zIndex: '-2', borderRadius: '6px' }}>
-
-                    <div style={{ position: 'relative', height: '36px', width: '235px', borderRadius: '6px', marginBottom: '6px' }}>
-                        <img style={{
-                            height: '100%',
-                            position: 'absolute',
-                            zIndex: '-1',
-                            borderRadius: '6px'
-                        }} src={`/fapi_fork_personal/farming/assembly_bg.png`} />
-
-                        <div className='strokeBlack' style={{ position: 'absolute', left: '48px', top: '-1px', color: 'white', fontWeight: 'bold', fontSize: '24px', height: '100%', }} >
-                            Assembly
-                        </div>
-                    </div>
-
-
-                    <div style={{ position: 'relative', height: '33px', width: 'calc(100% - 12px)', margin: '0 6px 0 6px' }}>
-
-                        <img style={{
-                            // height: '100%',
-                            width: '100%',
-                            height: '100%',
-                            position: 'absolute',
-                            zIndex: '-1'
-                        }} src={`/fapi_fork_personal/farming/assembly_plant_rank_exp.png`} />
-                        <div style={{ display: 'flex', justifyContent: 'space-between', position: 'absolute', width: '100%', height: '48px', top: '0px' }}>
-                            <div className='strokeBlack' style={{ color: 'white', fontWeight: 'bold', fontSize: '22px', marginLeft: '42px' }}>
-                                Plant Rank EXP:
-                            </div>
-                            <div className='strokeBlack' style={{ color: 'white', fontWeight: 'bold', fontSize: '22px', marginRight: '8px' }}>
-                                x{helper.roundTwoDecimal(assemblyPlantExp)}
-                            </div>
-
-                        </div>
-                    </div>
-                </div> */}
-            {/* </div> */}
-
-            {/* current plants */}
-            {/* <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}  >
-                {finalPlants.map((val, index) => {
-                    return <FarmingPlant
-                        key={'top' + index}
-                        data={{
-                            setPlantAutos: setPlantAutos, plantAutos: plantAutos, plant: val, index: index, customMultipliers: customMultipliers, setCustomMultipliers: setCustomMultipliers, allowSetMultipliers: false, allowSetMultipliers: true,
-                            modifiers: modifiers
-                        }} />
-                })}
-            </div> */}
-
-
             <div style={{
                 display: 'flex', flex: 1,
                 flexDirection: 'column',
                 width: '100%'
             }}>
-
                 <div
                     style={{ display: 'flex', marginLeft: '-6px' }}
                 >
-
 
                     {/* Future plants */}
                     <div style={{ display: 'flex', flexWrap: 'wrap' }}>
@@ -1565,6 +1393,7 @@ const FarmingLanding = ({ data }) => {
                 <div style={{
                     display: 'flex', width: '100%',
                     flex: 1,
+                    margin: '18px 0 0 0'
                     // backgroundColor: 'yellow'
                     // height: '100%'
                     //  height: '-webkit-fill-available' 
@@ -1572,283 +1401,199 @@ const FarmingLanding = ({ data }) => {
                     <div
                         style={{
                             color: 'black', width: '650px', display: 'flex', flexDirection: 'column',
-
                         }}
                     >
-                        {/* <h3 style={{ margin: '12px 0' }}>Future Calculations</h3> */}
-                        <div style={{
-                            display: 'flex',
-                            width: '526px',
-                            margin: '0 0 6px 0',
-                            border: '2px solid purple',
-                            borderRadius: '5px',
-                            padding: '3px'
-                            // flex: '1',
-                            // flexDirection: 'column',
-                            //  width: '172px'
-                        }}>
 
-                            {/* Hours to calc */}
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <MouseOverPopover tooltip={
-                                    <div>
-                                        How many hours into the future to calculate for each plant
-                                    </div>
-                                }>
-                                    <div>Hours to calculate</div>
 
-                                </MouseOverPopover>
+                        {/* timer + buttons */}
+                        <div
+                            style={{ display: 'flex', width: '100%', alignItems: 'center' }}
+                        >
 
-                                <input
-                                    style={{
-                                        marginLeft: '6px',
-                                        width: '48px'
-                                        // , WebkitAppearance: 'none' 
-                                    }}
-                                    type='number'
-                                    className='prepNumber'
-                                    value={futureTime}
-                                    onChange={
-                                        (e) => {
-                                            try {
-                                                let x = Number(e.target.value);
-                                                // x = Math.floor(x);
-                                                if (x < 0.01 || x > 99999999) {
-                                                    return;
-                                                }
-                                                setFutureTime(x);
-
-                                                ReactGA.event({
-                                                    category: "farming_interaction",
-                                                    action: `changed_futureHours`,
-                                                    label: `${x}`,
-                                                    value: x
-                                                })
-
-                                            }
-                                            catch (err) {
-                                                console.log(err);
-                                            }
-                                        }}
-                                    placeholder={futureTime + ''}
-                                    min="0.01"
-                                    max="99999999"
-                                />
-                            </div>
-
-                            {/* Max autos */}
+                            {/* hours, autos, max, clear */}
                             <div style={{
-                                display: 'flex', alignItems: 'center',
-                                marginLeft: '12px'
+                                display: 'flex',
+                                flexDirection: 'column',
+                                margin: '-1px 24px 0 0',
+                                height: '116px',
+                                border: '2px solid purple',
+                                borderRadius: '5px',
+                                padding: '3px'
+                                // flex: '1',
+                                // flexDirection: 'column',
+                                //  width: '172px'
                             }}>
-                                <MouseOverPopover tooltip={
-                                    <div>
-                                        How many autos to consider for calculations as the max
+
+                                <div
+                                    style={{ display: 'flex', flexDirection: 'column', width: '299px' }}
+                                >
+
+                                    {/* Hours to calc */}
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <MouseOverPopover tooltip={
+                                            <div>
+                                                How many hours into the future to calculate for each plant
+                                            </div>
+                                        }>
+                                            <div
+                                                style={{ width: '129px' }}
+                                            >
+                                                Hours to calculate
+                                            </div>
+
+                                        </MouseOverPopover>
+
+                                        <input
+                                            style={{
+                                                marginLeft: '6px',
+                                                width: '48px'
+                                                // , WebkitAppearance: 'none' 
+                                            }}
+                                            type='number'
+                                            className='prepNumber'
+                                            value={futureTime}
+                                            onChange={
+                                                (e) => {
+                                                    try {
+                                                        let x = Number(e.target.value);
+                                                        // x = Math.floor(x);
+                                                        if (x < 0.01 || x > 99999999) {
+                                                            return;
+                                                        }
+                                                        setFutureTime(x);
+
+                                                        ReactGA.event({
+                                                            category: "farming_interaction",
+                                                            action: `changed_futureHours`,
+                                                            label: `${x}`,
+                                                            value: x
+                                                        })
+
+                                                    }
+                                                    catch (err) {
+                                                        console.log(err);
+                                                    }
+                                                }}
+                                            placeholder={futureTime + ''}
+                                            min="0.01"
+                                            max="99999999"
+                                        />
                                     </div>
-                                }>
-                                    <div style={{ marginRight: '6px' }}>Max Autos</div>
-                                </MouseOverPopover>
 
-                                <input
-                                    style={{
-                                        width: '48px'
-                                        // , WebkitAppearance: 'none' 
-                                    }}
-                                    type='number'
-                                    className='prepNumber'
-                                    value={numSimulatedAutos}
-                                    onChange={
-                                        (e) => {
-                                            try {
-                                                let x = Number(e.target.value);
-                                                // x = Math.floor(x);
-                                                if (x < 0 || x > 12) {
-                                                    return;
-                                                }
-                                                setNumSimulatedAutos(x);
+                                    {/* Max autos */}
+                                    <div style={{
+                                        display: 'flex', alignItems: 'center', width: '100%'
+                                    }}>
+                                        <MouseOverPopover tooltip={
+                                            <div>
+                                                How many autos to consider for calculations as the max
+                                            </div>
+                                        }>
+                                            <div
+                                                style={{ width: '135px' }}
+                                            >Unlocked Autos</div>
+                                        </MouseOverPopover>
 
-                                                ReactGA.event({
-                                                    category: "farming_interaction",
-                                                    action: `changed_maxAutos`,
-                                                    label: `${x}`,
-                                                    value: x
-                                                })
+                                        <input
+                                            style={{
+                                                width: '48px'
+                                                // , WebkitAppearance: 'none' 
+                                            }}
+                                            type='number'
+                                            className='prepNumber'
+                                            value={numSimulatedAutos}
+                                            onChange={
+                                                (e) => {
+                                                    try {
+                                                        let x = Number(e.target.value);
+                                                        // x = Math.floor(x);
+                                                        if (x < 0 || x > 12) {
+                                                            return;
+                                                        }
+                                                        setNumSimulatedAutos(x);
 
-                                            }
-                                            catch (err) {
-                                                console.log(err);
-                                            }
-                                        }}
-                                    placeholder={numSimulatedAutos + ''}
-                                    min="1"
-                                    max="12"
-                                />
+                                                        ReactGA.event({
+                                                            category: "farming_interaction",
+                                                            action: `changed_maxAutos`,
+                                                            label: `${x}`,
+                                                            value: x
+                                                        })
+
+                                                    }
+                                                    catch (err) {
+                                                        console.log(err);
+                                                    }
+                                                }}
+                                            placeholder={numSimulatedAutos + ''}
+                                            min="1"
+                                            max="12"
+                                        />
+                                    </div>
+                                </div>
+
+
+                                <div
+                                    style={{ display: 'flex', marginTop: '6px', }}
+                                >
+                                    {/* Max all autos */}
+                                    <div style={{
+                                        display: 'flex', alignItems: 'center',
+                                        margin: '0 12px 0 0'
+                                    }}>
+                                        {/* <div>Max All Autos</div> */}
+                                        <button onClick={(e) => {
+                                            let temp = Array(20).fill(numSimulatedAutos);
+                                            setPlantAutos(temp);
+                                            ReactGA.event({
+                                                category: "farming_interaction",
+                                                action: `max_auto`,
+                                                label: `max_auto`,
+                                            })
+                                        }}>Max Autos</button>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        {/* <div>Clear All Autos</div> */}
+                                        <button onClick={(e) => {
+                                            let temp = Array(20).fill(0);
+                                            setPlantAutos(temp);
+                                            ReactGA.event({
+                                                category: "farming_interaction",
+                                                action: `clear_auto`,
+                                                label: `clear_auto`,
+                                            })
+                                        }}>Clear Autos</button>
+                                    </div>
+                                </div>
                             </div>
 
-                            {/* Max all autos */}
+
+                            {/* Calc buttons */}
                             <div style={{
-                                display: 'flex', alignItems: 'center',
-                                margin: '0 12px'
+                                display: 'flex', flexDirection: 'column',
+                                // border: '1px solid black',
+                                border: '2px solid purple',
+                                borderRadius: '5px',
+                                padding: '6px', marginRight: '12px',
+                                width: 'calc(100% - 308px)',
+                                minHeight: '110px',
+                                justifyContent: 'space-between'
                             }}>
-                                {/* <div>Max All Autos</div> */}
-                                <button onClick={(e) => {
-                                    let temp = Array(20).fill(numSimulatedAutos);
-                                    setPlantAutos(temp);
-                                    ReactGA.event({
-                                        category: "farming_interaction",
-                                        action: `max_auto`,
-                                        label: `max_auto`,
-                                    })
-                                }}>Max Autos</button>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                {/* <div>Clear All Autos</div> */}
-                                <button onClick={(e) => {
-                                    let temp = Array(20).fill(0);
-                                    setPlantAutos(temp);
-                                    ReactGA.event({
-                                        category: "farming_interaction",
-                                        action: `clear_auto`,
-                                        label: `clear_auto`,
-                                    })
-                                }}>Clear Autos</button>
-                            </div>
-                        </div>
-                        {/* Various settings */}
-                        <div style={{ display: 'flex' }}>
-
-                            <div>
                                 <MouseOverPopover tooltip={
                                     <div style={{ padding: '6px' }}>
                                         Calculates the best auto distribution for desired time into the future
                                     </div>
                                 }>
-                                    <div>
+                                    <div
+                                        style={{ fontWeight: 'bold', display: 'flex', justifyContent: 'center', marginBottom: '3px', marginTop: '-3px' }}
+                                    >
                                         Calculate best auto placements
                                     </div>
                                 </MouseOverPopover>
 
-
-
-                                <div style={{ display: 'flex' }}>
-
-                                    <MouseOverPopover tooltip={
-                                        <div style={{ padding: '6px' }}>
-                                            How many parallel simulations to run, higher number means more CPU usage but quicker result (diminishing returns with more threads)
-                                        </div>
-                                    }>
-                                        <div>
-                                            Num threads to use for calculating
-                                        </div>
-                                    </MouseOverPopover>
-
-
-
-                                    <select
-                                        style={{ maxWidth: '144px', marginLeft: '12px' }}
-                                        onChange={
-                                            (e) => {
-                                                setNumThreads(Number(e.target.value));
-                                                ReactGA.event({
-                                                    category: "farming_interaction",
-                                                    action: `changed_num_threads`,
-                                                    label: `${e.target.value}`,
-                                                    value: Number(e.target.value)
-                                                })
-                                            }
-                                        }
-                                        defaultValue={numThreads + ''}
-                                    >
-                                        <option value="1">1</option>
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                        <option value="4">4</option>
-                                        <option value="5">5</option>
-                                        <option value="6">6</option>
-                                        <option value="7">7</option>
-                                        <option value="8">8</option>
-                                        <option value="9">9</option>
-                                        <option value="10">10</option>
-                                        <option value="11">11</option>
-                                        <option value="12">12</option>
-                                    </select>
-                                </div>
-                                <div style={{ display: 'flex' }}>
-
-                                    <MouseOverPopover tooltip={
-                                        <div style={{ padding: '6px' }}>
-                                            Whether the simulation should automatically buy Farming Shop page 1 (Plant Boost Corner) upgrades. (This is an ascencion perk)
-                                        </div>
-                                    }>
-                                        <div>
-                                            Auto purchase Page 1 Upgrades (PBC)
-                                        </div>
-                                    </MouseOverPopover>
-
-
-                                    <input
-                                        type="checkbox"
-                                        onChange={(e) => {
-                                            setAutoBuyPBC(e.target.checked ? 1 : 0);
-                                            ReactGA.event({
-                                                category: "farming_interaction",
-                                                action: `changed_auto_pbc`,
-                                                label: `${e.target.checked}`,
-                                            })
-                                        }}
-                                        checked={!!autoBuyPBC}
-                                        value={!!autoBuyPBC}
-                                    />
-                                </div>
-                                <div style={{ display: 'flex' }}>
-
-                                    <MouseOverPopover tooltip={
-                                        <div style={{ padding: '6px' }}>
-                                            If checked, generates only possible auto distributions from your `Num Autos` selected above. If there are more autos assigned than you have purchased, then it will be disabled
-                                        </div>
-                                    }>
-                                        <div>
-                                            Lock in above `Num Autos`
-                                        </div>
-                                    </MouseOverPopover>
-
-
-                                    <input
-                                        type="checkbox"
-                                        onChange={(e) => {
-                                            setLockCustomAuto(e.target.checked ? 1 : 0);
-                                            ReactGA.event({
-                                                category: "farming_interaction",
-                                                action: `changed_lock_auto`,
-                                                label: `${e.target.checked}`,
-                                            })
-                                        }}
-                                        checked={!!lockCustomAuto}
-                                        value={!!lockCustomAuto}
-                                    />
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', }}>
-                                    <div style={{ marginRight: '6px' }}>
-                                        Y-Axis Scale
-                                    </div>
-                                    <button
-                                        onClick={(e) => {
-                                            setYScale(yScale === 'auto' ? `Log` : 'auto')
-                                        }}
-                                    >
-                                        {yScale === 'Log' ? `Log` : 'Linear'}
-                                    </button>
-
-                                </div>
-                            </div>
-
-
-                            <div style={{ display: 'flex', height: '100%', flexDirection: 'column' }}>
-
+                                {/* Calc Start buttons */}
                                 <div style={{ display: 'flex', flex: '1' }}>
-
                                     <div style={{
-                                        maxWidth: '50%', margin: '0 6px',
+                                        maxWidth: '50%', margin: '0',
                                         border: notEnoughAuto ? '1px solid black' : '',
                                         display: 'flex',
                                         flexDirection: 'column'
@@ -2010,146 +1755,180 @@ const FarmingLanding = ({ data }) => {
 
 
                                             }}>Calculate Step</button>
-                                        {futureTime < 1 && false && (
+                                        {futureTime < 1 && (
                                             <div>
                                                 Minimum 1 future hour!
                                             </div>
                                         )}
                                     </div>
-                                </div>
-
-
-
-                                {/* monte carlo */}
-                                {/* <div style={{
-                                    maxWidth: '50%', margin: '0 6px',
-                                    border: futureTime < 1 ? '1px solid black' : '',
-                                    display: 'flex',
-                                    flexDirection: 'column'
-                                }}>
-                                    <button
-
-                                        // disabled={futureTime < 1 || !calcDone}
-                                        onClick={(e) => {
-
-                                            let numSimulations = 75000;
-                                            let numSteps = 10;
-                                            let sims = [];
-                                            const maxTime = futureTime * secondsHour;
-
-
-
-                                            //     steps.push({
-                                            //         time: runTime,
-                                            //         autos: autos
-                                            //     })
-                                            // }
-                                            // result = helper.calcStepHPProd(finalPlants, { ...dataObj, steps: steps });
-                                            // break;
-
-                                            for (let i = 0; i < numSimulations; i++) {
-                                                //create references to each object, so its the same obj
-                                                // let steps = Array(numSteps).fill({ time: 0, autos: Array(numSimulatedAutos).fill(0) });
-                                                let steps = [];
-                                                for (let j = 0; j < numSteps; j++) {
-                                                    steps.push({ time: 0, autos: Array(numSimulatedAutos).fill(0) })
-                                                }
-
-
-                                                //populate plant autos first
-                                                for (let k = 0; k < numSteps; k++) {
-                                                    let remainingAuto = numSimulatedAutos;
-                                                    while (remainingAuto > 0) {
-                                                        // let numAuto = Math.floor(Math.random() * remainingAuto);
-                                                        let numAuto = 1;
-                                                        let index = Math.floor(Math.random() * finalPlants.length);
-                                                        steps[k].autos[index] += numAuto;
-                                                        remainingAuto -= numAuto;
-                                                    }
-                                                }
-
-
-                                                //Generate timings for each step
-                                                let curTime = maxTime;
-                                                let step = 0.01 * maxTime;
-
-                                                while (curTime > 0) {
-                                                    let index = Math.floor(Math.random() * numSteps);
-                                                    steps[index].time += step;
-                                                    curTime -= step;
-                                                }
-                                                sims.push(steps);
-                                            }
-
-
-                                            setCalcDone(false);
-                                            setCalcedFutureTime(futureTime);
-                                            console.log(`Time start: ` + (new Date()).getTime())
-                                            ReactGA.event({
-                                                category: "farming_interaction",
-                                                action: `clicked_optomise_carlo`,
-                                                label: `${futureTime}`,
-                                                value: futureTime
-                                            })
-
-                                            setCalcAFK(false);
-                                            setCalcStep(false);
-
-
-                                            let splitArraysIndicies = splitArrayIndices(sims, numThreads);
-                                            if (sims.length < numThreads) {
-                                                splitArraysIndicies = Array(12).fill([]);
-                                                splitArraysIndicies[0] = [0, sims.length - 1];
-                                            }
-                                            farmTotals.current = [];
-                                            setFarmCalcProgress((cur) => {
-                                                let temp = { ...cur };
-                                                temp.max = sims.length;
-                                                temp.current = 0;
-                                                return temp;
-                                            })
-                                            for (let i = 0; i < numThreads; i++) {
-                                                if (farmCalcStarted.current[i]) {
-                                                    continue;
-                                                }
-                                                if (splitArraysIndicies[i].length === 0) continue;
-                                                let worker = workers[i];
-                                                worker.postMessage({
-                                                    data: {
-                                                        combinations: sims,
-                                                        start: splitArraysIndicies[i][0],
-                                                        end: splitArraysIndicies[i][1],
-                                                        time: futureTime,
-                                                        modifiers: { ...modifiers, },
-                                                        finalPlants: finalPlants,
-                                                        mode: 'carlo',
-                                                        numSimulatedAutos: numSimulatedAutos
-                                                    },
-                                                    id: i
-                                                })
-                                                farmCalcStarted.current[i] = true;
-                                            }
-
-
-                                        }}>Calculate Monte Carlo</button>
-                                    {futureTime < 1 && false && (
+                                    {(farmCalcProgress.current > 0) && (
                                         <div>
-                                            Minimum 1 future hour!
+                                            {`${helper.roundTwoDecimal(farmCalcProgress.current / farmCalcProgress.max * 100)}%`}
                                         </div>
                                     )}
-                                </div> */}
+                                </div>
 
+
+                                <div
+                                    style={{
+                                        marginTop: '6px'
+                                    }}
+                                >
+                                    {`Last run time: ${timeCompleted ? timeCompleted.toLocaleString() : 'N/A'}`}
+                                </div>
 
                             </div>
-                            {(farmCalcProgress.current > 0) && (
-                                <div>
-                                    {`${helper.roundTwoDecimal(farmCalcProgress.current / farmCalcProgress.max * 100)}%`}
+
+                        </div>
+
+                        {/* Various settings */}
+                        <div style={{ display: 'flex', margin: '12px 0 0 0' }}>
+
+                            <div
+                                style={{ border: '1px solid black', padding: '3px', width: '345px' }}
+                            >
+
+
+
+                                <div style={{ display: 'flex' }}>
+
+                                    <MouseOverPopover tooltip={
+                                        <div style={{ padding: '6px' }}>
+                                            How many parallel simulations to run, higher number means more CPU usage but quicker result (diminishing returns with more threads)
+                                        </div>
+                                    }>
+                                        <div>
+                                            Num threads to use for calculating
+                                        </div>
+                                    </MouseOverPopover>
+
+
+
+                                    <select
+                                        style={{ maxWidth: '144px', marginLeft: '12px' }}
+                                        onChange={
+                                            (e) => {
+                                                setNumThreads(Number(e.target.value));
+                                                ReactGA.event({
+                                                    category: "farming_interaction",
+                                                    action: `changed_num_threads`,
+                                                    label: `${e.target.value}`,
+                                                    value: Number(e.target.value)
+                                                })
+                                            }
+                                        }
+                                        defaultValue={numThreads + ''}
+                                    >
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                        <option value="9">9</option>
+                                        <option value="10">10</option>
+                                        <option value="11">11</option>
+                                        <option value="12">12</option>
+                                    </select>
                                 </div>
-                            )}
+                                <div style={{ display: 'flex' }}>
+
+                                    <MouseOverPopover tooltip={
+                                        <div style={{ padding: '6px' }}>
+                                            Whether the simulation should automatically buy Farming Shop page 1 (Plant Boost Corner) upgrades. (This is an ascencion perk)
+                                        </div>
+                                    }>
+                                        <div>
+                                            Auto purchase Page 1 Upgrades (PBC)
+                                        </div>
+                                    </MouseOverPopover>
+
+
+                                    <input
+                                        type="checkbox"
+                                        onChange={(e) => {
+                                            setAutoBuyPBC(e.target.checked ? 1 : 0);
+                                            ReactGA.event({
+                                                category: "farming_interaction",
+                                                action: `changed_auto_pbc`,
+                                                label: `${e.target.checked}`,
+                                            })
+                                        }}
+                                        checked={!!autoBuyPBC}
+                                        value={!!autoBuyPBC}
+                                    />
+                                </div>
+                                <div style={{ display: 'flex' }}>
+
+                                    <MouseOverPopover tooltip={
+                                        <div style={{ padding: '6px' }}>
+                                            If checked, generates only possible auto distributions from your `Num Autos` selected above. If there are more autos assigned than you have purchased, then it will be disabled
+                                        </div>
+                                    }>
+                                        <div>
+                                            Lock in above `Num Autos`
+                                        </div>
+                                    </MouseOverPopover>
+
+
+                                    <input
+                                        type="checkbox"
+                                        onChange={(e) => {
+                                            setLockCustomAuto(e.target.checked ? 1 : 0);
+                                            ReactGA.event({
+                                                category: "farming_interaction",
+                                                action: `changed_lock_auto`,
+                                                label: `${e.target.checked}`,
+                                            })
+                                        }}
+                                        checked={!!lockCustomAuto}
+                                        value={!!lockCustomAuto}
+                                    />
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', }}>
+                                    <div style={{ marginRight: '6px' }}>
+                                        Y-Axis Scale
+                                    </div>
+                                    <button
+                                        onClick={(e) => {
+                                            setYScale(yScale === 'auto' ? `Log` : 'auto')
+                                        }}
+                                    >
+                                        {yScale === 'Log' ? `Log` : 'Linear'}
+                                    </button>
+
+                                </div>
+                            </div>
+
+
+                            {/* Timer Stuff */}
+                            <div
+                                style={{
+                                    margin: '0 12px 0 24px', border: '1px solid black', padding: '3px',
+                                    width: 'calc(100% - 308px)',
+
+                                }}
+                            >
+                                <h3
+                                    style={{
+                                        marginBottom: '6px',
+                                        marginTop: '0',
+                                        display: 'flex',
+                                        justifyContent: 'center'
+                                    }}
+                                >
+                                    Timer
+                                </h3>
+                                <div>
+                                    <Timer timeCompleted={timeCompleted} />
+                                </div>
+                            </div>
                         </div>
 
                         {/* Explanation */}
-                        < div style={{ display: 'flex', flex: 1, flexDirection: 'column' }}>
+                        < div style={{ display: 'flex', width: '100%', marginTop: '12px', flexDirection: 'column' }}>
 
                             <h3 style={{ margin: '0' }}>How to use</h3>
                             <div style={{ marginTop: '6px' }} >
@@ -2225,6 +2004,8 @@ const FarmingLanding = ({ data }) => {
                                 </div>
                             </div>
                         </div >
+
+
                     </div>
 
 
@@ -2347,7 +2128,7 @@ const FarmingLanding = ({ data }) => {
                                                                 </div>
 
                                                                 <div className='futurePicHolder'>
-                                                                    {`${helper.secondsToStringWithS(farmingHelper.calcTimeTillPrestige(
+                                                                    {`${helper.secondsToString(farmingHelper.calcTimeTillPrestige(
                                                                         bestPlantCombo.bestPic.result.plants[index],
                                                                         {
                                                                             ...bestPlantCombo.bestPic.result.result.finalModifiers,
@@ -2438,7 +2219,7 @@ const FarmingLanding = ({ data }) => {
                                                                         )}
                                                                     </div>
                                                                     <div className='futurePicHolder'>
-                                                                        {`${helper.secondsToStringWithS(farmingHelper.calcTimeTillPrestige(
+                                                                        {`${helper.secondsToString(farmingHelper.calcTimeTillPrestige(
                                                                             bestPlantCombo.bestPicPerc.result.plants[index],
                                                                             {
                                                                                 ...bestPlantCombo.bestPicPerc.result.result.finalModifiers,
@@ -2477,7 +2258,7 @@ const FarmingLanding = ({ data }) => {
                                                 {bestPlantCombo.bestPot.result.result.steps.map((val, index) => {
 
                                                     return <div className='bestSuggestion' >{
-                                                        `P${bestPlantCombo.bestPot.result.result.steps.length - index} for ${val.time > secondsHour ? helper.secondsToString(val.time) : helper.secondsToStringWithS(val.time)}`
+                                                        `P${bestPlantCombo.bestPot.result.result.steps.length - index} for ${val.time > secondsHour ? helper.secondsToString(val.time) : helper.secondsToString(val.time)}`
                                                     }</div>
 
                                                 })}
@@ -2526,7 +2307,7 @@ const FarmingLanding = ({ data }) => {
                                                                 <div className='suggestionHolder'>
                                                                     <div className='autoPicSuggestion'>
                                                                         {
-                                                                            `P${bestPlantCombo.bestPic.result.result.steps.length - index} for ${val.time > secondsHour ? helper.secondsToString(val.time) : helper.secondsToStringWithS(val.time)}`
+                                                                            `P${bestPlantCombo.bestPic.result.result.steps.length - index} for ${val.time > secondsHour ? helper.secondsToString(val.time) : helper.secondsToString(val.time)}`
                                                                         }
                                                                         {bestPlantCombo.bestPic.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].picIncrease > 0 && (
                                                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', }}>
@@ -2538,12 +2319,20 @@ const FarmingLanding = ({ data }) => {
                                                                                 >
                                                                                     +
                                                                                 </div>
-                                                                                <div>
+                                                                                <div
+                                                                                    style={{
+                                                                                        margin: '-6px 2px -2px 0',
+                                                                                        fontSize: '22px',
+                                                                                        display: 'flex',
+                                                                                        alignContent: 'center'
+                                                                                    }}
+                                                                                >
                                                                                     {
                                                                                         (bestPlantCombo.bestPic.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].prestige + bestPlantCombo.bestPic.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].picIncrease)
                                                                                         - bestPlantCombo.bestPic.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].prestige
                                                                                     }
                                                                                 </div>
+                                                                                <img style={{ height: '24px', marginTop: '-4px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
                                                                                 {/* <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
                                                                                 <div> {bestPlantCombo.bestPic.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].prestige}</div>
                                                                                 <img style={{ height: '24px' }} src={`/fapi_fork_personal/right_arrow.svg`} />
@@ -2555,7 +2344,7 @@ const FarmingLanding = ({ data }) => {
 
 
                                                                     <div className='futurePicHolder'>
-                                                                        {`${helper.secondsToStringWithS(farmingHelper.calcTimeTillPrestige(
+                                                                        {`${helper.secondsToString(farmingHelper.calcTimeTillPrestige(
                                                                             bestPlantCombo.bestPic.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index],
                                                                             {
                                                                                 ...bestPlantCombo.bestPic.result.result.finalModifiers,
@@ -2627,7 +2416,7 @@ const FarmingLanding = ({ data }) => {
                                                                     <div className='autoPicSuggestion'>
                                                                         <div>
 
-                                                                            {`P${bestPlantCombo.bestPicPerc.result.result.steps.length - index} for ${val.time > secondsHour ? helper.secondsToString(val.time) : helper.secondsToStringWithS(val.time)}`}
+                                                                            {`P${bestPlantCombo.bestPicPerc.result.result.steps.length - index} for ${val.time > secondsHour ? helper.secondsToString(val.time) : helper.secondsToString(val.time)}`}
                                                                         </div>
                                                                         {bestPlantCombo.bestPicPerc.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].picIncrease > 0 && (
                                                                             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -2642,7 +2431,7 @@ const FarmingLanding = ({ data }) => {
                                                                     </div>
 
                                                                     <div className='futurePicHolder'>
-                                                                        {`${helper.secondsToStringWithS(farmingHelper.calcTimeTillPrestige(
+                                                                        {`${helper.secondsToString(farmingHelper.calcTimeTillPrestige(
                                                                             bestPlantCombo.bestPicPerc.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index],
                                                                             {
                                                                                 ...bestPlantCombo.bestPicPerc.result.result.finalModifiers,
