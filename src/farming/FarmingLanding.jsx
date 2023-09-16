@@ -161,16 +161,23 @@ const FarmingLanding = ({ data }) => {
         if (data?.AssemblerCollection[0].BonusList[1].StartingLevel <= data?.AssemblerCollection[0].Level) {
             assemblyPlantExp *= farmingHelper.calcAssembly(data, 0, 1);
         }
+        if (data?.AssemblerCollection[5].BonusList[2].StartingLevel <= data?.AssemblerCollection[5].Level) {
+            assemblyPlantExp *= farmingHelper.calcAssembly(data, 5, 2);
+        }
+
         if (data?.AssemblerCollection[3].BonusList[2].StartingLevel <= data?.AssemblerCollection[3].Level) {
             assemblyProduction *= farmingHelper.calcAssembly(data, 3, 2);
         }
         if (data?.AssemblerCollection[7].BonusList[1].StartingLevel <= data?.AssemblerCollection[7].Level) {
             assemblyProduction *= farmingHelper.calcAssembly(data, 7, 1);
         }
+
         if (data?.AssemblerCollection[7].BonusList[0].StartingLevel <= data?.AssemblerCollection[7].Level) {
             assemblyPlantharvest *= farmingHelper.calcAssembly(data, 7, 0);
         }
-
+        if (data?.AssemblerCollection[9].BonusList[3].StartingLevel <= data?.AssemblerCollection[9].Level) {
+            assemblyPlantharvest *= farmingHelper.calcAssembly(data, 9, 3);
+        }
 
         const currFries = helper.calcPOW(data.FrenchFriesTotal);
 
@@ -278,9 +285,14 @@ const FarmingLanding = ({ data }) => {
 
     let assemblyPlantExp = 1;
     let assemblyProduction = 1;
+    let assemblyPlantharvest = 1;
     if (data?.AssemblerCollection[0].BonusList[1].StartingLevel <= data?.AssemblerCollection[0].Level) {
         assemblyPlantExp *= farmingHelper.calcAssembly(data, 0, 1);
     }
+    if (data?.AssemblerCollection[5].BonusList[2].StartingLevel <= data?.AssemblerCollection[5].Level) {
+        assemblyPlantExp *= farmingHelper.calcAssembly(data, 5, 2);
+    }
+
     if (data?.AssemblerCollection[3].BonusList[2].StartingLevel <= data?.AssemblerCollection[3].Level) {
         assemblyProduction *= farmingHelper.calcAssembly(data, 3, 2);
     }
@@ -288,9 +300,11 @@ const FarmingLanding = ({ data }) => {
         assemblyProduction *= farmingHelper.calcAssembly(data, 7, 1);
     }
 
-    let assemblyPlantharvest = 1;
     if (data?.AssemblerCollection[7].BonusList[0].StartingLevel <= data?.AssemblerCollection[7].Level) {
         assemblyPlantharvest *= farmingHelper.calcAssembly(data, 7, 0);
+    }
+    if (data?.AssemblerCollection[9].BonusList[3].StartingLevel <= data?.AssemblerCollection[9].Level) {
+        assemblyPlantharvest *= farmingHelper.calcAssembly(data, 9, 3);
     }
 
 
@@ -1425,7 +1439,7 @@ const FarmingLanding = ({ data }) => {
                             }}>
 
                                 <div
-                                    style={{ display: 'flex', flexDirection: 'column', width: '299px' }}
+                                    style={{ display: 'flex', flexDirection: 'column', width: '298px' }}
                                 >
 
                                     {/* Hours to calc */}
@@ -2028,21 +2042,110 @@ const FarmingLanding = ({ data }) => {
                                         <>
                                             <div style={{ display: 'flex' }}>
                                                 {/* style={{ marginRight: '24px', display: 'flex', alignItems: 'center' }}> */}
-                                                <div style={{ minWidth: '270px', display: 'flex', justifyContent: 'flex-end', marginRight: '2px' }}>
-                                                    Best Potatoe Generation, {`${100}% Fries`}:
-                                                </div>
-                                                {bestPlantCombo.pot.map((val, index) => {
-                                                    return <div
-                                                        className='bestSuggestion' style={{
-                                                            display: 'flex',
-                                                            justifyContent: 'center'
-                                                        }}>
-                                                        {`P${index + 1}: ${val} autos`}
+                                                <div style={{
+                                                    minWidth: '270px',
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    justifyContent: 'flex-end',
+                                                    marginRight: '2px'
+                                                }}>
+                                                    <div className='calcInfo'
+                                                        style={{
+                                                            margin: '-24px 0 16px 0'
+                                                        }}
+                                                    >
+                                                        <div>
+                                                            Best Potatoe Generation, {`${100}% Fries`}:
+                                                        </div>
                                                     </div>
+                                                    <div className='futurePicExplanation'>
+                                                        <div>
+                                                            Next PIC after {calcedFutureTime} hours + x hours
+                                                        </div>
+                                                        <div>
+                                                            with {numSimulatedAutos} autos per plant
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+
+                                                {bestPlantCombo.pot.map((val, index) => {
+                                                    return (
+                                                        <div className='suggestionHolder'>
+                                                            <MouseOverPopover key={'popover' + index} tooltip={
+                                                                <div>
+                                                                    <div>
+                                                                        <div>
+                                                                            Show how many PIC levels are gained (if any) and the time to hit the NEXT pic with your MAX num autos used
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            }>
+
+                                                                <div className='autoPicSuggestion'>
+                                                                    <div
+                                                                        style={{
+                                                                            display: 'flex',
+                                                                            justifyContent: 'center'
+                                                                        }}
+                                                                    >
+                                                                        {`P${index + 1}: ${val} autos`}
+                                                                    </div>
+                                                                    {bestPlantCombo.bestPot.result.plants[index].picIncrease > 0 && (
+                                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', }}>
+
+                                                                            {/* <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} /> */}
+                                                                            <div
+                                                                                style={{
+                                                                                    margin: '-6px 0 -2px -3px',
+                                                                                    fontSize: '22px'
+                                                                                }}
+                                                                            >
+                                                                                +
+                                                                            </div>
+                                                                            <div
+                                                                                style={{
+                                                                                    margin: '-6px 2px -2px 0',
+                                                                                    fontSize: '22px',
+                                                                                    display: 'flex',
+                                                                                    alignContent: 'center'
+                                                                                }}
+                                                                            >
+                                                                                {
+                                                                                    (bestPlantCombo.bestPot.result.plants[index].prestige + bestPlantCombo.bestPot.result.plants[index].picIncrease)
+                                                                                    - bestPlantCombo.bestPot.result.plants[index].prestige
+                                                                                }
+                                                                            </div>
+                                                                            <img style={{ height: '24px', marginTop: '-4px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+
+                                                                <div className='futurePicHolder'>
+                                                                    {`${helper.secondsToString(farmingHelper.calcTimeTillPrestige(
+                                                                        bestPlantCombo.bestPot.result.plants[index],
+                                                                        {
+                                                                            ...bestPlantCombo.bestPot.result.result.finalModifiers,
+                                                                            // numAuto: bestPlantCombo.bestPic.result.combo[index]
+                                                                            numAuto: numSimulatedAutos
+                                                                        }
+                                                                    ).remainingTime)
+                                                                        }`}
+                                                                </div>
+                                                            </MouseOverPopover>
+                                                        </div>
+                                                    )
                                                 }).reverse()}
+
+
                                             </div>
                                             {/* best raw pic levels */}
-                                            <div style={{ display: 'flex', marginTop: '6px', alignItems: 'center' }}>
+                                            <div style={{
+                                                display: 'flex',
+                                                marginTop: '-6px',
+                                                alignItems: 'center'
+                                            }}>
                                                 <div style={{ minWidth: '270px', marginRight: '2px' }}>
                                                     <div className='calcInfo' >
                                                         <div>
@@ -2111,7 +2214,6 @@ const FarmingLanding = ({ data }) => {
                                                                                     - bestPlantCombo.bestPic.result.plants[index].prestige
                                                                                 }
                                                                             </div>
-                                                                            {/* <img style={{ height: '24px' }} src={`/fapi_fork_personal/right_arrow.svg`} /> */}
                                                                             <img style={{ height: '24px', marginTop: '-4px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
                                                                             {/* <div> {bestPlantCombo.bestPic.result.plants[index].prestige + bestPlantCombo.bestPic.result.plants[index].picIncrease}</div> */}
                                                                         </div>
@@ -2132,34 +2234,11 @@ const FarmingLanding = ({ data }) => {
                                                                         bestPlantCombo.bestPic.result.plants[index],
                                                                         {
                                                                             ...bestPlantCombo.bestPic.result.result.finalModifiers,
-                                                                            // numAuto: bestPlantCombo.bestPic.result.combo[index]
                                                                             numAuto: numSimulatedAutos
                                                                         }
                                                                     ).remainingTime)
                                                                         }`}
-                                                                    {/* <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                                        <div>
-                                                                            +
-                                                                        </div>
-                                                                        <div>
-
-                                                                        </div>
-                                                                        <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
-                                                                        <div> {bestPlantCombo.bestPic.result.plants[index].prestige + bestPlantCombo.bestPic.result.plants[index].picIncrease}</div>
-                                                                        <img style={{ height: '24px' }} src={`/fapi_fork_personal/right_arrow.svg`} />
-                                                                        <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
-                                                                        <div> {bestPlantCombo.bestPic.result.plants[index].prestige + bestPlantCombo.bestPic.result.plants[index].picIncrease + 1}</div>
-                                                                    </div> */}
-                                                                    {/* <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                                        <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
-                                                                        <div> {bestPlantCombo.bestPic.result.plants[index].prestige + bestPlantCombo.bestPic.result.plants[index].picIncrease}</div>
-                                                                        <img style={{ height: '24px' }} src={`/fapi_fork_personal/right_arrow.svg`} />
-                                                                        <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
-                                                                        <div> {bestPlantCombo.bestPic.result.plants[index].prestige + bestPlantCombo.bestPic.result.plants[index].picIncrease + 1}</div>
-                                                                    </div> */}
-
                                                                 </div>
-
                                                             </MouseOverPopover>
                                                         </div>
                                                     )
@@ -2252,7 +2331,7 @@ const FarmingLanding = ({ data }) => {
                                 {calcStep && (
                                     <div className='calcResult'>
                                         <>
-                                            <div style={{ display: 'flex' }}>
+                                            {/* <div style={{ display: 'flex' }}>
 
                                                 <div style={{ minWidth: '270px', display: 'flex', justifyContent: 'flex-end', marginRight: '2px' }}>Best order, 100% Fries</div>
                                                 {bestPlantCombo.bestPot.result.result.steps.map((val, index) => {
@@ -2262,7 +2341,109 @@ const FarmingLanding = ({ data }) => {
                                                     }</div>
 
                                                 })}
+                                            </div> */}
+
+
+                                            <div style={{ display: 'flex' }}>
+                                                {/* style={{ marginRight: '24px', display: 'flex', alignItems: 'center' }}> */}
+                                                <div style={{
+                                                    minWidth: '270px',
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    justifyContent: 'flex-end',
+                                                    marginRight: '2px'
+                                                }}>
+                                                    <div className='calcInfo'
+                                                        style={{
+                                                            margin: '-24px 0 16px 0'
+                                                        }}
+                                                    >
+                                                        <div>
+                                                        Best order, 100% Fries
+                                                        </div>
+                                                    </div>
+                                                    <div className='futurePicExplanation'>
+                                                        <div>
+                                                            Next PIC after {calcedFutureTime} hours + x hours
+                                                        </div>
+                                                        <div>
+                                                            with {numSimulatedAutos} autos per plant
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+                                                {bestPlantCombo.bestPot.result.result.steps.map((val, index) => {
+                                                    return (
+                                                        <div className='suggestionHolder'>
+                                                            <MouseOverPopover key={'popover' + index} tooltip={
+                                                                <div>
+                                                                    <div>
+                                                                        <div>
+                                                                            Show how many PIC levels are gained (if any) and the time to hit the NEXT pic with your MAX num autos used
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            }>
+
+                                                                <div className='autoPicSuggestion'>
+                                                                    <div
+                                                                        style={{
+                                                                            display: 'flex',
+                                                                            justifyContent: 'center'
+                                                                        }}
+                                                                    >
+                                                                        {`P${bestPlantCombo.bestPot.result.result.steps.length - index} for ${val.time > secondsHour ? helper.secondsToString(val.time) : helper.secondsToString(val.time)}`}
+                                                                    </div>
+                                                                    {bestPlantCombo.bestPot.result.plants[index].picIncrease > 0 && (
+                                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', }}>
+
+                                                                            {/* <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} /> */}
+                                                                            <div
+                                                                                style={{
+                                                                                    margin: '-6px 0 -2px -3px',
+                                                                                    fontSize: '22px'
+                                                                                }}
+                                                                            >
+                                                                                +
+                                                                            </div>
+                                                                            <div
+                                                                                style={{
+                                                                                    margin: '-6px 2px -2px 0',
+                                                                                    fontSize: '22px',
+                                                                                    display: 'flex',
+                                                                                    alignContent: 'center'
+                                                                                }}
+                                                                            >
+                                                                                {
+                                                                                    (bestPlantCombo.bestPot.result.plants[index].prestige + bestPlantCombo.bestPot.result.plants[index].picIncrease)
+                                                                                    - bestPlantCombo.bestPot.result.plants[index].prestige
+                                                                                }
+                                                                            </div>
+                                                                            <img style={{ height: '24px', marginTop: '-4px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+
+                                                                <div className='futurePicHolder'>
+                                                                    {`${helper.secondsToString(farmingHelper.calcTimeTillPrestige(
+                                                                        bestPlantCombo.bestPot.result.plants[index],
+                                                                        {
+                                                                            ...bestPlantCombo.bestPot.result.result.finalModifiers,
+                                                                            // numAuto: bestPlantCombo.bestPic.result.combo[index]
+                                                                            numAuto: numSimulatedAutos
+                                                                        }
+                                                                    ).remainingTime)
+                                                                        }`}
+                                                                </div>
+                                                            </MouseOverPopover>
+                                                        </div>
+                                                    )
+                                                })}
                                             </div>
+
+
+
 
                                             {/* Best PIC */}
                                             {bestPlantCombo.bestPic.pic > 0 && (

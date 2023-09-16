@@ -2,7 +2,7 @@ import { memo, useState, useEffect } from 'react';
 import { useTimer } from 'react-timer-hook';
 import { useGlobalAudioPlayer } from 'react-use-audio-player';
 import useLocalStorage from "use-local-storage";
-
+import addNotification from 'react-push-notification';
 
 const Timer = ({ data, timeCompleted }) => {
     const [loopAlarm, setLoopAlarm] = useLocalStorage("loopAlarm", false);
@@ -44,6 +44,13 @@ const Timer = ({ data, timeCompleted }) => {
             if (initialStart) return;
             console.warn('Timer Finished');
             play();
+            addNotification({
+                title: 'FAPI Timer Finished',
+                // subtitle: 'This is a subtitle',
+                // message: 'This is a very long message',
+                // theme: 'darkblue',
+                native: true // when using native, your OS will handle theming.
+            });
         }
     });
 

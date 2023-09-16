@@ -29,11 +29,11 @@ var helper = {
         numHours = Math.floor((seconds % (3600 * 24)) / 3600);
         numMinutes = Math.floor((seconds % 3600) / 60);
         numSeconds = this.roundInt((seconds % (3600 * 24)) % 60);
-        
+
         if (numDays == Number.POSITIVE_INFINITY || numDays == Number.NEGATIVE_INFINITY) {
             return `` + numDays;
         }
-        
+
         if (numSeconds === 60) {
             numSeconds = 0;
             numMinutes++;
@@ -91,15 +91,18 @@ var helper = {
         if (numDays > 0) {
             string = string + `${numDays < 10 ? `0` + numDays : numDays}d:`
         }
-        if (numHours > 0) {
+        if (numHours > 0 || (numHours === 0 && numDays === 0)) {
             string = string + `${numHours < 10 ? `0` + numHours : numHours}h`
         }
         if (numDays === 0) {
+
+            string = string + `:`;
+
             if (numMinutes > 0) {
-                string = string + ':' + `${numMinutes < 10 ? `0` + numMinutes : numMinutes}m`
+                string = string + `${numMinutes < 10 ? `0` + numMinutes : numMinutes}m`
             }
             else {
-                string = string + ':' + `0s`;
+                string = string + `0s`;
             }
         }
 
