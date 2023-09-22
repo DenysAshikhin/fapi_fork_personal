@@ -17,20 +17,7 @@ const ItemSelection = ({ selectedItems, onItemSelected, data, weightMap, default
     };
 
     const renderPet = (petData) => {
-        const { petId } = petData;
-        const isItemSelected = isSelected(petId);
 
-        return (
-            <PetItem
-                key={petId}
-                petData={petData}
-                data={data}
-                isSelected={isItemSelected}
-                onClick={() => handleItemClick(petId)}
-                weightMap={weightMap}
-                defaultRank={defaultRank}
-            />
-        );
     };
 
     let newPetArray = [...petNameArray];
@@ -51,7 +38,31 @@ const ItemSelection = ({ selectedItems, onItemSelected, data, weightMap, default
 
     return (
         <div className="item-selection">
-            {newPetArray.map(renderPet)}
+            {newPetArray.map(
+                (petData) => {
+                    const { petId } = petData;
+                    const isItemSelected = isSelected(petId);
+
+                    return (
+                        <div
+                            style={{ display: "flex", alignItems: 'center', justifyContent:'center' }}
+                        >
+
+                            <PetItem
+                                key={petId}
+                                petData={petData}
+                                data={data}
+                                isSelected={isItemSelected}
+                                onClick={() => handleItemClick(petId)}
+                                weightMap={weightMap}
+                                defaultRank={defaultRank}
+                            />
+                        </div>
+                    );
+
+                }
+
+            )}
         </div>
     );
 };

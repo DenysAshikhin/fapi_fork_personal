@@ -363,14 +363,14 @@ function App() {
                             <div style={{ textAlign: 'center' }}>Cards</div>
                         </div>
                     )}
-                    {!!data && (
+                    {/* {!!data && (
                         <div className="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
                             onClick={() => setTabSwitch(5)}
                         >
                             <img style={{ width: '30px' }} src={`/fapi_fork_personal/scale.svg`} />
                             <div style={{ textAlign: 'center' }}>Weight</div>
                         </div>
-                    )}
+                    )} */}
                 </div>
                 <div style={{ overflow: 'auto', width: '100%', display: 'flex', flex: 1 }}>
                     {selectComponent()}

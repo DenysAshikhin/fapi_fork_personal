@@ -89,17 +89,20 @@ var helper = {
         }
 
         if (numDays > 0) {
-            string = string + `${numDays < 10 ? `0` + numDays : numDays}d:`
+            string = string + `${numDays < 10 ? `0` + numDays : numDays}d:`;
+            if (numHours === 0) {
+                string = string + `00h`
+            }
         }
         if (numHours > 0 || (numHours === 0 && numDays === 0)) {
-            string = string + `${numHours < 10 ? `0` + numHours : numHours}h`
+            string = string + `${numHours < 10 ? `0` + numHours : numHours}h`;
         }
         if (numDays === 0) {
 
             string = string + `:`;
 
             if (numMinutes > 0) {
-                string = string + `${numMinutes < 10 ? `0` + numMinutes : numMinutes}m`
+                string = string + `${numMinutes < 10 ? `0` + numMinutes : numMinutes}m`;
             }
             else {
                 string = string + `0s`;

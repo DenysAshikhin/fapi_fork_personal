@@ -12,6 +12,9 @@ import helper from '../util/helper.js'
 import xIcon from "../assets/images/x_icon.svg"
 import pinIcon from "../assets/images/pin-line-icon.svg"
 import trashIcon from "../assets/images/trash-can-icon.svg"
+import infoIcon from '../assets/images/info.svg';
+import infoIconRed from '../assets/images/info_red.svg';
+import infoIconGreen from '../assets/images/info_green.svg';
 
 import ReactGA from "react-ga4";
 import SearchBox from '../util/search.jsx';
@@ -142,7 +145,7 @@ const JSONDisplay = ({
             const groupBests = petHelper.calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken, data: data }, comboSelector)[tokenSelections[index]];
             // totalTokensHR += groupBests.tokenHR;
             // totalTokensHR += groupBests.totalTokens / groupBests.hours;
-            totalTokensHR += groupBests.floored / groupBests.hours;
+            totalTokensHR += groupBests.tokenHR / groupBests.hours;
         })
 
     if (selectedPets) {
@@ -201,6 +204,7 @@ const JSONDisplay = ({
                 style={{
                     display: 'flex',
                     flexDirection: 'column',
+                    minWidth: '300px'
                     // width: '100%'
                 }}
             >
@@ -216,7 +220,7 @@ const JSONDisplay = ({
                     // let tokenScore = groupTotal.tokenMult * (Math.pow(1 + petHelper.SOUL_CLOVER_STEP, data.SoulGoldenClover)) * comboSelector * data.ExpeditionTokenBonuses;
                     // tokenScore = tokenScore.toExponential(3);
                     let tempTokenScore = petHelper.calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken, data: data }, comboSelector)[tokenSelections[index]]
-                    let tokenScore = (tempTokenScore.floored / tempTokenScore.hours).toExponential(3);
+                    let tokenScore = (tempTokenScore.tokenHR / tempTokenScore.hours).toExponential(3);
                     const score = groupTotal.groupScore;
                     const displayedDamage = (score * 5 * data.PetDamageBonuses).toExponential(3);
 
@@ -225,11 +229,11 @@ const JSONDisplay = ({
 
                     switch (groupRankCritera) {
                         case 1://damage
-                            groupLabel = `Group ${index + 1} Damage: ${displayedDamage} || Token: ${tokenScore}`;
+                            groupLabel = `Group ${index + 1} Damage: ${displayedDamage} || Token/hr: ${tokenScore}`;
                             tokenInfo = petHelper.calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken, data: data }, comboSelector);
                             break;
                         case 2://token
-                            groupLabel = `Group ${index + 1} Token: ${tokenScore} || Damage: ${displayedDamage}`;
+                            groupLabel = `Group ${index + 1} Token/hr: ${tokenScore} || Damage: ${displayedDamage}`;
                             tokenInfo = petHelper.calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken, data: data }, comboSelector);
                             break;
                         case 3://Advanced
@@ -256,8 +260,8 @@ const JSONDisplay = ({
                         key={(1 + index) * 9001}
                         style={{
                             // height: '1px'
-                            marginTop: '12px',
-                            marginBottom: '12px'
+                            // marginTop: '12px',
+                            marginBottom: '6px'
                         }}
                     >
                         <MouseOverPopover tooltip={groupTooltip}>
@@ -265,7 +269,8 @@ const JSONDisplay = ({
                         </MouseOverPopover>
 
                         {/* {groupRankCritera === 2 && ( */}
-                        <div style={{ display: "flex" }}>
+                        {/* best hours */}
+                        {/* <div style={{ display: "flex" }}>
                             <div style={{ marginRight: '12px' }}>Best hours:</div>
                             <select
                                 style={{ maxWidth: '312px' }}
@@ -282,134 +287,133 @@ const JSONDisplay = ({
                             >
                                 {tokenInfo.map((value, indexInner) => {
                                     return <option value={indexInner} key={indexInner}>
-                                        {/* {`${value.hours} hours creating ${value.floored} (${helper.roundTwoDecimal(value.totalTokens)}) tokens wasting ${value.wastedHR.toExponential(3)}/hr`} */}
+                                       
                                         {`${value.hours} hours creating ${value.floored} (${helper.roundTwoDecimal(value.totalTokens)}) tokens wasting ${helper.roundThreeDecimal(value.wastedHR)}/hr`}
                                     </option>
                                 })}
                             </select>
-                        </div>
+                        </div> */}
                         {/* )} */}
                     </div>
 
 
-                    let GroupIcons = <Grid2
-                        container
-                        spacing={1}
-                        style={{
-                            // height: '1px'
-                        }}
-                    >
-                        {!!group && group.map((petData, idx) => {
-                            const { ID } = petData;
-                            let staticPetData = petNameArray.find(staticPetDatum => staticPetDatum.petId === ID)
+                    let GroupIcons =
+                        <div
+                            style={{
+                                display: 'flex',
+                            }}
+                        >
+                            {!!group && group.map((petData, idx) => {
+                                const { ID } = petData;
+                                let staticPetData = petNameArray.find(staticPetDatum => staticPetDatum.petId === ID)
 
-                            if (!staticPetData) {
-                                staticPetData = {
-                                    img: '/fapi_fork_personal/pets/missing.png',
-                                    location: '??-??',
-                                    name: 'Unknown',
-                                    petId: ID
+                                if (!staticPetData) {
+                                    staticPetData = {
+                                        img: '/fapi_fork_personal/pets/missing.png',
+                                        location: '??-??',
+                                        name: 'Unknown',
+                                        petId: ID
+                                    }
                                 }
-                            }
 
-                            return (
-                                <div
-                                    style={{
-                                        position: 'relative',
-                                        display: 'flex',
-                                        flex: '1',
-                                        width: 'auto',
-                                        height: 'auto',
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
-                                    }}
-                                >
-                                    <PetItem
-                                        key={ID}
-                                        petData={staticPetData}
-                                        fullPetData={petData}
-                                        data={data}
-                                        isSelected={true}
-                                        onClick={() => { }}
-                                        weightMap={weightMap}
-                                        defaultRank={defaultRank}
-                                        borderActive={petData.BonusList.find((a) => a.ID === hoveredBonus) || ID === activePet}
-                                        enabledBonusHighlight={enabledBonusHighlight}
-                                    />
+                                return (
                                     <div
-                                        className="hover"
                                         style={{
-                                            position: 'absolute', top: '0', right: '0',
-                                            // width: '20px',
-                                            // height: '20px'
-                                        }}
-                                        onClick={(e) => {
-
-                                            setPetWhiteList((curr) => {
-                                                let temp = [...curr];
-
-                                                let pet_inner = temp.find((sample_pet) => sample_pet.id === petData.ID);
-                                                if (!pet_inner) {
-                                                    temp.push({ label: staticPetData.name, id: staticPetData.petId, placement: 'team', parameters: { team: index, damageBias: 17 } });
-                                                }
-                                                else {
-                                                    pet_inner.placement = 'team';
-                                                    pet_inner.parameters = { team: index }
-                                                }
-
-
-                                                return temp;
-                                            })
-
-                                            setRefreshGroups(true);
-                                            return;
-
+                                            position: 'relative',
+                                            display: 'flex',
+                                            flex: '1',
+                                            width: 'auto',
+                                            height: 'auto',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
                                         }}
                                     >
+                                        <PetItem
+                                            key={ID}
+                                            petData={staticPetData}
+                                            fullPetData={petData}
+                                            data={data}
+                                            isSelected={true}
+                                            onClick={() => { }}
+                                            weightMap={weightMap}
+                                            defaultRank={defaultRank}
+                                            borderActive={petData.BonusList.find((a) => a.ID === hoveredBonus) || ID === activePet}
+                                            enabledBonusHighlight={enabledBonusHighlight}
+                                        />
+                                        <div
+                                            className="hover"
+                                            style={{
+                                                position: 'absolute', top: '0', right: '0',
+                                                // width: '20px',
+                                                // height: '20px'
+                                            }}
+                                            onClick={(e) => {
 
-                                        <img
-                                            style={{ width: '20px' }}
-                                            src={pinIcon} />
+                                                setPetWhiteList((curr) => {
+                                                    let temp = [...curr];
+
+                                                    let pet_inner = temp.find((sample_pet) => sample_pet.id === petData.ID);
+                                                    if (!pet_inner) {
+                                                        temp.push({ label: staticPetData.name, id: staticPetData.petId, placement: 'team', parameters: { team: index, damageBias: 17 } });
+                                                    }
+                                                    else {
+                                                        pet_inner.placement = 'team';
+                                                        pet_inner.parameters = { team: index }
+                                                    }
+
+
+                                                    return temp;
+                                                })
+
+                                                setRefreshGroups(true);
+                                                return;
+
+                                            }}
+                                        >
+
+                                            <img
+                                                style={{ width: '20px' }}
+                                                src={pinIcon} />
+                                        </div>
+                                        <div
+                                            className="hover"
+                                            style={{
+                                                position: 'absolute', bottom: '0', right: '0',
+                                                // width: '20px',
+                                                // height: '20px'
+                                            }}
+                                            onClick={(e) => {
+
+                                                setPetWhiteList((curr) => {
+                                                    let temp = [...curr];
+
+                                                    let pet_inner = temp.find((sample_pet) => sample_pet.id === petData.ID);
+                                                    if (!pet_inner) {
+                                                        temp.push({ label: staticPetData.name, id: staticPetData.petId, placement: 'blacklist', parameters: { team: 0, damageBias: 17 } });
+                                                    }
+                                                    else {
+                                                        pet_inner.placement = 'blacklist';
+                                                        pet_inner.parameters = { team: 0 }
+                                                    }
+
+                                                    return temp;
+                                                })
+
+                                                setRefreshGroups(true);
+                                                return;
+
+                                            }}
+                                        >
+
+                                            <img
+                                                style={{ width: '20px' }}
+                                                src={trashIcon} />
+                                        </div>
                                     </div>
-                                    <div
-                                        className="hover"
-                                        style={{
-                                            position: 'absolute', bottom: '0', right: '0',
-                                            // width: '20px',
-                                            // height: '20px'
-                                        }}
-                                        onClick={(e) => {
 
-                                            setPetWhiteList((curr) => {
-                                                let temp = [...curr];
-
-                                                let pet_inner = temp.find((sample_pet) => sample_pet.id === petData.ID);
-                                                if (!pet_inner) {
-                                                    temp.push({ label: staticPetData.name, id: staticPetData.petId, placement: 'blacklist', parameters: { team: 0, damageBias: 17 } });
-                                                }
-                                                else {
-                                                    pet_inner.placement = 'blacklist';
-                                                    pet_inner.parameters = { team: 0 }
-                                                }
-
-                                                return temp;
-                                            })
-
-                                            setRefreshGroups(true);
-                                            return;
-
-                                        }}
-                                    >
-
-                                        <img
-                                            style={{ width: '20px' }}
-                                            src={trashIcon} />
-                                    </div>
-                                </div>
-
-                            );
-                        })}
-                    </Grid2>
+                                );
+                            })}
+                        </div>
                     let finalRow = <div
                         key={'group' + index}
                         style={{
@@ -732,7 +736,8 @@ const JSONDisplay = ({
                                     display: 'flex',
                                     boxShadow: `0 0 0 1px #ecf0f5`,
                                     backgroundColor: '#fbfafc',
-                                    justifyContent: 'center'
+                                    justifyContent: 'center',
+                                    alignItems: 'center'
                                 }}
                             >
                                 Bonus
@@ -744,7 +749,8 @@ const JSONDisplay = ({
                                     display: 'flex',
                                     boxShadow: `0 0 0 1px #ecf0f5`,
                                     backgroundColor: '#fbfafc',
-                                    justifyContent: 'center'
+                                    justifyContent: 'center',
+                                    alignItems: 'center'
                                 }}
                             >
                                 Amount
@@ -756,7 +762,8 @@ const JSONDisplay = ({
                                     display: 'flex',
                                     boxShadow: `0 0 0 1px #ecf0f5`,
                                     backgroundColor: '#fbfafc',
-                                    justifyContent: 'center'
+                                    justifyContent: 'center',
+                                    alignItems: 'center'
                                 }}
                             >
                                 Equation
@@ -790,8 +797,11 @@ const JSONDisplay = ({
                                         </div>
                                     </div>
                                 }>
-                                    <div>
-                                        Placement
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <div>
+                                            Placement
+                                        </div>
+                                        <img style={{ height: '16px', marginLeft: '6px' }} src={infoIcon} />
                                     </div>
                                 </MouseOverPopover>
 
@@ -804,7 +814,8 @@ const JSONDisplay = ({
                                     display: 'flex',
                                     boxShadow: `0 0 0 1px #ecf0f5`,
                                     backgroundColor: '#fbfafc',
-                                    justifyContent: 'center'
+                                    justifyContent: 'center',
+                                    alignItems: 'center'
                                 }}
                             >
                                 Total Max
@@ -1374,8 +1385,11 @@ const JSONDisplay = ({
                                         </div>
                                     </div>
                                 }>
-                                    <div>
-                                        Placement
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <div>
+                                            Placement
+                                        </div>
+                                        <img style={{ height: '16px', marginLeft: '6px' }} src={infoIcon} />
                                     </div>
                                 </MouseOverPopover>
 
@@ -1403,8 +1417,12 @@ const JSONDisplay = ({
                                         </div>
                                     </div>
                                 }>
-                                    <div>
-                                        Parameters
+
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <div>
+                                            Parameters
+                                        </div>
+                                        <img style={{ height: '16px', marginLeft: '6px' }} src={infoIcon} />
                                     </div>
                                 </MouseOverPopover>
                             </div>
@@ -1417,6 +1435,116 @@ const JSONDisplay = ({
                                     // petLabel += ` (Group: ${relWhiteListMap[pet.id].finalGroup + 1})`
                                     petGroup += `(Group: ${relWhiteListMap[pet.id].finalGroup + 1})`
                                 }
+
+                                let showRed = false;//Too high
+                                let showGreen = false;// Too low
+                                let hoverMsg = ``;
+
+                                //Check whether this pet is placed too low or too high
+                                if (pet.placement !== `blacklist`) {
+                                    let bigsad = -1;//
+
+                                    let group_index = groups.findIndex((temp_e) => {
+                                        return temp_e.find((temp_e2) => temp_e2.ID === pet.id)
+                                    });
+
+                                    if (group_index > -1) {
+
+                                        //Check if this pet got put in too high
+
+                                        let group = groups[group_index];
+
+                                        try {
+                                            //Can only check if not on bottom
+                                            if (group_index !== (groups.length - 1)) {
+                                                //By default only need to check twice (2gnd or 2air)
+                                                const maxChecks = 2;
+                                                let originalGroupScore = petHelper.calculateGroupScore(group, defaultRank).groupScore;
+                                                let tempGroup = [];
+                                                let triedPets = {};
+
+                                                for (let i = 0; i < maxChecks; i++) {//
+                                                    let foundNew = false;
+
+                                                    for (let j = 0; j < groups[group_index + 1].length; j++) {
+
+                                                        let temp_pet = groups[group_index + 1][j];
+                                                        if (temp_pet.Type === pet.pet.Type) {
+                                                            let bigsad = -1;
+                                                            if (!(temp_pet.ID in triedPets) && !foundNew) {
+                                                                triedPets[temp_pet.ID] = true;
+                                                                foundNew = true;
+                                                                tempGroup = [...group];
+                                                                let ind = tempGroup.findIndex((temp_repl) => temp_repl.ID === pet.pet.ID)
+                                                                tempGroup[ind] = temp_pet;
+                                                            }
+                                                        }
+                                                    }
+
+                                                    let newGroupScore = petHelper.calculateGroupScore(tempGroup, defaultRank).groupScore;
+
+                                                    if (newGroupScore > originalGroupScore) {
+                                                        showRed = true;
+                                                        hoverMsg = `${petLabel} might be too high, try ${pet.placement === 'rel' ? `increase` : `lowering`} the value to drop them to a lower team`
+                                                    }
+                                                    tempGroup = [];
+                                                }
+                                            }
+                                        }
+                                        catch (err) {
+                                            let temppp = group_index;
+                                            console.log(err);
+                                        }
+                                        try {
+                                            //If they are not too high, check if they are too low (except for team 1)
+                                            if (!showRed && group_index > 0) {
+                                                //By default only need to check twice (2gnd or 2air)
+                                                const maxChecks = 2;
+                                                let originalGroupScore = petHelper.calculateGroupScore(groups[group_index - 1], defaultRank).groupScore;
+                                                let tempGroup = [];
+                                                let triedPets = {};
+
+                                                for (let i = 0; i < maxChecks; i++) {//
+                                                    let foundNew = false;
+
+                                                    for (let j = 0; j < groups[group_index - 1].length; j++) {
+
+                                                        let temp_pet = groups[group_index - 1][j];
+                                                        if (temp_pet.Type === pet.pet.Type) {
+                                                            let bigsad = -1;
+                                                            if (!(temp_pet.ID in triedPets) && !foundNew) {
+                                                                triedPets[temp_pet.ID] = true;
+                                                                foundNew = true;
+                                                                tempGroup = [...groups[group_index - 1]];
+                                                                let ind = tempGroup.findIndex((temp_repl) => temp_repl.ID === temp_pet.ID)
+                                                                tempGroup[ind] = pet.pet;
+                                                            }
+                                                        }
+                                                    }
+
+                                                    let newGroupScore = petHelper.calculateGroupScore(tempGroup, defaultRank).groupScore;
+
+                                                    if (newGroupScore > originalGroupScore) {
+                                                        showGreen = true;
+                                                        hoverMsg = ` ${petLabel} might be too low, try ${pet.placement === 'rel' ? `lowering` : `increasing`} the value to bump them to a higher team`
+                                                    }
+                                                    tempGroup = [];
+                                                }
+                                            }
+                                        }
+                                        catch (err) {
+                                            let tempy = group_index;
+                                            console.log(err);
+                                        }
+                                    }
+                                    //Has a nan placement -> suggest decreasing the rel value
+                                    else {
+                                        hoverMsg = `Try lowering this value until ${petLabel} is put in`;
+                                        showGreen = true;
+                                    }
+
+                                }
+
 
                                 return (
                                     <div
@@ -1511,7 +1639,7 @@ const JSONDisplay = ({
                                         {/* parameters */}
                                         <div
                                             disabled={pet.placement === 'blacklist'}
-                                            style={{ width: '30%', opacity: pet.placement === 'blacklist' ? '0.4' : '', display: 'flex', justifyContent: 'center' }}
+                                            style={{ width: '30%', opacity: pet.placement === 'blacklist' ? '0.4' : '', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
                                         >
                                             {pet.placement === 'team' && (
                                                 <div>
@@ -1540,8 +1668,11 @@ const JSONDisplay = ({
                                                 </div>
                                             )}
                                             {pet.placement === `rel` && (
-                                                <div>
+                                                <div
+
+                                                >
                                                     <input
+                                                        style={{ maxWidth: '36px' }}
                                                         type='number'
                                                         // className='prepNumber'
                                                         value={pet.parameters.damageBias}
@@ -1574,6 +1705,13 @@ const JSONDisplay = ({
                                             )}
                                             {pet.placement === 'blacklist' && (
                                                 <>Unavailable</>
+                                            )}
+                                            {(showGreen || showRed) && (
+
+                                                <MouseOverPopover muiHeight={'18px'} tooltip={<div>{hoverMsg}</div>} style={{ display: 'flex', alignItems: 'center', height: '18px' }}>
+                                                    <img style={{ height: '18px', marginLeft: '6px', marginTop: '2px' }} src={showGreen ? infoIconGreen : infoIconRed} />
+                                                </MouseOverPopover>
+
                                             )}
                                         </div>
                                     </div>

@@ -120,6 +120,7 @@ const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, de
             <div
                 key={petId}
                 onClick={onClick}
+                style={{ display: 'flex' }}
                 className={`item-tile${pet.Type === 1 ? '-ground ' : '-air '} ${isSelected ? '' : 'unselected'}`}
             // className={`item-tile ${isSelected ? '' : 'unselected'}`}
             >
@@ -127,7 +128,8 @@ const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, de
                     className="item-image-container"
                     style={{
                         border: borderActive ? 'black 1px solid' : '',
-                        position: 'relative'
+                        position: 'relative',
+                        display:'flex'
                     }}>
                     {numHighlights.map((item, index) => {
                         return (<div

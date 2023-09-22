@@ -12,6 +12,10 @@ code {
     monospace;
 }
 
+.popoverContainer .MuiTypography-root {
+  display: flex;
+}
+
 .hover:hover {
   cursor: pointer;
 }

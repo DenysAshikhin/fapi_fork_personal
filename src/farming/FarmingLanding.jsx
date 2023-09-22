@@ -417,6 +417,58 @@ const FarmingLanding = ({ data }) => {
 
     let tempFuture = useMemo(() => {
         console.log(`calcing`);
+
+        if (false) {
+            let final_steps = [];
+            let completeRunTime = 0;
+
+            for (let i = finalPlants.length - 1; i >= 0; i--) {
+                let runTime = 0;
+                let loop_flag = true;
+
+                let plants_inner = [...finalPlants];
+                let modif_inner = { ...modifiers }
+                let index = i;
+                let autos_inner = Array(numSimulatedAutos).fill(0);
+                while (loop_flag) {
+
+                    let temp_time = plants_inner[index].growthTime === 10 ? 60 : plants_inner[index].growthTime;
+
+                    runTime += temp_time;
+
+                    autos_inner[index] = numSimulatedAutos;
+                    let temp_result = farmingHelper.calcHPProd(plants_inner, { ...modif_inner, time: temp_time, numAutos: autos_inner });
+
+                    let mult_increase = mathHelper.subtractDecimal(temp_result.plants[index].futureMult, plants_inner[index].futureMult);
+                    let mult_increase_ind = mathHelper.divideDecimal(mult_increase, numSimulatedAutos);
+                    let mult_increase_perc = mathHelper.divideDecimal(mult_increase_ind, temp_result.plants[index].futureMult).toNumber();
+
+                    let mult_per_s = mult_increase_perc / (temp_time * (index === 0 ? 0.75 : 1));
+
+                    plants_inner = temp_result.plants;
+                    modif_inner = temp_result.finalModifiers;
+                    const thresh = 0.000024579935867502135 / 3;
+                    if (mult_per_s < thresh) {
+
+                        loop_flag = false;
+                    }
+                }
+                completeRunTime += runTime;
+                final_steps.push({ time: runTime, autos: autos_inner });
+            }
+
+            console.log(final_steps)
+            let temp_steps = farmingHelper.calcStepHPProd(finalPlants, { ...modifiers, steps: final_steps });
+            console.log(`temp steps: ${completeRunTime} -> ${helper.secondsToString(completeRunTime)}`);
+            console.log(temp_steps);
+
+
+            // console.log(`final duration: ${helper.secondsToString(runTime)}`)
+            // let timeTillLevel_temp = farmingHelper.calcTimeTillLevel(finalPlants[6], {...modifiers});
+
+        }
+
+
         let result = farmingHelper.calcHPProd(finalPlants, { ...modifiers, time: secondsHour * futureTime, numAutos: plantAutos });
         for (let i = 0; i < result.dataPointsPotatoes.length; i++) {
             let cur = result.dataPointsPotatoes[i];
@@ -663,7 +715,7 @@ const FarmingLanding = ({ data }) => {
         futurePlants.push(newPlant);
     }
 
-
+    //Calc best + listeners
     useEffect(() => {
 
         const findBest = () => {
@@ -1333,17 +1385,6 @@ const FarmingLanding = ({ data }) => {
         })
 
     }, [])
-
-
-    // if (password !== 'cheese_needed_this')
-    //     return <div>
-    //         <input type='string' value={password} onChange={(e) => { setPassword(e.target.value) }} />
-    //     </div>
-
-    const dataGrassHopper = helper.calcPOW(data.GrasshopperTotal);
-    const level = dataGrassHopper + (futureGrasshopper - 1);
-    let grassHopperAmount = helper.roundInt(2250 + (level + 1) * (level + 2) / 2 * 250 * Math.pow(1.025, level));
-
 
     let notEnoughAuto = false;
 
@@ -2073,7 +2114,7 @@ const FarmingLanding = ({ data }) => {
                                                 {bestPlantCombo.pot.map((val, index) => {
                                                     return (
                                                         <div className='suggestionHolder'>
-                                                            <MouseOverPopover key={'popover' + index} tooltip={
+                                                            <MouseOverPopover extraClasses={'suggestionHolder'} key={'popover' + index} tooltip={
                                                                 <div>
                                                                     <div>
                                                                         <div>
@@ -2170,7 +2211,7 @@ const FarmingLanding = ({ data }) => {
                                                 {bestPlantCombo.pic.map((val, index) => {
                                                     return (
                                                         <div className='suggestionHolder'>
-                                                            <MouseOverPopover key={'popover' + index} tooltip={
+                                                            <MouseOverPopover extraClasses={'suggestionHolder'} key={'popover' + index} tooltip={
                                                                 <div>
                                                                     <div>
                                                                         <div>
@@ -2359,7 +2400,7 @@ const FarmingLanding = ({ data }) => {
                                                         }}
                                                     >
                                                         <div>
-                                                        Best order, 100% Fries
+                                                            Best order, 100% Fries
                                                         </div>
                                                     </div>
                                                     <div className='futurePicExplanation'>
@@ -2376,7 +2417,7 @@ const FarmingLanding = ({ data }) => {
                                                 {bestPlantCombo.bestPot.result.result.steps.map((val, index) => {
                                                     return (
                                                         <div className='suggestionHolder'>
-                                                            <MouseOverPopover key={'popover' + index} tooltip={
+                                                            <MouseOverPopover extraClasses={'suggestionHolder'} key={'popover' + index} tooltip={
                                                                 <div>
                                                                     <div>
                                                                         <div>
@@ -2393,9 +2434,10 @@ const FarmingLanding = ({ data }) => {
                                                                             justifyContent: 'center'
                                                                         }}
                                                                     >
+                                                                        {/* {`P${bestPlantCombo.bestPot.result.result.steps.length - index} for ${val.time > secondsHour ? helper.secondsToString(val.time) : helper.secondsToString(val.time)}`} */}
                                                                         {`P${bestPlantCombo.bestPot.result.result.steps.length - index} for ${val.time > secondsHour ? helper.secondsToString(val.time) : helper.secondsToString(val.time)}`}
                                                                     </div>
-                                                                    {bestPlantCombo.bestPot.result.plants[index].picIncrease > 0 && (
+                                                                    {bestPlantCombo.bestPot.result.plants[bestPlantCombo.bestPot.result.result.steps.length - index - 1].picIncrease > 0 && (
                                                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', }}>
 
                                                                             {/* <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} /> */}
@@ -2416,8 +2458,8 @@ const FarmingLanding = ({ data }) => {
                                                                                 }}
                                                                             >
                                                                                 {
-                                                                                    (bestPlantCombo.bestPot.result.plants[index].prestige + bestPlantCombo.bestPot.result.plants[index].picIncrease)
-                                                                                    - bestPlantCombo.bestPot.result.plants[index].prestige
+                                                                                    (bestPlantCombo.bestPot.result.plants[bestPlantCombo.bestPot.result.result.steps.length - index - 1].prestige + bestPlantCombo.bestPot.result.plants[bestPlantCombo.bestPot.result.result.steps.length - index - 1].picIncrease)
+                                                                                    - bestPlantCombo.bestPot.result.plants[bestPlantCombo.bestPot.result.result.steps.length - index - 1].prestige
                                                                                 }
                                                                             </div>
                                                                             <img style={{ height: '24px', marginTop: '-4px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
@@ -2427,7 +2469,7 @@ const FarmingLanding = ({ data }) => {
 
                                                                 <div className='futurePicHolder'>
                                                                     {`${helper.secondsToString(farmingHelper.calcTimeTillPrestige(
-                                                                        bestPlantCombo.bestPot.result.plants[index],
+                                                                        bestPlantCombo.bestPot.result.plants[bestPlantCombo.bestPot.result.result.steps.length - index - 1],
                                                                         {
                                                                             ...bestPlantCombo.bestPot.result.result.finalModifiers,
                                                                             // numAuto: bestPlantCombo.bestPic.result.combo[index]

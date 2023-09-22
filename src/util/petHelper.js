@@ -55,14 +55,15 @@ var helper = {
         }
 
         // bestArr.sort((a, b) => { return a.wasted - b.wasted })
-        bestArr.sort((a, b) => {
-            let a_waste = general_helper.roundThreeDecimal(a.wastedHR)
-            let b_waste = general_helper.roundThreeDecimal(b.wastedHR)
-            if (a_waste === b_waste) {
-                return a.hours - b.hours;
-            }
-            return a_waste - b_waste;
-        })
+
+        // bestArr.sort((a, b) => {
+        //     let a_waste = general_helper.roundThreeDecimal(a.wastedHR)
+        //     let b_waste = general_helper.roundThreeDecimal(b.wastedHR)
+        //     if (a_waste === b_waste) {
+        //         return a.hours - b.hours;
+        //     }
+        //     return a_waste - b_waste;
+        // })
 
         return bestArr;
     },
@@ -416,6 +417,9 @@ var helper = {
                 if (prevCombination.length > 0) {
 
                     let validTeam = true;
+                    let fakeRel = 0;
+                    let exact = 0;
+                    const maxPets = 4;
 
                     //First confirm the the combination satisfies all bonuses
                     for (let i = 0; i < bonusList.length; i++) {
@@ -430,6 +434,12 @@ var helper = {
 
                                 if (pet.ID === bonus.pet.ID) {
                                     currCount++;
+                                    if (bonus.parameters.fake) {
+                                        fakeRel++;
+                                    }
+                                    else {
+                                        exact++
+                                    }
                                 }
                             }
 
@@ -437,7 +447,7 @@ var helper = {
                                 // console.log(`we good`);
                                 pass = true;
                             }
-                            else {
+                            else if (!bonus.parameters.fake) {
                                 // console.log(`we not good`);
                                 validTeam = false;
                                 pass = false;
@@ -453,6 +463,7 @@ var helper = {
 
                                 if (pet.BonusList.find((a) => a.ID === bonus.bonus.id)) {
                                     currCount++;
+                                    exact++;
                                 }
                             }
 
@@ -475,6 +486,7 @@ var helper = {
 
                                 if (pet.BonusList.find((a) => a.ID === bonus.bonus.id)) {
                                     currCount++;
+                                    exact++;
                                 }
                             }
 
@@ -496,7 +508,10 @@ var helper = {
 
                             for (let j = 0; j < prevCombination.length; j++) {
                                 let pet = prevCombination[j];
-                                if (pet.BonusList.find((a) => a.ID === bonus.bonus.id)) maxCounter++;
+                                if (pet.BonusList.find((a) => a.ID === bonus.bonus.id)) {
+                                    maxCounter++;
+                                    fakeRel++;
+                                }
                                 // if (bonus.tempRequired > 0)
                                 //     if (bonus.tempRequiredPets.find((a) => a.ID === pet.ID)) {
                                 //         currCount++;
@@ -563,8 +578,40 @@ var helper = {
                         if (pass) {
                             bonus.passed++;
                         }
+                    }
+                    let maxRel = 0;
 
-                        if (!validTeam) break;
+                    for (let x = 0; x < bonusList.length; x++) {
+                        let temp_inner = bonusList[x];
+                        if (temp_inner.placement) {
+                            //bigsad = -1 note does not handle the rel filter for bonuses very well
+                            if (temp_inner.parameters.fake) {
+                                maxRel++;
+                            }
+                        }
+                    }
+
+                    //Check if we have all the req pets, and enough rel pets
+                    if (maxRel > 0) {
+                        let currRel = 0;
+
+                        if (fakeRel > 3) {
+                            let bigsad = -1;
+                        }
+
+                        //There are more recommended than we can fit, so just make sure he have enough
+                        if (maxRel + exact > maxPets) {
+                            maxRel = maxPets - exact;
+                        }
+
+                        if (fakeRel < maxRel) {
+                            validTeam = false;
+                        }
+                        else {
+                            validTeam = true;
+                        }
+
+
                     }
 
                     if (validTeam) {
@@ -1063,9 +1110,22 @@ var helper = {
                             bonusList.push(whiteListReqPets[j]);
                             // }
                         }
-                        whiteListReqPets = whiteListReqPets.filter((e) => !e.parameters.fake)
                         let combinations_rel = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length), bonusList);
                         console.log(`got new combinations after the rel calcs`)
+
+                        //Only filter out the fake `rel` whitelisted pets, if they WERE selected by the combo
+                        whiteListReqPets = whiteListReqPets.filter((e) => {
+                            let temp = combinations_rel;
+                            if (!e.parameters.fake) {
+                                return true;
+                            }
+                            else {
+                                let found = combinations_rel.team.find((inner_pet) => inner_pet.ID === e.id)
+                                return !found;
+                            }
+
+                        });
+
 
                         //Only hard crash in case of no backup team that is possible
                         if (combinations_rel === -1 && whiteListReqPets.length === 0) {
@@ -1079,9 +1139,10 @@ var helper = {
 
                             combinations = combinations_rel;
 
-                            //Also need to delete all the rel whitelists from future teams
+                            //Also need to delete all the rel whitelists from future teams, only if they exist
                             for (let x = 0; x < bonusList.length; x++) {
-                                if (bonusList[x].id in whitelistRel) {
+
+                                if (bonusList[x].id in whitelistRel && combinations_rel.team.find((inner_pet) => inner_pet.ID === bonusList[x].id)) {
                                     delete whitelistRel[bonusList[x].id]
                                 }
                             }

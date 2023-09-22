@@ -61,8 +61,8 @@ var farmingHelper = {
                     TotalCreated, plantMult),
                 PlantTotalProductionBonus),
             mathHelper.createDecimal(Math.pow(1.02, prestige))
-        )
-            ;
+        );
+        
         if (plant_input.ID === 1) {
             output = mathHelper.multiplyDecimal(output, modifiers_input.hpBonus);
         }

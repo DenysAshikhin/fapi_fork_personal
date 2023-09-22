@@ -2,7 +2,7 @@ import * as React from 'react';
 import Popover from '@mui/material/Popover';
 import Typography from '@mui/material/Typography';
 
-function MouseOverPopover({ tooltip, children }) {
+function MouseOverPopover({ tooltip, children, style, extraClasses }) {
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const handlePopoverOpen = (event) => {
@@ -17,7 +17,8 @@ function MouseOverPopover({ tooltip, children }) {
 
     return (
         <div
-
+            class={extraClasses ? extraClasses + 'popoverContainer' : 'popoverContainer'}
+            style={style ? style : {}}
         >
             <Typography
                 // aria-owns={open ? 'mouse-over-popover' : undefined}

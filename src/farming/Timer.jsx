@@ -69,7 +69,7 @@ const Timer = ({ data, timeCompleted }) => {
                         className='prepNumber'
                         value={innerDays}
                         style={{
-                            width: '30px'
+                            width: '33px'
                         }}
                         onChange={
                             (e) => {
@@ -91,19 +91,19 @@ const Timer = ({ data, timeCompleted }) => {
                         max="99"
                     />
                     <div>
-                        d:
+                        d :
                     </div>
                 </div>
                 {/* hours */}
                 <div
-                    style={{ display: 'flex' }}
+                    style={{ display: 'flex', margin: '0 3px 0 6px' }}
                 >
                     < input
                         type='number'
                         className='prepNumber'
                         value={innerHours}
                         style={{
-                            width: '30px'
+                            width: '33px'
                         }}
                         onChange={
                             (e) => {
@@ -125,19 +125,19 @@ const Timer = ({ data, timeCompleted }) => {
                         max="99"
                     />
                     <div>
-                        h:
+                        h :
                     </div>
                 </div>
                 {/* minutes */}
                 <div
-                    style={{ display: 'flex' }}
+                    style={{ display: 'flex', marginLeft: '3px' }}
                 >
                     < input
                         type='number'
                         className='prepNumber'
                         value={innerMinutes}
                         style={{
-                            width: '30px'
+                            width: '33px'
                         }}
                         onChange={
                             (e) => {
@@ -159,19 +159,19 @@ const Timer = ({ data, timeCompleted }) => {
                         max="99"
                     />
                     <div>
-                        m:
+                        {`m :`}
                     </div>
                 </div>
                 {/* seconds */}
                 <div
-                    style={{ display: 'flex' }}
+                    style={{ display: 'flex', margin: '0 0 0 6px' }}
                 >
                     < input
                         type='number'
                         className='prepNumber'
                         value={innerSeconds}
                         style={{
-                            width: '30px'
+                            width: '33px'
                         }}
                         onChange={
                             (e) => {
@@ -198,6 +198,7 @@ const Timer = ({ data, timeCompleted }) => {
                 </div>
             </div>
 
+            {/* Timer controls */}
             <div
                 style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '6px' }}
             >
@@ -222,12 +223,16 @@ const Timer = ({ data, timeCompleted }) => {
                             setInitialStart(false);
                             restart(time);
                         }
-                        if (isRunning) {
-                            restart(time);
+                        // start(e);
+
+                        // if (isRunning) {
+                        // restart(time);
+                        // }
+                        // else {
+                        else if (!isRunning) {
+                            resume(e);
                         }
-                        else {
-                            start(e);
-                        }
+                        // }
                     }
                     }>Start</button>
                 <button
