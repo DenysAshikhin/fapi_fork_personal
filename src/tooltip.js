@@ -2,7 +2,7 @@ import * as React from 'react';
 import Popover from '@mui/material/Popover';
 import Typography from '@mui/material/Typography';
 
-function MouseOverPopover({ tooltip, children, style, extraClasses }) {
+function MouseOverPopover({ tooltip, children, style, extraClasses, opacity }) {
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const handlePopoverOpen = (event) => {
@@ -12,7 +12,7 @@ function MouseOverPopover({ tooltip, children, style, extraClasses }) {
     const handlePopoverClose = () => {
         setAnchorEl(null);
     };
-
+    opacity = opacity ? opacity : '0.9';
     const open = Boolean(anchorEl);
 
     return (
@@ -56,7 +56,7 @@ function MouseOverPopover({ tooltip, children, style, extraClasses }) {
                 slotProps={{
                     paper: {
                         style: {
-                            backgroundColor: "rgba(255,255,255,0.9)",
+                            backgroundColor: `rgba(255,255,255,${opacity})`,
                             padding: '6px'
                         }
                     }

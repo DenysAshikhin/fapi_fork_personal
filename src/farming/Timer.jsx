@@ -11,6 +11,7 @@ const Timer = ({ data, timeCompleted }) => {
     const [innerMinutes, setInnerMinutes] = useState(0);
     const [innerSeconds, setInnerSeconds] = useState(0);
     const [initialStart, setInitialStart] = useState(true);
+    const [finished, setFinished] = useState(false);
 
     let timeIncrease = ((innerDays * 3600 * 24) + (innerHours * 3600) + (innerMinutes * 60) + (innerSeconds)) * 1000;
     let time = new Date();
@@ -24,7 +25,7 @@ const Timer = ({ data, timeCompleted }) => {
         load('/fapi_fork_personal/alarm.mp3', {
             autoplay: false
         });
-        setTimeout(() => { loop(loopAlarm) }, 1000)
+        // setTimeout(() => { loop(loopAlarm) }, 1000)
     }, [])
 
 
@@ -43,6 +44,7 @@ const Timer = ({ data, timeCompleted }) => {
         expiryTimestamp: time, onExpire: () => {
             if (initialStart) return;
             console.warn('Timer Finished');
+            setFinished(true);
             play();
             addNotification({
                 title: 'FAPI Timer Finished',
@@ -217,9 +219,21 @@ const Timer = ({ data, timeCompleted }) => {
                         }}
                     />
                 </div>
+                {/* start */}
                 <button
                     onClick={(e) => {
-                        if (initialStart) {
+
+                        if (finished) {
+                            let time = new Date();
+                            time = new Date(time.getTime() + timeIncrease)
+                            restart(time);
+                            setFinished(false);
+                        }
+
+
+                        else if (initialStart) {
+                            let time = new Date();
+                            time = new Date(time.getTime() + timeIncrease)
                             setInitialStart(false);
                             restart(time);
                         }
@@ -229,12 +243,14 @@ const Timer = ({ data, timeCompleted }) => {
                         // restart(time);
                         // }
                         // else {
+
                         else if (!isRunning) {
                             resume(e);
                         }
                         // }
                     }
                     }>Start</button>
+                {/* Pause */}
                 <button
                     style={{ margin: '0 6px' }}
                     onClick={pause}>Pause</button>
@@ -243,6 +259,8 @@ const Timer = ({ data, timeCompleted }) => {
                     // Restarts to 5 minutes timer
                     // const time = new Date();
                     // time.setSeconds(time.getSeconds() + 300);
+                    let time = new Date();
+                    time = new Date(time.getTime() + timeIncrease)
                     restart(time)
                 }}>Restart</button>
             </div>

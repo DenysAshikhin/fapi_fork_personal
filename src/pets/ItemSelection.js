@@ -35,6 +35,51 @@ const ItemSelection = ({ selectedItems, onItemSelected, data, weightMap, default
         }
     }
 
+    newPetArray = newPetArray.sort((a_inner, b_inner) => {
+
+        let a = a_inner.location;
+        let b = b_inner.location;
+
+        if (a.includes('E')) {
+            if (b.includes('E')) {
+
+                let num_a = a.length === 3 ? Number(a[1]) : Number(a[1] + a[2]);
+                let num_b = b.length === 3 ? Number(b[1]) : Number(b[1] + b[2]);
+
+                if (num_a === num_b) {
+                    return a[2].localeCompare(b[2])
+                }
+                else {
+                    return num_a - num_b;
+                }
+            }
+            else {
+                return 1;
+            }
+        }
+        else if (b.includes('E')) {
+            if (a.includes('E')) {
+                let num_a = a[1];
+                let num_b = b[1];
+
+                if (num_a === num_b) {
+                    throw new Error(`uncaught case for sorting`)
+                }
+                else {
+                    return num_a - num_b;
+                }
+            }
+            else {
+                return -1;
+            }
+        }
+        else {
+            let num_a = Number(a[0] * 10 + a[2]);
+            let num_b = Number(b[0] * 10 + b[2]);
+            return num_a - num_b;
+        }
+    })
+
 
     return (
         <div className="item-selection">
@@ -45,7 +90,7 @@ const ItemSelection = ({ selectedItems, onItemSelected, data, weightMap, default
 
                     return (
                         <div
-                            style={{ display: "flex", alignItems: 'center', justifyContent:'center' }}
+                            style={{ display: "flex", alignItems: 'center', justifyContent: 'center' }}
                         >
 
                             <PetItem

@@ -62,7 +62,7 @@ var farmingHelper = {
                 PlantTotalProductionBonus),
             mathHelper.createDecimal(Math.pow(1.02, prestige))
         );
-        
+
         if (plant_input.ID === 1) {
             output = mathHelper.multiplyDecimal(output, modifiers_input.hpBonus);
         }
@@ -147,21 +147,18 @@ var farmingHelper = {
         let remainingTime = modifiers.time;
         let numAutos = modifiers.numAuto || modifiers?.numAuto === 0 ? modifiers.numAuto : 1;
 
-        if (numAutos === 0) {
-            let newOutPut = this.calcProdOutput(plant, modifiers);
-
-            plant.production = newOutPut;
-            return plant;
-        }
-
-
         let expTick = plant.prestigeBonus * modifiers.expBonus;
         plant.growthTime = Math.floor(plant.TimeNeeded / plant.prestigeBonus / (1 + 0.05 * modifiers.shopGrowingSpeed) / modifiers.petPlantCombo / modifiers.contagionPlantGrowth);
         if (plant.growthTime < 10) {
             plant.growthTime = 10;
         }
 
+        if (numAutos === 0) {
+            let newOutPut = this.calcProdOutput(plant, modifiers);
 
+            plant.production = newOutPut;
+            return plant;
+        }
 
         while (remainingTime > 0) {
 
@@ -292,13 +289,13 @@ var farmingHelper = {
             let timeToLevel = this.calcTimeTillLevel(plant, modifiers);
             let requiredPerPic = 10 * Math.pow(2, plant.prestige);
             let requiredHarvests = runningHarvests + requiredPerPic;
-            let remainingHarvests = mathHelper.subtractDecimal(requiredHarvests, plant.created);
+            let remainingHarvests = mathHelper.subtractDecimal(requiredHarvests, plant.created);//minimum number of ticks
             let timeTillPrestige =
                 mathHelper.multiplyDecimal(
                     mathHelper.divideDecimal(
                         remainingHarvests,
                         (plant.perHarvest * numAutos)
-                    ),
+                    ).ceil(),
                     plant.growthTime
                 ).ceil().toNumber()
                 ;

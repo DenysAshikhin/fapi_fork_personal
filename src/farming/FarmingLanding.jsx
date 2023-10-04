@@ -380,6 +380,11 @@ const FarmingLanding = ({ data }) => {
             //                 plant.prestige += 40;
             //             }
             // //
+            // if (plant.ID === 7) {
+            //     let bigSad = -1;
+            //     plant.ManuallyCreated.mantissa = 1.63839;
+            //     plant.ManuallyCreated.exponent = 5;
+            // }
 
             plant.prestigeBonus = Math.pow(1.02, plant.prestige)
             plant.growthTime = Math.floor(plant.TimeNeeded / plant.prestigeBonus / (1 + 0.05 * shopGrowingSpeed) / petPlantCombo / contagionPlantGrowth);
@@ -1691,7 +1696,8 @@ const FarmingLanding = ({ data }) => {
                                                 // const combinations = generateCombinations(3, finalPlants.length);
                                                 let splitArraysIndicies = splitArrayIndices(combinations, numThreads);
                                                 if (combinations.length < numThreads) {
-                                                    splitArraysIndicies = [[0, combinations.length - 1], [], [], [], [], []];
+                                                    splitArraysIndicies = Array(numThreads).fill([]);
+                                                    splitArraysIndicies[0] = [0, combinations.length - 1];
                                                 }
                                                 farmTotals.current = [];
                                                 setFarmCalcProgress((cur) => {
@@ -1704,7 +1710,9 @@ const FarmingLanding = ({ data }) => {
                                                     if (farmCalcStarted.current[i]) {
                                                         continue;
                                                     }
+
                                                     if (splitArraysIndicies[i].length === 0) continue;
+
                                                     let worker = workers[i];
                                                     worker.postMessage({
                                                         data: {
@@ -2110,7 +2118,7 @@ const FarmingLanding = ({ data }) => {
                                                 </div>
 
 
-
+{/* sadsd */}
                                                 {bestPlantCombo.pot.map((val, index) => {
                                                     return (
                                                         <div className='suggestionHolder'>

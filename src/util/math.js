@@ -28,6 +28,24 @@ var helper = {
     pow: function (number, exp) {
         number = number.mantissa || number.mantissa === 0 ? number : this.createDecimal(number);
         return number.pow(exp);
+    },
+    min: function (number1, number2) {
+        number1 = number1.mantissa || number1.mantissa === 0 ? number1 : this.createDecimal(number1);
+        number2 = number2.mantissa || number2.mantissa === 0 ? number2 : this.createDecimal(number2);
+
+        if (number1.greaterThan(number2)) {
+            return number2;
+        }
+        return number1;
+    },
+    max: function (number1, number2) {
+        number1 = number1.mantissa || number1.mantissa === 0 ? number1 : this.createDecimal(number1);
+        number2 = number2.mantissa || number2.mantissa === 0 ? number2 : this.createDecimal(number2);
+
+        if (number1.greaterThan(number2)) {
+            return number1;
+        }
+        return number2;
     }
 }
 

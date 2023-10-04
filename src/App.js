@@ -224,8 +224,8 @@ function App() {
     const handleData = (uploadedData) => {
 
         console.log(uploadedData)
-        // uploadedData.PetDamageBonuses = helper.calcPOW(uploadedData.PetDamageBonusesBD);
-        uploadedData.PetDamageBonuses = 1;
+        uploadedData.PetDamageBonuses = helper.calcPOW(uploadedData.PetDamageBonusesBD);
+        // uploadedData.PetDamageBonuses = 1;
 
         setData(uploadedData);
 
