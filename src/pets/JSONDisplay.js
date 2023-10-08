@@ -88,6 +88,7 @@ const JSONDisplay = ({
     // const [showAllBonusTally, setShowAllBonusTally] = useState(false);
     const [showAllBonusTally, setShowAllBonusTally] = useLocalStorage("showAllBonusTally", false);
     const [leftOverBonus1, setLeftOverBonus1] = useLocalStorage("leftOverBonus1", 1016);
+    const [hideLocked, setHideLocked] = useLocalStorage("hideLocked", false);
     const [activePet, setActivePet] = useState(-1);
 
     useEffect(() => {
@@ -121,6 +122,22 @@ const JSONDisplay = ({
 
     let filterablePets = [];
     let equippedPets = {};
+
+    // if (hideLocked) {
+    //     let unlockedPets = {};
+    //     originalPets.map((e) => {
+    //         if (e.Locked === 1) {
+    //             unlockedPets[e.ID] = true;
+    //         }
+    //     })
+    //     selectedItems = selectedItems.filter((e) => {
+    //         let show = !!unlockedPets[e];
+    //         if (!show) {
+    //             let bigsad = -1;
+    //         }
+    //         return show;
+    //     })
+    // }
 
     for (let i = 0; i < petWhiteList.length; i++) {
         let cur = petWhiteList[i];
@@ -1756,7 +1773,7 @@ const JSONDisplay = ({
                                         {
                                             Object.values(BonusMap).sort((a, b) => a.label.localeCompare(b.label)).map((e) => {
                                                 if (!leftOverIgnore[e.id] && e.id < 5000)
-                                                    return <option value={e.id} key={e.id}> {e.label}</option>
+                                                    return <option value={e.id} key={e.id}> {e.id >= 1000 ? e.label + ` Expedition` : e.label}</option>
                                             })
                                         }
                                     </select>
@@ -1915,7 +1932,7 @@ const JSONDisplay = ({
             </div>
             <div className="grid-right">
                 <div style={{ display: 'flex' }}>
-                    <Typography variant={"h5"} style={{ marginRight: '12px' }}>Click a pet to enable/disable</Typography>
+                    <Typography variant={"h5"} style={{ marginRight: '12px', fontSize: '22px' }}>Click a pet to enable/disable</Typography>
                     <div style={{ display: 'flex' }}>
                         <button
                             onClick={(e) => {
@@ -1964,6 +1981,17 @@ const JSONDisplay = ({
 
                             }}
                         >Reset</button>
+                        <button
+                            onClick={(e) => {
+                                ReactGA.event({
+                                    category: "expedition_pets",
+                                    action: 'toggle_hide_locked',
+                                    label: hideLocked ? 'show_locked' : 'hide_locked',
+                                    value: hideLocked
+                                })
+                                setHideLocked(!hideLocked);
+                            }}
+                        >{hideLocked ? `Show Locked` : `Hide Locked`}</button>
                     </div>
                 </div>
                 <ItemSelection
@@ -1972,6 +2000,7 @@ const JSONDisplay = ({
                     selectedItems={selectedItems}
                     onItemSelected={handleItemSelected}
                     defaultRank={defaultRank}
+                    showLocked={!hideLocked}
                 />
             </div>
         </div >

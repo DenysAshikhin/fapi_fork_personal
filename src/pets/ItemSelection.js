@@ -3,7 +3,7 @@ import './ItemSelection.css';
 import { petNameArray } from '../itemMapping';
 import PetItem from './PetItem';
 
-const ItemSelection = ({ selectedItems, onItemSelected, data, weightMap, defaultRank }) => {
+const ItemSelection = ({ selectedItems, onItemSelected, data, weightMap, defaultRank, showLocked }) => {
     const isSelected = (petId) => {
         return selectedItems.includes(petId);
     };
@@ -33,6 +33,11 @@ const ItemSelection = ({ selectedItems, onItemSelected, data, weightMap, default
             }
             newPetArray.push(temp)
         }
+    }
+
+    if (!showLocked) {
+
+        newPetArray = newPetArray.filter((e) => selectedItems.includes(e.petId))
     }
 
     newPetArray = newPetArray.sort((a_inner, b_inner) => {
