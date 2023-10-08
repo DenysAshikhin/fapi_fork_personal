@@ -147,7 +147,8 @@ var farmingHelper = {
         let remainingTime = modifiers.time;
         let numAutos = modifiers.numAuto || modifiers?.numAuto === 0 ? modifiers.numAuto : 1;
 
-        let expTick = plant.prestigeBonus * modifiers.expBonus;
+        let expTick = plant.prestigeBonus * modifiers.expBonus * modifiers.potionRank;
+ 
         plant.growthTime = Math.floor(plant.TimeNeeded / plant.prestigeBonus / (1 + 0.05 * modifiers.shopGrowingSpeed) / modifiers.petPlantCombo / modifiers.contagionPlantGrowth);
         if (plant.growthTime < 10) {
             plant.growthTime = 10;
@@ -221,7 +222,7 @@ var farmingHelper = {
         if (numAutos === 0) return Infinity;
 
         let remExp = plant.reqExp - plant.curExp;
-        let expBonus = plant.prestigeBonus * modifiers.expBonus * numAutos;
+        let expBonus = plant.prestigeBonus * modifiers.expBonus * modifiers.potionRank * numAutos;
         let ticksTillLevel = Math.ceil((remExp) / expBonus);
 
         return ticksTillLevel * plant.growthTime - plant.elapsedTime;
@@ -283,7 +284,7 @@ var farmingHelper = {
         let prestiged = false;
         let totalTime = 0;
         let runningHarvests = 0;
-        let expTick = plant.prestigeBonus * modifiers.expBonus;
+        let expTick = plant.prestigeBonus * modifiers.expBonus * modifiers.potionRank;
 
         while (!prestiged) {
             let timeToLevel = this.calcTimeTillLevel(plant, modifiers);
@@ -431,6 +432,15 @@ var farmingHelper = {
                 }
                 prevPlantsProd[j] = curr.production;
 
+            }
+
+
+            //Reduce plant rank potion timer, or set it the bonus to 0 if necessary
+            if (modifiers.potionRank > 1 && !modifiers.forceRankPotion) {
+                modifiers.potionRankTime -= tickRate;
+                if (modifiers.potionRankTime < 0) {
+                    modifiers.potionRank = 1;
+                }
             }
 
             let curTime = helper.roundInt(i * tickRate + startTime);

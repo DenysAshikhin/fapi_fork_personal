@@ -895,7 +895,7 @@ const CardCard = ({ vertical, displayMode, data, card, weightMap, i, applyWeight
     } = card;
     const { ChargeTransfertPowerPerma, ChargeTransfertPowerTemp } = data;
 
-    const [cardWeight, setCardWeight] = useLocalStorage(`cardWeight-${ID}`,-1);
+    const [cardWeight, setCardWeight] = useLocalStorage(`cardWeight-${ID}`, -1);
 
     useEffect(() => {
         if (resetWeights > 10) {
@@ -1259,7 +1259,10 @@ export default function CardComponent({ data, weightMap, applyWeights }) {
         }
     }
 
-    let reincHr = (futureReincLevel - currentReincLevel) / currReincTime;
+    let levelDiff = futureReincLevel - currentReincLevel;
+    if (levelDiff === 0) levelDiff = 1;
+
+    let reincHr = (levelDiff) / currReincTime;
     let remTime = (requiredReincLevel - futureReincLevel) / reincHr;
     let soulClock = data.SoulOldClock;
     let chargeDuration = 12 * (1 - 0.25 * soulClock);

@@ -122,6 +122,7 @@ const FarmingLanding = ({ data }) => {
     const [forceGraphUpdate, setForceGraphUpdate] = useState(false);
     const [autoBuyPBC, setAutoBuyPBC] = useLocalStorage("autoBuyPBC", data.ASCFarmingShopAutoPage1 === 1);
     const [lockCustomAuto, setLockCustomAuto] = useLocalStorage("lockCustomAuto", false);
+    const [forceRankPotion, setForceRankPotion] = useLocalStorage("forceRankPotion", false);
     const [calcAFK, setCalcAFK] = useState(false);
     const [calcStep, setCalcStep] = useState(false);
 
@@ -179,16 +180,6 @@ const FarmingLanding = ({ data }) => {
             assemblyPlantharvest *= farmingHelper.calcAssembly(data, 9, 3);
         }
 
-        const currFries = helper.calcPOW(data.FrenchFriesTotal);
-
-        let timeTillNextLevel = Number.MAX_SAFE_INTEGER;
-
-        let highestOverallMult = 0;
-        let highestOverallMultMine = 0;
-        let highestWeightedMultIncrease = 0;
-        let highestWeightedMultIncreaseMine = 0;
-
-
         for (let i = 0; i < data.PetsSpecial.length; i++) {
             let t = data.PetsSpecial[i];
             if (t.BonusID === 5015 && t.Active === 1) {
@@ -196,6 +187,11 @@ const FarmingLanding = ({ data }) => {
             }
         }
 
+        let potionRankTime = data.SoulPotionHealthyRankTime;
+        let potionRank = potionRankTime > 0 ? data.SoulPotionHealthyRankBonus + 1 : 1;
+        if (forceRankPotion && potionRank === 1) {
+            potionRank = 1.5;
+        }
         const modifiers = {
             time: 0,
             // numAuto: numAuto,
@@ -207,7 +203,10 @@ const FarmingLanding = ({ data }) => {
             contagionPlantGrowth: contagionPlantGrowth,
             soulPlantEXP: soulPlantEXP,
             assemblyPlantExp: assemblyPlantExp,
-            expBonus: shopRankEXP * soulPlantEXP * contagionPlantEXP * assemblyPlantExp
+            expBonus: shopRankEXP * soulPlantEXP * contagionPlantEXP * assemblyPlantExp,
+            potionRank: potionRank,
+            potionRankTime: potionRankTime,
+            forceRankPotion: forceRankPotion
         }
 
 
@@ -320,6 +319,13 @@ const FarmingLanding = ({ data }) => {
         }
     }
 
+
+    let potionRankTime = data.SoulPotionHealthyRankTime;
+    let potionRank = potionRankTime > 0 ? data.SoulPotionHealthyRankBonus + 1 : 1;
+    if (forceRankPotion && potionRank === 1) {
+        potionRank = 1.5;
+    }
+
     const modifiers = useMemo(() => {
         console.log(`setin modif`);
         return {
@@ -349,12 +355,15 @@ const FarmingLanding = ({ data }) => {
             autoBuyPBC: autoBuyPBC,
             // tickRate: Math.floor((futureTime * secondsHour) * 0.0015) < 1 ? 1 : Math.floor((futureTime * secondsHour) * 0.0015),
             tickRate: Math.floor((futureTime * secondsHour) * 0.01) < 1 ? 1 : Math.floor((futureTime * secondsHour) * 0.01),
+            potionRankTime: potionRankTime,
+            potionRank: potionRank,
+            forceRankPotion: forceRankPotion
         }
     },
         [
             shopGrowingSpeed, manualHarvestFormula, contagionHarvest, shopRankEXP, shopRankLevel, picPlants, Number(petPlantCombo),
             contagionPlantEXP, contagionPlantGrowth, soulPlantEXP, assemblyPlantExp, assemblyProduction, contagionPlantProd, assemblyPlantharvest,
-            data, currHP, totalHP, autoBuyPBC, futureTime
+            data, currHP, totalHP, autoBuyPBC, futureTime, potionRank, potionRankTime, forceRankPotion
         ]
     )
 
@@ -1923,6 +1932,7 @@ const FarmingLanding = ({ data }) => {
                                         value={!!autoBuyPBC}
                                     />
                                 </div>
+                                {/* Lock in checkbox */}
                                 <div style={{ display: 'flex' }}>
 
                                     <MouseOverPopover tooltip={
@@ -1948,6 +1958,34 @@ const FarmingLanding = ({ data }) => {
                                         }}
                                         checked={!!lockCustomAuto}
                                         value={!!lockCustomAuto}
+                                    />
+                                </div>
+                                {/* Ignore current potion, force it always on */}
+                                <div style={{ display: 'flex' }}>
+
+                                    <MouseOverPopover tooltip={
+                                        <div style={{ padding: '6px' }}>
+                                            If checked, assums plant rank EXP + 50% for the whole run, otherwise uses the remaining potion time in your save
+                                        </div>
+                                    }>
+                                        <div>
+                                            Plant Rank Potion Force On
+                                        </div>
+                                    </MouseOverPopover>
+
+
+                                    <input
+                                        type="checkbox"
+                                        onChange={(e) => {
+                                            setForceRankPotion(e.target.checked ? 1 : 0);
+                                            ReactGA.event({
+                                                category: "farming_interaction",
+                                                action: `changed_potion_rank`,
+                                                label: `${e.target.checked}`,
+                                            })
+                                        }}
+                                        checked={!!forceRankPotion}
+                                        value={!!forceRankPotion}
                                     />
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', }}>
@@ -1994,6 +2032,13 @@ const FarmingLanding = ({ data }) => {
                         < div style={{ display: 'flex', width: '100%', marginTop: '12px', flexDirection: 'column' }}>
 
                             <h3 style={{ margin: '0' }}>How to use</h3>
+                            <div
+                                style={{ display: 'flex' }}>
+                                <div style={{ fontWeight: 'bold', marginRight: '12px' }}>
+                                    Quickstart:
+                                </div>
+                                Enter how many hours you want to simulate into the future above (Hours to calculate). This should coincide with how long you want your overall run to be. So if you are 12 hours into a 48 hour run, enter 36hours.
+                            </div>
                             <div style={{ marginTop: '6px' }} >
                                 <div className='outerExplanation'>
                                     <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -2118,7 +2163,7 @@ const FarmingLanding = ({ data }) => {
                                                 </div>
 
 
-{/* sadsd */}
+                                                {/* sadsd */}
                                                 {bestPlantCombo.pot.map((val, index) => {
                                                     return (
                                                         <div className='suggestionHolder'>

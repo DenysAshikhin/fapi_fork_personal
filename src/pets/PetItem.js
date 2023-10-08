@@ -10,7 +10,7 @@ const filterBonuses = (bonuses, filterFn) => {
         .filter(filterFn);
 };
 
-const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, defaultRank, borderActive, enabledBonusHighlight, fullPetData }) => {
+const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, defaultRank, borderActive, enabledBonusHighlight, fullPetData, showNameOnly }) => {
     if (!!data === false) return <div></div>;
     const { petId, location, img, name } = petData;
 
@@ -117,45 +117,56 @@ const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, de
                     </div>
                 </div>
             }>
-            <div
-                key={petId}
-                onClick={onClick}
-                style={{ display: 'flex' }}
-                className={`item-tile${pet.Type === 1 ? '-ground ' : '-air '} ${isSelected ? '' : 'unselected'}`}
-            // className={`item-tile ${isSelected ? '' : 'unselected'}`}
-            >
+            {!showNameOnly && (
                 <div
-                    className="item-image-container"
-                    style={{
-                        border: borderActive ? 'black 1px solid' : '',
-                        position: 'relative',
-                        display:'flex'
-                    }}>
-                    {numHighlights.map((item, index) => {
-                        return (<div
-                            style={{
-                                background: helper.bonusColorMap[item].color,
-                                position: 'absolute',
-                                top: '0%',
-                                left: `${(100 / numHighlights.length) * index}%`,
-                                height: '100%',
-                                width: `${100 / numHighlights.length}%`,
-                                zIndex: -1
-                            }}
-                        >
+                    key={petId}
+                    onClick={onClick}
+                    style={{ display: 'flex' }}
+                    className={`item-tile${pet.Type === 1 ? '-ground ' : '-air '} ${isSelected ? '' : 'unselected'}`}
+                // className={`item-tile ${isSelected ? '' : 'unselected'}`}
+                >
+                    <div
+                        className="item-image-container"
+                        style={{
+                            border: borderActive ? 'black 1px solid' : '',
+                            position: 'relative',
+                            display: 'flex'
+                        }}>
+                        {numHighlights.map((item, index) => {
+                            return (<div
+                                style={{
+                                    background: helper.bonusColorMap[item].color,
+                                    position: 'absolute',
+                                    top: '0%',
+                                    left: `${(100 / numHighlights.length) * index}%`,
+                                    height: '100%',
+                                    width: `${100 / numHighlights.length}%`,
+                                    zIndex: -1
+                                }}
+                            >
 
-                        </div>)
-                    })}
-                    {/* <div className="item-image"> */}
-                    <img src={img} alt={name} className='item-image' />
-                    {/* </div> */}
+                            </div>)
+                        })}
+                        {/* <div className="item-image"> */}
+                        <img src={img} alt={name} className='item-image' />
+                        {/* </div> */}
+                    </div>
                 </div>
-            </div>
+            )}
+
+            {showNameOnly && (
+                <div
+
+                    style={{ width: '100%' }}>
+                    {name}
+                </div>
+            )}
+
         </MouseOverPopover>
     );
 };
 
-const StaticPetItem = ({ petData, highlight }) => {
+const StaticPetItem = ({ petData, highlight, showNameOnly }) => {
     const { petId, location, img, name, pet } = petData;
     //ss
 
@@ -227,7 +238,16 @@ const StaticPetItem = ({ petData, highlight }) => {
                     </div>
                 </div>
             }>
-            <img src={img} alt={name} className='item-image' />
+            {!showNameOnly && (
+                <img src={img} alt={name} className='item-image' />
+            )}
+
+            {showNameOnly && (
+                <>
+                    {name}
+                </>
+            )}
+
         </MouseOverPopover>
 
 

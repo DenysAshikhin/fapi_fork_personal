@@ -37,7 +37,7 @@ const FileUpload = ({ onData }) => {
     return (
         <div className="FileUpload">
             <h1>SPOILERS AWAIT</h1>
-            <h2>Upload your save file for top 6 teams according to base dmg, current rank, and expedition dmg/time bonuses:</h2>
+            <h2>Upload your save file helpful tools for: Expeditions, Pet Combos, Farming, Cards</h2>
             <h3>Your save file can be found at:</h3>
             <div>PC: %APPDATA%\..\LocalLow\Oni Gaming\Farmer Against Potatoes Idle\fapi-save.txt</div>
             <div>Mobile:/storage/emulated/0/Android/data/com.oninou.FAPI/files/fapi-save.txt </div>

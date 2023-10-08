@@ -405,7 +405,7 @@ export const BonusMap = {
     5004: {id: 5004, label: "Minimum Rarity"},
     5005: {id: 5005, label: "Base Residue"},
     5006: {id: 5006, label: "Drop Bonuses Cap"},
-    5007: {id: 5007, label: "Expedition Reward"},
+    // 5007: {id: 5007, label: "Expedition Reward"},
     5008: {id: 5008, label: "Combo Pet Damage"},
     5009: {id: 5009, label: "Breeding Timer"},
     5010: {id: 5010, label: "Milk Timer"},

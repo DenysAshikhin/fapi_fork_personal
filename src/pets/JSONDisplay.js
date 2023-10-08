@@ -8,7 +8,7 @@ import ItemSelection from "./ItemSelection";
 import MouseOverPopover from "../tooltip";
 import Typography from "@mui/material/Typography";
 
-import helper from '../util/helper.js'
+import helper from '../util/helper.js';
 import xIcon from "../assets/images/x_icon.svg"
 import pinIcon from "../assets/images/pin-line-icon.svg"
 import trashIcon from "../assets/images/trash-can-icon.svg"
@@ -87,6 +87,7 @@ const JSONDisplay = ({
     const [enabledBonusHighlight, setEnabledBonusHighlight] = useLocalStorage("enabledBonusHighlight", {});
     // const [showAllBonusTally, setShowAllBonusTally] = useState(false);
     const [showAllBonusTally, setShowAllBonusTally] = useLocalStorage("showAllBonusTally", false);
+    const [leftOverBonus1, setLeftOverBonus1] = useLocalStorage("leftOverBonus1", 1016);
     const [activePet, setActivePet] = useState(-1);
 
     useEffect(() => {
@@ -118,6 +119,9 @@ const JSONDisplay = ({
 
     let relWhiteListMap = {};
 
+    let filterablePets = [];
+    let equippedPets = {};
+
     for (let i = 0; i < petWhiteList.length; i++) {
         let cur = petWhiteList[i];
         if (cur.placement === `rel`) {
@@ -131,6 +135,10 @@ const JSONDisplay = ({
         groups.map((group, index) => {
             damageTotal += (petHelper.calculateGroupScore(group, defaultRank).groupScore) * 5 * data.PetDamageBonuses;
             group.forEach((pet) => {
+
+                if (!equippedPets[pet.ID]) {
+                    equippedPets[pet.ID] = pet;
+                }
 
                 if (pet.ID in relWhiteListMap) {
                     relWhiteListMap[pet.ID].finalGroup = index;
@@ -166,7 +174,6 @@ const JSONDisplay = ({
     }
 
 
-    let filterablePets = [];
     if (groupRankCritera === 1) {
         selectedPets.map((pet) => {
             let found;
@@ -179,7 +186,14 @@ const JSONDisplay = ({
                 console.log(err);
             }
 
-            if (found) return;
+            if (found) {
+
+                if (!equippedPets[pet.ID]) {
+                    equippedPets[pet.ID] = pet;
+                }
+
+                return;
+            }
             try {
                 if (pet.ID > 0)
                     filterablePets.push({ id: pet.ID, label: petNames[pet.ID].name })
@@ -190,6 +204,20 @@ const JSONDisplay = ({
             }
         })
     }
+
+    const leftOverIgnore = {
+        17: true
+    }
+    let leftOver1Pets = [];
+
+    selectedPets.map((e, index) => {
+        let found = e.BonusList.find((inner_bonus) => inner_bonus.ID === leftOverBonus1);
+        if (found && !equippedPets[e.ID]) {
+            leftOver1Pets.push(e);
+        }
+    });
+
+    leftOver1Pets = leftOver1Pets.sort((a, b) => petHelper.calculatePetBaseDamage(b, defaultRank) - petHelper.calculatePetBaseDamage(a, defaultRank))
 
     return (
         <div
@@ -650,9 +678,6 @@ const JSONDisplay = ({
 
                         />
                     </div>
-
-
-
                 )}
                 {groupRankCritera === 1 && (
                     <div style={{ display: 'flex', marginTop: '12px' }}>
@@ -672,59 +697,12 @@ const JSONDisplay = ({
                             flexDirection: 'column',
                             flex: '1',
                             border: 'black 1px solid',
-                            // padding:'6px 6px 0 6px'
+                            padding: '6px 6px 6px 6px'
                         }}
                     >
-                        <div
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                margin: '6px 0 6px 0',
-                                paddingLeft: '6px'
-                            }}
-                        >
-                            {/* <div>
-                                Custom Bonuses
-                            </div> */}
-
-
-                            <div
-                                style={{
-                                    // margin: '6px 12px 0 12px'
-                                    marginRight: '6px'
-                                }}
-                            >
-                                Available bonuses:
-                            </div>
-                            <select
-                                style={{ maxWidth: '144px' }}
-                                disabled={refreshGroups}
-                                onChange={
-                                    (e) => {
-                                        if (e.target.value.length > 0) {
-                                            setAvailableCustomBonuses(e.target.value);
-
-                                        }
-                                    }
-                                }
-                                value={''}
-                            >
-                                {
-                                    [<option value='' selected>Select Bonus</option>, ...availableCustomBonuses.map((e) => {
-                                        return <option value={e.id} key={e.id}> {e.label}</option>
-                                    })]
-                                }
-                                {/* <option
-                                    value="1">1.0</option>
-                                <option
-                                    value="1.1">1.1</option>
-                                <option
-                                    value="1.2">1.2</option> */}
-                            </select>
-                        </div>
 
                         {/* Bonus headers */}
-                        <div
+                        {/* <div
                             style={{
                                 display: 'flex',
                                 boxShadow: `0 0 0 1px #ecf0f5`,
@@ -823,10 +801,10 @@ const JSONDisplay = ({
                             >
                                 Total Max
                             </div>
-                        </div>
+                        </div> */}
 
                         {/* Active bonuses list */}
-                        {activeCustomBonuses.map((e) => {
+                        {/* {activeCustomBonuses.map((e) => {
 
                             let bonusName = e.label;
                             let currentBonus = activeCustomBonuses.find((a) => a.id === e.id);
@@ -1020,7 +998,7 @@ const JSONDisplay = ({
                                     />
                                 </div>
                             </div>
-                        })}
+                        })} */}
 
 
 
@@ -1270,9 +1248,9 @@ const JSONDisplay = ({
 
                             })}
                         </div>
-
+                        <h4 style={{ margin: '0' }}>Pet Whitelist</h4>
                         {/* Pet whitelist stuff */}
-                        <div style={{ margin: '24px 0 0 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '36px' }}>
+                        <div style={{ margin: '0 0 0 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '36px' }}>
                             <SearchBox data={{
                                 list: filterablePets
                             }}
@@ -1733,24 +1711,207 @@ const JSONDisplay = ({
                             </div>
                         )}
 
-                        {false && (
+                        {/* left over pets */}
+                        {(
                             <div
-                                style={{ display: 'flex', width: '100%', justifyContent: "center" }}
+                                style={{ display: 'flex', width: '100%', marginTop: '12px', flexDirection: 'column' }}
                             >
+                                {/* Title */}
+                                <div
+                                    style={{ display: 'flex', width: '100%' }}
+                                >
+                                    <h4 style={{ margin: '0' }}> Leftover Pets</h4>
 
-                                <div>
-                                    Leftover Pets
+                                </div>
+
+                                {/* Table */}
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        margin: '6px 0 0 0',
+                                        // paddingLeft: '6px'
+                                    }}
+                                >
+
+                                    <div
+                                        style={{
+                                            // margin: '6px 12px 0 12px'
+                                            marginRight: '6px'
+                                        }}
+                                    >
+                                        Select Bonus:
+                                    </div>
+
+                                    <select
+                                        style={{ maxWidth: '144px' }}
+                                        disabled={refreshGroups}
+                                        onChange={
+                                            (e) => {
+                                                setLeftOverBonus1(Number(e.target.value));
+                                            }
+                                        }
+                                        value={leftOverBonus1}
+                                    >
+                                        {
+                                            Object.values(BonusMap).sort((a, b) => a.label.localeCompare(b.label)).map((e) => {
+                                                if (!leftOverIgnore[e.id] && e.id < 5000)
+                                                    return <option value={e.id} key={e.id}> {e.label}</option>
+                                            })
+                                        }
+                                    </select>
+
+                                </div>
+
+                                {/* Headers */}
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        boxShadow: `0 0 0 1px #ecf0f5`,
+                                        backgroundColor: '#fbfafc',
+                                        margin: '6px 1px 0 1px'
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            // background: 'red',
+                                            width: '70%',
+                                            display: 'flex',
+                                            // boxShadow: `0 2px 1px -1px #ecf0f5`,
+                                            // boxShadow: `0 0 0 1px #ecf0f5`,
+                                            backgroundColor: '#fbfafc',
+                                            justifyContent: 'center',
+                                            alignItems: 'center'
+                                        }}
+                                    >
+                                        Pet
+                                    </div>
+
+                                    {/* placement */}
+                                    <div
+                                        style={{
+                                            // background: 'yellow',
+                                            width: '30%',
+                                            display: 'flex',
+                                            boxShadow: `0 0 0 1px #ecf0f5`,
+                                            backgroundColor: '#fbfafc',
+                                            justifyContent: 'center',
+                                            alignItems: 'center'
+                                        }}
+                                    >
+                                        <MouseOverPopover tooltip={
+                                            <div style={{ padding: '6px' }}>
+                                                <div>The pet's damage </div>
+                                            </div>
+                                        }>
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                <div>
+                                                    Damage
+                                                </div>
+                                                {/* <img style={{ height: '16px', marginLeft: '6px' }} src={infoIcon} /> */}
+                                            </div>
+                                        </MouseOverPopover>
+                                    </div>
+
+                                </div>
+                                {/* Pets */}
+                                <div style={{ margin: '0 1px 0 1px', boxShadow: `0 0 0 1px #ecf0f5`, }}>
+                                    {leftOver1Pets.map((pet) => {
+                                        let staticPetData = petNameArray.find(staticPetDatum => staticPetDatum.petId === pet.ID)
+
+                                        if (!staticPetData) {
+                                            staticPetData = {
+                                                img: '/fapi_fork_personal/pets/missing.png',
+                                                location: '??-??',
+                                                name: 'Unknown',
+                                                petId: pet.ID
+                                            }
+                                        }
+                                        return (
+                                            <div
+                                                key={pet.label}
+                                                style={{
+                                                    boxShadow: `0 2px 1px -1px #ecf0f5`,
+                                                    display: 'flex',
+                                                    width: '100%'
+                                                }}
+                                            >
+                                                {/* Pet name + pin */}
+                                                <div style={{
+                                                    width: 'calc(70% - 1px)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
+                                                    boxShadow: `2px 0 2px -1px #ecf0f5`
+                                                }}
+                                                >
+                                                    <div
+                                                        style={{
+                                                            // position: 'absolute',
+                                                            width: '100%',
+                                                            display: 'flex',
+                                                            flex: '1',
+                                                            justifyContent: 'space-between',
+                                                            // alignContent: 'space-between',
+                                                            // zIndex: '-1'
+                                                        }}
+
+                                                    >
+                                                        <div
+                                                            style={{
+                                                                marginLeft: '6px',
+                                                                width: '100%'
+                                                            }}
+                                                        >
+                                                            {/* {petNames[pet.ID].name} */}
+                                                            <PetItem
+                                                                showNameOnly={true}
+                                                                key={pet.ID}
+                                                                petData={staticPetData}
+                                                                fullPetData={pet}
+                                                                data={data}
+                                                                onClick={() => { }}
+                                                                weightMap={weightMap}
+                                                                defaultRank={defaultRank}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <img
+                                                        style={{
+                                                            maxHeight: '12px',
+                                                            margin: '0 12px 0 0'
+                                                        }}
+                                                        onClick={(e) => {
+                                                            setPetWhiteList((curr) => {
+                                                                let temp = [...curr];
+
+                                                                let pet_inner = temp.find((sample_pet) => sample_pet.id === pet.ID);
+                                                                if (!pet_inner) {
+                                                                    temp.push({ label: petNames[pet.ID].name, id: pet.ID, placement: 'rel', parameters: { team: 0, damageBias: 17 } });
+                                                                }
+                                                                else {
+                                                                    throw new Error(`should not have an existing pet in this list!`)
+                                                                }
+                                                                return temp;
+                                                            })
+
+                                                            setRefreshGroups(true);
+                                                            return;
+
+                                                        }}
+                                                        src={pinIcon}
+                                                    />
+                                                </div>
+                                                {/* Pet Damage */}
+                                                <div style={{ width: 'calc(30% + 1px)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `2px 0 2px -1px #ecf0f5`, }}>
+                                                    {helper.roundTwoDecimal(petHelper.calculatePetBaseDamage(pet, defaultRank))}
+                                                </div>
+
+                                            </div>
+                                        )
+                                    })}
                                 </div>
                             </div>
                         )}
-
-
-
                     </div>
-                )
-
-                }
-
+                )}
             </div>
             <div className="grid-right">
                 <div style={{ display: 'flex' }}>
