@@ -379,6 +379,9 @@ const FarmingLanding = ({ data }) => {
 
             plant.prestige = picPlants[i];
 
+                        if (plant.ID === 3) {
+                            plant.prestige += 0;
+                        }
             //             if (plant.ID === 4) {
             //                 plant.prestige += 0;
             //             }
@@ -423,7 +426,7 @@ const FarmingLanding = ({ data }) => {
             tempArr.push(plant);
         }
         return tempArr;
-    }, [modifiers, plantAutos, shopGrowingSpeed, petPlantCombo, contagionPlantGrowth])
+    }, [modifiers, plantAutos, plantAutos, shopGrowingSpeed, petPlantCombo, contagionPlantGrowth])
 
 
     const [calcDone, setCalcDone] = useState(true);
@@ -482,14 +485,17 @@ const FarmingLanding = ({ data }) => {
 
         }
 
+        let tempModif = { ...modifiers, time: secondsHour * futureTime, numAutos: plantAutos };
 
-        let result = farmingHelper.calcHPProd(finalPlants, { ...modifiers, time: secondsHour * futureTime, numAutos: plantAutos });
+        let result = farmingHelper.calcHPProd(finalPlants, tempModif);
+        let bigsad = -1;
         for (let i = 0; i < result.dataPointsPotatoes.length; i++) {
             let cur = result.dataPointsPotatoes[i];
             cur.time = helper.roundInt(cur.time);
             cur.originalProduction = mathHelper.createDecimal(cur.production.toString());
         }
-
+        console.log(`future plants:`);
+        console.log(result);
         return result;
     },
         [finalPlants, modifiers, futureTime, plantAutos, secondsHour]);
@@ -717,7 +723,7 @@ const FarmingLanding = ({ data }) => {
 
 
     let customFuturePlants = [];
-    let futurePlants = [];
+    let futurePlants = [];//ss
     for (let i = 0; i < tempFuture.plants.length; i++) {
         let newPlant = tempFuture.plants[i];
         let prestigeTimings = farmingHelper.calcTimeTillPrestige(newPlant, { ...modifiers, time: secondsHour * futureTime, numAuto: plantAutos[i] });

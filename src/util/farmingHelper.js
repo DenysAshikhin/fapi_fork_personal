@@ -148,7 +148,7 @@ var farmingHelper = {
         let numAutos = modifiers.numAuto || modifiers?.numAuto === 0 ? modifiers.numAuto : 1;
 
         let expTick = plant.prestigeBonus * modifiers.expBonus * modifiers.potionRank;
- 
+
         plant.growthTime = Math.floor(plant.TimeNeeded / plant.prestigeBonus / (1 + 0.05 * modifiers.shopGrowingSpeed) / modifiers.petPlantCombo / modifiers.contagionPlantGrowth);
         if (plant.growthTime < 10) {
             plant.growthTime = 10;
@@ -165,6 +165,9 @@ var farmingHelper = {
 
             // plant.timeToLevel = Math.ceil((plant.reqExp - plant.curExp) / expTick) * plant.growthTime - plant.elapsedTime;
             plant.timeToLevel = this.calcTimeTillLevel(plant, modifiers);
+            if (plant.timeToLevel === null) {
+                let bigsad = -1;
+            }
 
             let elapsedTime = 0;
 
@@ -185,6 +188,9 @@ var farmingHelper = {
                 numHarvests = Math.floor(plant.elapsedTime / plant.growthTime);
 
                 let toCreate = plant.perHarvest * numHarvests * numAutos;
+                if (plant.ID === 3) {
+                    let bigsad = -1;
+                }
                 plant.created = mathHelper.addDecimal(plant.created, toCreate);
                 plant.totalMade = mathHelper.addDecimal(plant.totalMade, toCreate);
 
@@ -318,7 +324,9 @@ var farmingHelper = {
             else if (timeTillPrestige > timeToLevel) {
                 plant.elapsedTime += timeToLevel;
                 let ticks = Math.floor(plant.elapsedTime / plant.growthTime);
-
+                if (plant.ID === 3) {
+                    let bigsad = -1;
+                }
 
                 plant.created = mathHelper.addDecimal(plant.created, ticks * plant.perHarvest * numAutos);
                 plant.totalMade = mathHelper.addDecimal(plant.totalMade, ticks * plant.perHarvest * numAutos);
@@ -335,7 +343,9 @@ var farmingHelper = {
                 prestiged = true;
                 plant.elapsedTime += timeTillPrestige;
                 let ticks = Math.floor(plant.elapsedTime / plant.growthTime);
-
+                if (plant.ID === 3) {
+                    let bigsad = -1;
+                }
                 plant.created = mathHelper.addDecimal(plant.created, ticks * plant.perHarvest * numAutos);
                 plant.totalMade = mathHelper.addDecimal(plant.totalMade, ticks * plant.perHarvest * numAutos);
                 totalTime += timeTillPrestige;
