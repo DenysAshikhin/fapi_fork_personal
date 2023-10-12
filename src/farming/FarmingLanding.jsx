@@ -196,14 +196,22 @@ const FarmingLanding = ({ data }) => {
             time: 0,
             // numAuto: numAuto,
             shopGrowingSpeed: shopGrowingSpeed,
+            originalPotionRank: data.SoulPotionHealthyRankTime,
+            originalShopGrowingLevel: data.FarmingShopPlantGrowingSpeed,
+            originalShopGrowingBonus: data.PlantGrowingSpeedBonus,
             manualHarvestFormula: manualHarvestFormula,
             shopRankEXP: shopRankEXP, picPlants: picPlants,
+            originalShopRankLevel: data.PlantRankExpBonus,
+            originalRankLevelBonus: data.FarmingShopPlantRankExpEarned,
+            originalShopProdLevel: data.FarmingShopPlantTotalProduction,
+            originalShopProdBonus: data.PlantTotalProductionBonus,
             petPlantCombo: Number(petPlantCombo),
             contagionPlantEXP: contagionPlantEXP,
             contagionPlantGrowth: contagionPlantGrowth,
             soulPlantEXP: soulPlantEXP,
             assemblyPlantExp: assemblyPlantExp,
             expBonus: shopRankEXP * soulPlantEXP * contagionPlantEXP * assemblyPlantExp,
+            manualHarvestBonus: mathHelper.createDecimal(data.PlantManualHarvestBonus).toNumber(),
             potionRank: potionRank,
             potionRankTime: potionRankTime,
             forceRankPotion: forceRankPotion
@@ -214,11 +222,7 @@ const FarmingLanding = ({ data }) => {
         let smallestGrowth = -1;
         for (let i = 0; i < data.PlantCollection.length; i++) {
             let plant = data.PlantCollection[i];
-            plant.growthTime = Math.floor(plant.TimeNeeded / plant.prestigeBonus / (1 + 0.05 * modifiers.shopGrowingSpeed) / modifiers.petPlantCombo / modifiers.contagionPlantGrowth)
-            plant.growthTime = plant.TimeNeeded;
-            if (plant.growthTime < 10) {
-                plant.growthTime = 10;
-            }
+            plant.growthTime = farmingHelper.calcGrowthTime(plant, modifiers);
 
             if (smallestGrowth === -1)
                 smallestGrowth = plant.growthTime;
@@ -328,14 +332,21 @@ const FarmingLanding = ({ data }) => {
 
     const modifiers = useMemo(() => {
         console.log(`setin modif`);
-        return {
+        let test = data.PlantTotalProductionBonus
+        let tempy =
+        {
             time: 0,
             // numAuto: numAuto,
+            originalPotionRank: data.SoulPotionHealthyRankTime,
             shopGrowingSpeed: shopGrowingSpeed,
+            originalShopGrowingLevel: data.FarmingShopPlantGrowingSpeed,
+            originalShopGrowingBonus: data.PlantGrowingSpeedBonus,
             manualHarvestFormula: manualHarvestFormula,
             contagionHarvest: contagionHarvest,
             shopRankEXP: shopRankEXP,
             shopRankLevel: shopRankLevel,
+            originalShopRankLevel: data.FarmingShopPlantRankExpEarned,
+            originalRankLevelBonus: data.PlantRankExpBonus,
             picPlants: picPlants,
             petPlantCombo: Number(petPlantCombo),
             contagionPlantEXP: contagionPlantEXP,
@@ -344,7 +355,10 @@ const FarmingLanding = ({ data }) => {
             assemblyPlantExp: assemblyPlantExp,
             assemblyProduction: assemblyProduction,
             assemblyPlantharvest: assemblyPlantharvest,
+            manualHarvestBonus: mathHelper.createDecimal(data.PlantManualHarvestBonus).toNumber(),
             shopProdBonus: mathHelper.pow(1.25, data.FarmingShopPlantTotalProduction),
+            originalShopProdLevel: data.FarmingShopPlantTotalProduction,
+            originalShopProdBonus: data.PlantTotalProductionBonus,
             shopProdLevel: data.FarmingShopPlantTotalProduction,
             contagionPlantProd: contagionPlantProd,
             hpBonus: mathHelper.createDecimal(data.HealthyPotatoBonus),
@@ -359,6 +373,8 @@ const FarmingLanding = ({ data }) => {
             potionRank: potionRank,
             forceRankPotion: forceRankPotion
         }
+        tempy.originalShopProdBonus = data.PlantTotalProductionBonus;
+        return tempy
     },
         [
             shopGrowingSpeed, manualHarvestFormula, contagionHarvest, shopRankEXP, shopRankLevel, picPlants, Number(petPlantCombo),
@@ -379,9 +395,9 @@ const FarmingLanding = ({ data }) => {
 
             plant.prestige = picPlants[i];
 
-                        if (plant.ID === 3) {
-                            plant.prestige += 0;
-                        }
+            if (plant.ID === 3) {
+                plant.prestige += 0;
+            }
             //             if (plant.ID === 4) {
             //                 plant.prestige += 0;
             //             }
@@ -399,10 +415,7 @@ const FarmingLanding = ({ data }) => {
             // }
 
             plant.prestigeBonus = Math.pow(1.02, plant.prestige)
-            plant.growthTime = Math.floor(plant.TimeNeeded / plant.prestigeBonus / (1 + 0.05 * shopGrowingSpeed) / petPlantCombo / contagionPlantGrowth);
-            if (plant.growthTime < 10) {
-                plant.growthTime = 10;
-            }
+            plant.growthTime = farmingHelper.calcGrowthTime(plant, modifiers);
 
             plant.created = mathHelper.createDecimal(plant.ManuallyCreated);
             plant.totalMade = mathHelper.createDecimal(plant.TotalCreated);

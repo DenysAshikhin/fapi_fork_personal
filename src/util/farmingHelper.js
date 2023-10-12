@@ -31,14 +31,21 @@ var farmingHelper = {
         return multipliers;
     },
     calcGrowthTime: function (plant, modifiers) {
-        let num = Math.floor(plant.TimeNeeded / plant.prestigeBonus / (1 + 0.05 * modifiers.shopGrowingSpeed) / modifiers.petPlantCombo / modifiers.contagionPlantGrowth);
+        let growingBonus = mathHelper.createDecimal(modifiers.originalShopGrowingBonus);
+        growingBonus = mathHelper.divideDecimal(growingBonus, (1 + 0.05 * modifiers.originalShopGrowingLevel));
+        growingBonus = mathHelper.multiplyDecimal(growingBonus, (1 + 0.05 * modifiers.shopGrowingSpeed)).toNumber();
+
+        let old = (1 + 0.05 * modifiers.shopGrowingSpeed) * modifiers.petPlantCombo * modifiers.contagionPlantGrowth;
+
+        let num = Math.floor(plant.TimeNeeded / plant.prestigeBonus / growingBonus);
         return num < 10 ? 10 : num;
     },
     calcPlantHarvest: function (plant, modifiers) {
-        return helper.roundInt((1 + plant.Rank) * Math.pow(1.05, plant.Rank)) * Math.pow(1.02, plant.prestige) * modifiers.contagionHarvest * modifiers.assemblyPlantharvest;
+        let num = helper.roundInt((1 + plant.Rank) * Math.pow(1.05, plant.Rank)) * Math.pow(1.02, plant.prestige) * modifiers.manualHarvestBonus;
+        return num;
     },
     calcShopProdBonus: function (modifiers_input, shopLevel) {
-        shopLevel = shopLevel ? shopLevel : modifiers_input.FarmingShopPlantTotalProduction;
+        shopLevel = shopLevel || shopLevel === 0 ? shopLevel : modifiers_input.FarmingShopPlantTotalProduction;
         return mathHelper.pow(1.25, shopLevel);
     },
     calcProdOutput: function (plant_input, modifiers_input) {
@@ -51,7 +58,11 @@ var farmingHelper = {
         const assemblyBonus = modifiers_input.assemblyProduction;
         let prestige = plant_input.prestige;
         // GM.PD.PlantTotalProductionBonus = 1 * BigDouble.Pow(1.25, GM.PD.FarmingShopPlantTotalProduction) * GM.ASMA.GetAssemblerBonus(26) * GM.GHLM.GetBonus(3) * Math.Pow(1.01, Math.Max(0, GM.PD.CurrentEventPoint - 75));
-        let PlantTotalProductionBonus = mathHelper.multiplyDecimal(mathHelper.multiplyDecimal(shopProdBonus, assemblyBonus), modifiers_input.contagionPlantProd);
+        // let PlantTotalProductionBonus = mathHelper.multiplyDecimal(mathHelper.multiplyDecimal(shopProdBonus, assemblyBonus), modifiers_input.contagionPlantProd);
+        let PlantTotalProductionBonus = mathHelper.createDecimal(modifiers_input.originalShopProdBonus);
+        PlantTotalProductionBonus = mathHelper.divideDecimal(PlantTotalProductionBonus, this.calcShopProdBonus(null, modifiers_input.originalShopProdLevel));
+        PlantTotalProductionBonus = mathHelper.multiplyDecimal(shopProdBonus, PlantTotalProductionBonus);
+
 
         let plantMult = plant_input.futureMult;
 
@@ -133,6 +144,28 @@ var farmingHelper = {
         leftOver = numEXP;
         return { leftOver, numLevels, reqExp };
     },
+    calcEXPBonus: function (modifiers) {
+        let originalBonus = modifiers.originalRankLevelBonus;
+        let originalLevel = modifiers.originalShopRankLevel;
+        let currentShopLevel = modifiers.shopRankLevel;
+        let originalPotion = modifiers.originalPotionRank;
+        let currentPotion = modifiers.potionRank;
+        let expBonus = mathHelper.createDecimal(originalBonus);
+        expBonus = mathHelper.divideDecimal(expBonus, 1 + originalLevel * 0.1);
+        expBonus = mathHelper.divideDecimal(expBonus, originalPotion > 0 ? 1.5 : 1);
+
+        expBonus = mathHelper.multiplyDecimal(expBonus, 1 + currentShopLevel * 0.1);
+        expBonus = mathHelper.multiplyDecimal(expBonus, currentPotion);
+        expBonus = expBonus.toNumber();
+        let prev = modifiers.expBonus;
+
+        if (Math.abs(prev - expBonus) > 0.00001) {
+            let bigsad = -1;
+        }
+
+        // let expBonus = shopRankEXP * soulPlantEXP * contagionPlantEXP * assemblyPlantExp;
+        return expBonus;
+    },
     futureMultBD: function (plant, modifiers) {
         return mathHelper.pow(
             (1 + 0.05 * (1 + modifiers.manualHarvestFormula * 0.02)),
@@ -147,12 +180,13 @@ var farmingHelper = {
         let remainingTime = modifiers.time;
         let numAutos = modifiers.numAuto || modifiers?.numAuto === 0 ? modifiers.numAuto : 1;
 
-        let expTick = plant.prestigeBonus * modifiers.expBonus * modifiers.potionRank;
-
-        plant.growthTime = Math.floor(plant.TimeNeeded / plant.prestigeBonus / (1 + 0.05 * modifiers.shopGrowingSpeed) / modifiers.petPlantCombo / modifiers.contagionPlantGrowth);
-        if (plant.growthTime < 10) {
-            plant.growthTime = 10;
+        let newExpBonus = this.calcEXPBonus(modifiers);
+        let expTickOld = plant.prestigeBonus * modifiers.expBonus * modifiers.potionRank;
+        let expTick = plant.prestigeBonus * newExpBonus;
+        if (Math.abs(expTick - expTickOld) > 0.00001) {
+            let bigsad = -1;
         }
+        plant.growthTime = this.calcGrowthTime(plant, modifiers);
 
         if (numAutos === 0) {
             let newOutPut = this.calcProdOutput(plant, modifiers);
@@ -228,7 +262,13 @@ var farmingHelper = {
         if (numAutos === 0) return Infinity;
 
         let remExp = plant.reqExp - plant.curExp;
-        let expBonus = plant.prestigeBonus * modifiers.expBonus * modifiers.potionRank * numAutos;
+        let newExpBonus = this.calcEXPBonus(modifiers);
+        let expBonusOld = plant.prestigeBonus * modifiers.expBonus * modifiers.potionRank * numAutos;
+        let expBonus = plant.prestigeBonus * newExpBonus * numAutos;
+        if (Math.abs(expBonus - expBonusOld) > 0.00001) {
+            let bigsad = -1;
+        }
+
         let ticksTillLevel = Math.ceil((remExp) / expBonus);
 
         return ticksTillLevel * plant.growthTime - plant.elapsedTime;
@@ -290,8 +330,12 @@ var farmingHelper = {
         let prestiged = false;
         let totalTime = 0;
         let runningHarvests = 0;
-        let expTick = plant.prestigeBonus * modifiers.expBonus * modifiers.potionRank;
-
+        let newExpBonus = this.calcEXPBonus(modifiers);
+        let expTickOld = plant.prestigeBonus * modifiers.expBonus * modifiers.potionRank;
+        let expTick = plant.prestigeBonus * newExpBonus;
+        if (Math.abs(expTick - expTickOld) > 0.00001) {
+            let bigsad = -1;
+        }
         while (!prestiged) {
             let timeToLevel = this.calcTimeTillLevel(plant, modifiers);
             let requiredPerPic = 10 * Math.pow(2, plant.prestige);
