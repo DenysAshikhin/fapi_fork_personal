@@ -313,7 +313,12 @@ const JSONDisplay = ({
                         }}
                     >
                         <MouseOverPopover tooltip={groupTooltip}>
-                            {groupLabel}
+                            <div
+                                style={{ display: 'flex', alignItems: 'center' }}
+                            >
+                                {groupLabel}
+                                <img style={{ height: '16px', margin: '-2px 0 0 6px' }} src={infoIcon} />
+                            </div>
                         </MouseOverPopover>
 
                         {/* {groupRankCritera === 2 && ( */}
