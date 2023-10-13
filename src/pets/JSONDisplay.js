@@ -24,12 +24,12 @@ import petHelper from '../util/petHelper.js';
 
 
 function ScoreSection({ data, group, totalScore, defaultRank }) {
-    const { baseGroupScore, dmgCount, timeCount, synergyBonus } = petHelper.calculateGroupScore(group, defaultRank);
+    const { baseGroupScore, groupScoreMax, dmgCount, timeCount, synergyBonus } = petHelper.calculateGroupScore(group, defaultRank);
     return (
         <React.Fragment>
             <ul>
                 <li key="totalScore">
-                    {Number(totalScore).toExponential(2)}&nbsp;~=&nbsp; 5 *
+                    {`True Damage: ${(5 * groupScoreMax * Number(data?.PetDamageBonuses)).toExponential(2)}`}
                 </li>
                 <li key="baseGroupScore">
                     Group Base: {Number(baseGroupScore).toExponential(2)}

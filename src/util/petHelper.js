@@ -82,8 +82,11 @@ var helper = {
         let tokenModif = 0;
         const typeCounts = {};
 
+        let groupScoreMax = 0;
+
         group.forEach((pet) => {
             groupScore += this.calculatePetBaseDamage(pet, defaultRank);
+            groupScoreMax += this.calculatePetBaseDamage(pet, 0);
             if (pet.BonusList.some((bonus) => bonus.ID === 1013)) {
                 dmgCount++;
             }
@@ -120,14 +123,18 @@ var helper = {
         if (earthType > 1 && airType > 1) synergyBonus += this.SYNERGY_MOD_STEP;
 
         groupScore *= (1 + dmgCount * this.EXP_DMG_MOD);
+        groupScoreMax *= (1 + dmgCount * this.EXP_DMG_MOD);
         groupScore *= (1 + timeCount * this.EXP_TIME_MOD);
+        groupScoreMax *= (1 + timeCount * this.EXP_TIME_MOD);
         groupScore *= synergyBonus;
+        groupScoreMax *= synergyBonus;
 
         tokenModif = tokenRewardCount * this.EXP_TOKEN_MOD;
         tokenMult = synergyBonus + synergyBonus * tokenModif;
         return {
             groupScore,
             baseGroupScore,
+            groupScoreMax,
             dmgCount,
             timeCount,
             synergyBonus,
