@@ -21,8 +21,6 @@ import SearchBox from '../util/search.jsx';
 import petHelper from '../util/petHelper.js';
 
 
-
-
 function ScoreSection({ data, group, totalScore, defaultRank }) {
     const { baseGroupScore, groupScoreMax, dmgCount, timeCount, synergyBonus } = petHelper.calculateGroupScore(group, defaultRank);
     return (
@@ -122,6 +120,7 @@ const JSONDisplay = ({
 
     let filterablePets = [];
     let equippedPets = {};
+    let whitelistedPets = {};
 
     // if (hideLocked) {
     //     let unlockedPets = {};
@@ -205,8 +204,8 @@ const JSONDisplay = ({
 
             if (found) {
 
-                if (!equippedPets[pet.ID]) {
-                    equippedPets[pet.ID] = pet;
+                if (!whitelistedPets[pet.ID]) {
+                    whitelistedPets[pet.ID] = pet;
                 }
 
                 return;
@@ -229,13 +228,36 @@ const JSONDisplay = ({
 
     selectedPets.map((e, index) => {
         let found = e.BonusList.find((inner_bonus) => inner_bonus.ID === leftOverBonus1);
-        if (found && !equippedPets[e.ID]) {
-            leftOver1Pets.push(e);
+        if (found) {
+            let tempy = { ...e };
+
+            if (equippedPets[e.ID]) {
+                tempy.equipped = true;
+            }
+            if (whitelistedPets[e.ID]) {
+                tempy.whitelisted = true;
+            }
+
+            leftOver1Pets.push(tempy);
         }
     });
 
     leftOver1Pets = leftOver1Pets.sort((a, b) => petHelper.calculatePetBaseDamage(b, defaultRank) - petHelper.calculatePetBaseDamage(a, defaultRank))
 
+    let filterableBonuses = Object.values(BonusMap)
+        .sort((a, b) => a.label.localeCompare(b.label))
+        .map((inner_e) => {
+            if (inner_e.id < 5000) {
+                if (inner_e.id >= 1000 && !inner_e.label.includes(`Expedition`)) {
+                    inner_e.label += ` Expedition`;
+                }
+                return inner_e;
+            }
+        })
+        .filter((e) => !!e && !leftOverIgnore[e.id])
+
+
+    // let filterableBonuses = [];
     return (
         <div
             className="grid-container"
@@ -261,9 +283,6 @@ const JSONDisplay = ({
                     let groupLabel = ``;
 
                     const groupTotal = petHelper.calculateGroupScore(group, defaultRank);
-                    if (index === 0) {
-                        console.log(groupTotal)
-                    }
                     // let tokenScore = groupTotal.tokenMult * (Math.pow(1 + petHelper.SOUL_CLOVER_STEP, data.SoulGoldenClover)) * (1 + 0.05 * data.SoulGoldenClover) * comboSelector;s
                     // let tokenScore = groupTotal.tokenMult * (Math.pow(1 + petHelper.SOUL_CLOVER_STEP, data.SoulGoldenClover)) * comboSelector * data.ExpeditionTokenBonuses;
                     // tokenScore = tokenScore.toExponential(3);
@@ -407,11 +426,12 @@ const JSONDisplay = ({
 
                                                     let pet_inner = temp.find((sample_pet) => sample_pet.id === petData.ID);
                                                     if (!pet_inner) {
-                                                        temp.push({ label: staticPetData.name, id: staticPetData.petId, placement: 'team', parameters: { team: index, damageBias: 17 } });
+                                                        temp.push({ label: staticPetData.name, id: staticPetData.petId, placement: 'team', parameters: { team: index, damageBias: 17 }, pet:petData});
                                                     }
                                                     else {
                                                         pet_inner.placement = 'team';
-                                                        pet_inner.parameters = { team: index }
+                                                        pet_inner.parameters = { team: index };
+                                                        pet_inner.pet = petData;
                                                     }
 
 
@@ -442,11 +462,12 @@ const JSONDisplay = ({
 
                                                     let pet_inner = temp.find((sample_pet) => sample_pet.id === petData.ID);
                                                     if (!pet_inner) {
-                                                        temp.push({ label: staticPetData.name, id: staticPetData.petId, placement: 'blacklist', parameters: { team: 0, damageBias: 17 } });
+                                                        temp.push({ label: staticPetData.name, id: staticPetData.petId, placement: 'blacklist', parameters: { team: 0, damageBias: 17 }, pet: petData });
                                                     }
                                                     else {
                                                         pet_inner.placement = 'blacklist';
                                                         pet_inner.parameters = { team: 0 }
+                                                        pet_inner.pet = petData;
                                                     }
 
                                                     return temp;
@@ -1279,7 +1300,8 @@ const JSONDisplay = ({
                                 onSelect={(e) => {
                                     setPetWhiteList((curr) => {
                                         let temp = [...curr];
-                                        temp.push({ ...e, placement: 'blacklist', parameters: { team: 0, damageBias: 17 } });
+                                        let petObj = originalPets.find((search_pet) => search_pet.ID === e.id)
+                                        temp.push({ ...e, placement: 'blacklist', parameters: { team: 0, damageBias: 17 }, pet: petObj });
                                         return temp;
                                     })
                                     setRefreshGroups(true);
@@ -1765,7 +1787,7 @@ const JSONDisplay = ({
                                         Select Bonus:
                                     </div>
 
-                                    <select
+                                    {/* <select
                                         style={{ maxWidth: '144px' }}
                                         disabled={refreshGroups}
                                         onChange={
@@ -1778,11 +1800,21 @@ const JSONDisplay = ({
                                         {
                                             Object.values(BonusMap).sort((a, b) => a.label.localeCompare(b.label)).map((e) => {
                                                 if (!leftOverIgnore[e.id] && e.id < 5000)
-                                                    return <option value={e.id} key={e.id}> {e.id >= 1000 ? e.label + ` Expedition` : e.label}</option>
+                                                    return <option value={e.id} key={e.id}> {e.id >= 1000 && !e.label.includes(`Expedition`) ? e.label + ` Expedition` : e.label}</option>
                                             })
                                         }
-                                    </select>
-
+                                    </select> */}
+                                    <SearchBox
+                                        updateBox={true}
+                                        placeholder='Enter a bonus'
+                                        data={{
+                                            list: filterableBonuses
+                                        }}
+                                        onSelect={(e) => {
+                                            console.log(e);
+                                            setLeftOverBonus1(Number(e.id));
+                                        }}
+                                    />
                                 </div>
 
                                 {/* Headers */}
@@ -1885,6 +1917,7 @@ const JSONDisplay = ({
                                                             {/* {petNames[pet.ID].name} */}
                                                             <PetItem
                                                                 showNameOnly={true}
+                                                                grayBackground={pet.equipped}
                                                                 key={pet.ID}
                                                                 petData={staticPetData}
                                                                 fullPetData={pet}
@@ -1895,31 +1928,45 @@ const JSONDisplay = ({
                                                             />
                                                         </div>
                                                     </div>
-                                                    <img
-                                                        style={{
-                                                            maxHeight: '12px',
-                                                            margin: '0 12px 0 0'
-                                                        }}
-                                                        onClick={(e) => {
-                                                            setPetWhiteList((curr) => {
-                                                                let temp = [...curr];
+                                                    {/* Pin icon */}
+                                                    {!pet.whitelisted && (
+                                                        <div
+                                                            style={{
+                                                                height: '100%',
+                                                                width: '24px',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center'
+                                                            }}
+                                                        >
+                                                            <img
+                                                                style={{
+                                                                    maxHeight: '12px',
 
-                                                                let pet_inner = temp.find((sample_pet) => sample_pet.id === pet.ID);
-                                                                if (!pet_inner) {
-                                                                    temp.push({ label: petNames[pet.ID].name, id: pet.ID, placement: 'rel', parameters: { team: 0, damageBias: 17 } });
-                                                                }
-                                                                else {
-                                                                    throw new Error(`should not have an existing pet in this list!`)
-                                                                }
-                                                                return temp;
-                                                            })
+                                                                }}
+                                                                onClick={(e) => {
+                                                                    setPetWhiteList((curr) => {
+                                                                        let temp = [...curr];
 
-                                                            setRefreshGroups(true);
-                                                            return;
+                                                                        let pet_inner = temp.find((sample_pet) => sample_pet.id === pet.ID);
+                                                                        if (!pet_inner) {
+                                                                            temp.push({ label: petNames[pet.ID].name, id: pet.ID, placement: 'rel', parameters: { team: 0, damageBias: 17 } });
+                                                                        }
+                                                                        else {
+                                                                            throw new Error(`should not have an existing pet in this list!`)
+                                                                        }
+                                                                        return temp;
+                                                                    })
 
-                                                        }}
-                                                        src={pinIcon}
-                                                    />
+                                                                    setRefreshGroups(true);
+                                                                    return;
+
+                                                                }}
+                                                                src={pinIcon}
+                                                            />
+                                                        </div>
+                                                    )}
+
                                                 </div>
                                                 {/* Pet Damage */}
                                                 <div style={{ width: 'calc(30% + 1px)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `2px 0 2px -1px #ecf0f5`, }}>

@@ -376,6 +376,7 @@ var helper = {
         const memo = {};
         let failedFiltersObj = {};
         let petsMap = {};
+        let bad_synergy_allowed = false;
 
         for (let i = 0; i < PETSCOLLECTION.length; i++) {
             petsMap[PETSCOLLECTION[i].ID] = JSON.parse(JSON.stringify(PETSCOLLECTION[i]))
@@ -419,6 +420,42 @@ var helper = {
             // let temp = [];
             let best = -1;
 
+
+            //Number of air/gnd pets that are manually placed -> default allow bad synergy
+            let requiredAir = {};
+            let requiredGnd = {};
+
+            //Check num air and num ground relative pets from bonus
+            let relAirTotalMap = {};
+            let relGndTotalMap = {};
+
+
+            for (let i = 0; i < bonusList.length; i++) {
+                let bonus = bonusList[i];
+                if (bonus.placement === 'team') {
+
+                    if (!bonus.parameters.fake) {
+
+                        if (bonus.pet.Type === 1 && !requiredGnd[bonus.pet.ID]) {
+                            requiredGnd[bonus.pet.ID] = true;
+                        }
+                        else if (!requiredGnd[bonus.pet.ID]) {
+                            requiredGnd[bonus.pet.ID] = true;
+                        }
+                    }
+                    else {
+                        if (bonus.pet.Type === 2 && !relAirTotalMap[bonus.pet.ID]) {
+                            relAirTotalMap[bonus.pet.ID] = true;
+                        }
+                        else if (!relGndTotalMap[bonus.pet.ID]) {
+                            relGndTotalMap[bonus.pet.ID] = true;
+                        }
+                    }
+
+                }
+            }
+
+
             const f = (start, prevCombination) => {
 
                 if (prevCombination.length > 0) {
@@ -428,222 +465,343 @@ var helper = {
                     let exact = 0;
                     const maxPets = 4;
 
-                    //First confirm the the combination satisfies all bonuses
-                    for (let i = 0; i < bonusList.length; i++) {
-                        let bonus = bonusList[i];
-                        let pass = false;
+                    //Check how many pets of each type are the correct rel ones
+                    let currAir = 0;
+                    let currGnd = 0;
 
-                        //Pet being forcefull included, needs to be here
-                        if (bonus.placement === 'team') {
-                            let currCount = 0;
-                            for (let j = 0; j < prevCombination.length; j++) {
-                                let pet = prevCombination[j];
+                    //absolute number of each type of pet
+                    let totalGnd = 0;
+                    let totalAir = 0;
 
-                                if (pet.ID === bonus.pet.ID) {
-                                    currCount++;
-                                    if (bonus.parameters.fake) {
-                                        fakeRel++;
-                                    }
-                                    else {
-                                        exact++
-                                    }
-                                }
-                            }
 
-                            if (currCount > 0) {
-                                // console.log(`we good`);
-                                pass = true;
-                            }
-                            else if (!bonus.parameters.fake) {
-                                // console.log(`we not good`);
-                                validTeam = false;
-                                pass = false;
-                                break;
-                            }
+                    for (let j = 0; j < prevCombination.length; j++) {
+                        let tempy = prevCombination[j];
+                        if (tempy.Type === 1) {
+                            totalGnd++;
                         }
-                        //Meaning there are required pets that have to be in the comp
-                        else if (bonus.requiredNumber > 0) {
-                            let currCount = 0;
-
-                            for (let j = 0; j < prevCombination.length; j++) {
-                                let pet = prevCombination[j];
-
-                                if (pet.BonusList.find((a) => a.ID === bonus.bonus.id)) {
-                                    currCount++;
-                                    exact++;
-                                }
-                            }
-
-                            if (currCount >= bonus.requiredNumber) {
-                                // console.log(`we good`);
-                                pass = true;
-                            }
-                            else {
-                                // console.log(`we not good`);
-                                validTeam = false;
-                                pass = false;
-                                break;
-                            }
+                        else {
+                            totalAir++;
                         }
-                        else if (bonus.exactNumber > -1) {
-                            let currCount = 0;
-
-                            for (let j = 0; j < prevCombination.length; j++) {
-                                let pet = prevCombination[j];
-
-                                if (pet.BonusList.find((a) => a.ID === bonus.bonus.id)) {
-                                    currCount++;
-                                    exact++;
-                                }
-                            }
-
-                            if (currCount === bonus.exactNumber) {
-                                // console.log(`we good`);
-                                pass = true;
-                            }
-                            else {
-                                // console.log(`we not good`);
-                                validTeam = false;
-                                pass = false;
-                                break;
-                            }
+                        if (tempy.Type === 1 && relGndTotalMap[tempy.ID]) {
+                            currGnd++
                         }
-                        //Meaning there is a `rel` filter active
-                        else if (bonus.bonus.placement === 'rel') {
-                            let currCount = 0;
-                            let maxCounter = 0;
-
-                            for (let j = 0; j < prevCombination.length; j++) {
-                                let pet = prevCombination[j];
-                                if (pet.BonusList.find((a) => a.ID === bonus.bonus.id)) {
-                                    maxCounter++;
-                                    fakeRel++;
-                                }
-                                // if (bonus.tempRequired > 0)
-                                //     if (bonus.tempRequiredPets.find((a) => a.ID === pet.ID)) {
-                                //         currCount++;
-                                //     }
-                            }
-
-                            if (maxCounter <= bonus.bonus.amount) {
-                                //Check that we have some of the required pets, but not exceeding the max amount
-                                if (bonus.tempRequired > 0) {
-                                    if (
-
-                                        (bonus.bonus.amount < bonus.tempRequired && maxCounter === bonus.bonus.amount) ||//max is < required (i.e. we could fit 4 but max is set to 2) -> ensure # pets === max
-                                        (maxCounter >= bonus.tempRequired) //Max is >= required, ensure #pet >= required
-                                    ) {
-                                        // console.log(`we good`);
-                                        pass = true;
-                                    }
-                                    else {
-                                        // console.log(`we not good`);
-                                        validTeam = false;
-                                        pass = false;
-                                        break;
-                                    }
-                                }
-                                else {
-                                    pass = true;
-                                }
-                            }
-                            //otherwise, ensure we don't exceed the maximum
-                            else {
-                                validTeam = false;
-                                pass = false;
-                                break;
-                            }
-                        }
-                        else if (bonus.placement === `relative`) {
-
-                        }
-                        //`eq` or `min` isn't active, but needs to reserve certain pets
-                        if (bonus.tempMax || (bonus.tempMax === 0 && !bonus.disabled && bonus.disabled !== undefined)) {
-                            let currCount = 0;
-
-                            for (let j = 0; j < prevCombination.length; j++) {
-                                let pet = prevCombination[j];
-
-                                if (bonus.pets.find((a) => a.ID === pet.ID)) {
-                                    currCount++;
-                                }
-
-                            }
-
-                            if (currCount <= bonus.tempMax) {
-                                // console.log(`we good`);
-                                pass = true;
-                            }
-                            else {
-                                // console.log(`we not good`);
-                                validTeam = false;
-                                pass = false;
-                                break;
-                            }
-                        }
-
-                        if (pass) {
-                            bonus.passed++;
+                        else if (relAirTotalMap[tempy.ID]) {
+                            currAir++
                         }
                     }
+
+
+                    let reqAir = Object.entries(requiredAir).length;
+                    let reqGnd = Object.entries(requiredGnd).length;
+                    let relAirTotal = Object.entries(relAirTotalMap).length;
+                    let relGndTotal = Object.entries(relGndTotalMap).length;
+
+                    //Determine how many more `rel` of gnd/fly type are allowed based on how many hard (placement=group) there are
+                    let airLimit = 2 > reqAir ? 2 - reqAir : 0;
+                    let gndLimit = 2 > reqGnd ? 2 - reqGnd : 0;
+
                     let maxRel = 0;
 
-                    for (let x = 0; x < bonusList.length; x++) {
-                        let temp_inner = bonusList[x];
-                        if (temp_inner.placement) {
-                            //bigsad = -1 note does not handle the rel filter for bonuses very well
-                            if (temp_inner.parameters.fake) {
-                                maxRel++;
-                            }
+
+                    //I can have a max of 2 air or 2 ground
+                    // if i have any required air, number of relative air allowed is 2 - required
+                    // if num relative air > 0 I need to make sure i have a an air, but less then the number above
+
+                    //If there are any relative air pets required
+                    if (relAirTotal > 0) {
+                        let checkNum = relAirTotal < airLimit ? relAirTotal : airLimit;
+
+                        if (currAir > airLimit) {
+                            validTeam = false;
                         }
-                    }
-
-                    //Check if we have all the req pets, and enough rel pets
-                    if (maxRel > 0) {
-                        let currRel = 0;
-
-                        if (fakeRel > 3) {
-                            let bigsad = -1;
-                        }
-
-                        //There are more recommended than we can fit, so just make sure he have enough
-                        if (maxRel + exact > maxPets) {
-                            maxRel = maxPets - exact;
-                        }
-
-                        if (fakeRel < maxRel) {
+                        else if (currAir !== checkNum) {
                             validTeam = false;
                         }
                         else {
-                            validTeam = true;
+                            maxRel += checkNum;
                         }
-
-
                     }
+                    if (relGndTotal > 0) {
+                        let checkNum = relGndTotal < gndLimit ? relGndTotal : gndLimit;
 
-                    if (validTeam) {
-                        let id = '';
-                        for (let i = 0; i < prevCombination.length; i++) {
-                            id = id + prevCombination[i].ID;
-                            if (i + 1 !== prevCombination.length) {
-                                id = id + ','
-                            }
+                        if (currGnd > gndLimit) {
+                            validTeam = false;
                         }
-                        let x = { ID: id, team: prevCombination };
-                        // temp.push(x);
-                        if (best === -1) {
-                            best = { ID: id, team: prevCombination, score: memoizedGroupScore(x) };
+                        else if (currGnd !== checkNum) {
+                            validTeam = false;
                         }
                         else {
-                            let cur = memoizedGroupScore(x);
+                            if (checkNum > 1) {
+                                let bigsad = -1;
+                            }
+                            maxRel += checkNum;
+                        }
+                    }
 
-                            if (cur.damage === best.score.damage) {
-                                if (cur.token > best.score.token) {
-                                    best = { ID: id, team: prevCombination, score: cur };
+                    let airMaxIncrease = reqAir > 2 ? reqAir - 2 : 0;
+                    let gndMaxIncrease = reqGnd > 2 ? reqGnd - 2 : 0;
+
+                    if ((totalAir > (2 + airMaxIncrease) || totalGnd > (2 + gndMaxIncrease))) {
+                        validTeam = false;
+                    }
+
+                    if (relAirTotal > 0 || relGndTotal > 0) {
+                        let bigsad = -1;
+                    }
+
+
+                    if (validTeam) {
+
+                        if (bonusList.length > 0) {
+                            let bigsad = -1;
+
+                        }
+
+
+                        //First confirm the the combination satisfies all bonuses
+                        for (let i = 0; i < bonusList.length; i++) {
+                            let bonus = bonusList[i];
+                            let pass = false;
+
+                            //Pet being forcefull included, needs to be here
+                            if (bonus.placement === 'team') {
+                                let currCount = 0;
+                                for (let j = 0; j < prevCombination.length; j++) {
+                                    let pet = prevCombination[j];
+
+
+                                    if (pet.ID === bonus.pet.ID) {
+
+                                        //Fake means its a rel pet
+                                        if (bonus.parameters.fake) {
+                                            //Check if we have too many air/gnd pets before adding this one in
+
+                                            // if (pet.Type === 1 && currGnd > gndLimit) {
+                                            //     continue;
+                                            // }
+                                            // else if (currAir > airLimit) {
+                                            //     continue;
+                                            // }
+
+                                            fakeRel++;
+                                        }
+                                        else {
+                                            exact++;
+
+                                            if (pet.Type === 1) {
+                                                reqGnd++;
+                                            }
+                                            else {
+                                                reqAir++;
+                                            }
+                                        }
+                                        currCount++;
+                                    }
+                                }
+
+                                if (currCount > 0) {
+                                    // console.log(`we good`);
+                                    pass = true;
+                                }
+                                else if (!bonus.parameters.fake) {
+                                    // console.log(`we not good`);
+                                    validTeam = false;
+                                    pass = false;
+                                    break;
                                 }
                             }
-                            else if (cur.damage > best.score.damage) {
-                                best = { ID: id, team: prevCombination, score: cur };
+                            //Meaning there are required pets that have to be in the comp
+                            else if (bonus.requiredNumber > 0) {
+                                let currCount = 0;
+
+                                for (let j = 0; j < prevCombination.length; j++) {
+                                    let pet = prevCombination[j];
+
+                                    if (pet.BonusList.find((a) => a.ID === bonus.bonus.id)) {
+                                        currCount++;
+                                        exact++;
+                                    }
+                                }
+
+                                if (currCount >= bonus.requiredNumber) {
+                                    // console.log(`we good`);
+                                    pass = true;
+                                }
+                                else {
+                                    // console.log(`we not good`);
+                                    validTeam = false;
+                                    pass = false;
+                                    break;
+                                }
+                            }
+                            else if (bonus.exactNumber > -1) {
+                                let currCount = 0;
+
+                                for (let j = 0; j < prevCombination.length; j++) {
+                                    let pet = prevCombination[j];
+
+                                    if (pet.BonusList.find((a) => a.ID === bonus.bonus.id)) {
+                                        currCount++;
+                                        exact++;
+                                    }
+                                }
+
+                                if (currCount === bonus.exactNumber) {
+                                    // console.log(`we good`);
+                                    pass = true;
+                                }
+                                else {
+                                    // console.log(`we not good`);
+                                    validTeam = false;
+                                    pass = false;
+                                    break;
+                                }
+                            }
+                            //Meaning there is a `rel` filter active
+                            else if (bonus.bonus.placement === 'rel') {
+                                let currCount = 0;
+                                let maxCounter = 0;
+
+                                for (let j = 0; j < prevCombination.length; j++) {
+                                    let pet = prevCombination[j];
+                                    if (pet.BonusList.find((a) => a.ID === bonus.bonus.id)) {
+                                        maxCounter++;
+                                        fakeRel++;
+                                    }
+                                    // if (bonus.tempRequired > 0)
+                                    //     if (bonus.tempRequiredPets.find((a) => a.ID === pet.ID)) {
+                                    //         currCount++;
+                                    //     }
+                                }
+
+                                if (maxCounter <= bonus.bonus.amount) {
+                                    //Check that we have some of the required pets, but not exceeding the max amount
+                                    if (bonus.tempRequired > 0) {
+                                        if (
+
+                                            (bonus.bonus.amount < bonus.tempRequired && maxCounter === bonus.bonus.amount) ||//max is < required (i.e. we could fit 4 but max is set to 2) -> ensure # pets === max
+                                            (maxCounter >= bonus.tempRequired) //Max is >= required, ensure #pet >= required
+                                        ) {
+                                            // console.log(`we good`);
+                                            pass = true;
+                                        }
+                                        else {
+                                            // console.log(`we not good`);
+                                            validTeam = false;
+                                            pass = false;
+                                            break;
+                                        }
+                                    }
+                                    else {
+                                        pass = true;
+                                    }
+                                }
+                                //otherwise, ensure we don't exceed the maximum
+                                else {
+                                    validTeam = false;
+                                    pass = false;
+                                    break;
+                                }
+                            }
+                            else if (bonus.placement === `relative`) {
+
+                            }
+                            //`eq` or `min` isn't active, but needs to reserve certain pets
+                            if (bonus.tempMax || (bonus.tempMax === 0 && !bonus.disabled && bonus.disabled !== undefined)) {
+                                let currCount = 0;
+
+                                for (let j = 0; j < prevCombination.length; j++) {
+                                    let pet = prevCombination[j];
+
+                                    if (bonus.pets.find((a) => a.ID === pet.ID)) {
+                                        currCount++;
+                                    }
+
+                                }
+
+                                if (currCount <= bonus.tempMax) {
+                                    // console.log(`we good`);
+                                    pass = true;
+                                }
+                                else {
+                                    // console.log(`we not good`);
+                                    validTeam = false;
+                                    pass = false;
+                                    break;
+                                }
+                            }
+
+                            if (pass) {
+                                bonus.passed++;
+                            }
+                        }
+
+
+                        // for (let x = 0; x < bonusList.length; x++) {
+                        //     let temp_inner = bonusList[x];
+                        //     if (temp_inner.placement) {
+                        //         //bigsad = -1 note does not handle the rel filter for bonuses very well
+                        //         if (temp_inner.parameters.fake) {
+
+
+                        //             let pet = temp_inner.pet;
+                        //             if (pet.Type === 1 && relGndTotal > gndLimit) {
+                        //                 continue;
+                        //             }
+                        //             else if (relAirTotal > airLimit) {
+                        //                 continue;
+                        //             }
+
+                        //             maxRel++;
+                        //         }
+                        //     }
+                        // }
+
+                        //Check if we have all the req pets, and enough rel pets
+                        if (maxRel > 0 && validTeam) {
+
+                            //There are more recommended than we can fit, so just make sure he have enough
+                            if (maxRel + exact > maxPets) {
+                                maxRel = maxPets - exact;
+                            }
+
+                            if (fakeRel < maxRel) {
+                                validTeam = false;
+                            }
+                            else {
+                                validTeam = true;
+                            }
+
+
+                        }
+                        if (validTeam) {
+                            let bigsad = -1;
+                        }
+
+                        if (validTeam) {
+                            let id = '';
+                            for (let i = 0; i < prevCombination.length; i++) {
+                                id = id + prevCombination[i].ID;
+                                if (i + 1 !== prevCombination.length) {
+                                    id = id + ','
+                                }
+                            }
+                            let x = { ID: id, team: prevCombination };
+                            // temp.push(x);
+                            if (best === -1) {
+                                best = { ID: id, team: prevCombination, score: memoizedGroupScore(x) };
+                            }
+                            else {
+                                let cur = memoizedGroupScore(x);
+
+                                if (cur.damage === best.score.damage) {
+                                    if (cur.token > best.score.token) {
+                                        best = { ID: id, team: prevCombination, score: cur };
+                                    }
+                                }
+                                else if (cur.damage > best.score.damage) {
+                                    best = { ID: id, team: prevCombination, score: cur };
+                                }
                             }
                         }
                     }
@@ -1120,19 +1278,20 @@ var helper = {
                         let combinations_rel = getCombinationsInner(finalPetsCollection, Math.min(k, finalPetsCollection.length), bonusList);
                         console.log(`got new combinations after the rel calcs`)
 
-                        //Only filter out the fake `rel` whitelisted pets, if they WERE selected by the combo
-                        whiteListReqPets = whiteListReqPets.filter((e) => {
-                            let temp = combinations_rel;
-                            if (!e.parameters.fake) {
-                                return true;
-                            }
-                            else {
-                                let found = combinations_rel.team.find((inner_pet) => inner_pet.ID === e.id)
-                                return !found;
-                            }
+                        if (combinations_rel !== -1) {
+                            //Only filter out the fake `rel` whitelisted pets, if they WERE selected by the combo
+                            whiteListReqPets = whiteListReqPets.filter((e) => {
+                                let temp = combinations_rel;
+                                if (!e.parameters.fake) {
+                                    return true;
+                                }
+                                else {
+                                    let found = combinations_rel.team.find((inner_pet) => inner_pet.ID === e.id)
+                                    return !found;
+                                }
 
-                        });
-
+                            });
+                        }
 
                         //Only hard crash in case of no backup team that is possible
                         if (combinations_rel === -1 && whiteListReqPets.length === 0) {

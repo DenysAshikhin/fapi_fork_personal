@@ -10,7 +10,7 @@ const filterBonuses = (bonuses, filterFn) => {
         .filter(filterFn);
 };
 
-const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, defaultRank, borderActive, enabledBonusHighlight, fullPetData, showNameOnly }) => {
+const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, defaultRank, borderActive, enabledBonusHighlight, fullPetData, showNameOnly, grayBackground }) => {
     if (!!data === false) return <div></div>;
     const { petId, location, img, name } = petData;
 
@@ -156,9 +156,11 @@ const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, de
 
             {showNameOnly && (
                 <div
-
-                    style={{ width: '100%' }}>
-                    {name}
+                    style={{
+                        width: '100%',
+                        backgroundColor: grayBackground ? 'lightgray' : ''
+                    }}>
+                    {`(${pet.Type === 1 ? 'Ground' : 'Air'}) ${name}`}
                 </div>
             )}
 

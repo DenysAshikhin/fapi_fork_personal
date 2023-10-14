@@ -6,10 +6,11 @@ import TextField from '@mui/material/TextField';
 
 
 
-const SearchBox = ({ data, onSelect }) => {
+const SearchBox = ({ data, onSelect, placeholder, updateBox }) => {
 
 
     const [value, setValue] = useState(null);
+
 
     // note: the id field is mandatory
     const items = [
@@ -71,18 +72,24 @@ const SearchBox = ({ data, onSelect }) => {
                 // sx={{ height: '22px', padding: '1px' }}
                 options={data.list}
                 renderInput={(params) => (
-                    <TextField {...params} placeholder="Enter a pet"
+                    <TextField {...params} placeholder={value?.label && updateBox ? value.label : placeholder ? placeholder : "Enter a pet"}
                     //  sx={{ height: '12px', padding: '0' }} 
                     />
                 )}
                 ListboxProps={{ style: { maxHeight: 150 } }}
                 value={value}
                 clearOnBlur={true}
-                // inputValue=''
+                // inputValue='hi'
                 onChange={(e, value) => {
                     if (!value) return;
                     onSelect(value);
-                    setValue({ label: '', id: -1 });
+                    if (!updateBox) {
+                        setValue({ label: '', id: -1 });
+                    }
+                    else {
+                        setValue(value);
+
+                    }
                 }}
             />
 
