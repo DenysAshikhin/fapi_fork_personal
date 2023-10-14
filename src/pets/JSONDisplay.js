@@ -222,7 +222,23 @@ const JSONDisplay = ({
     }
 
     const leftOverIgnore = {
-        17: true
+        17: true,//attack speed
+        30: true,//contagion hp damage
+        27: true,//fries bonus
+        19: true,//Pet LEVEL Exp
+        18: true,//Pet Dmg
+        20: true,//Pet Rank Exp
+        26: true,//Plant Final Prod
+        32: true,//Plant Growth
+        25: true,//Plant Manual Harvest
+        26: true,//Plant Final Prod
+        24: true,//Plant Rank Exp
+        31: true,//Reinc Point Bonus
+        18: true,//Pet Dmg
+        18: true,//Pet Dmg
+        18: true,//Pet Dmg
+        18: true,//Pet Dmg
+        18: true,//Pet Dmg
     }
     let leftOver1Pets = [];
 
@@ -426,7 +442,7 @@ const JSONDisplay = ({
 
                                                     let pet_inner = temp.find((sample_pet) => sample_pet.id === petData.ID);
                                                     if (!pet_inner) {
-                                                        temp.push({ label: staticPetData.name, id: staticPetData.petId, placement: 'team', parameters: { team: index, damageBias: 17 }, pet:petData});
+                                                        temp.push({ label: staticPetData.name, id: staticPetData.petId, placement: 'team', parameters: { team: index, damageBias: 17 }, pet: petData });
                                                     }
                                                     else {
                                                         pet_inner.placement = 'team';

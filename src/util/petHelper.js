@@ -376,7 +376,6 @@ var helper = {
         const memo = {};
         let failedFiltersObj = {};
         let petsMap = {};
-        let bad_synergy_allowed = false;
 
         for (let i = 0; i < PETSCOLLECTION.length; i++) {
             petsMap[PETSCOLLECTION[i].ID] = JSON.parse(JSON.stringify(PETSCOLLECTION[i]))
@@ -419,6 +418,20 @@ var helper = {
 
             // let temp = [];
             let best = -1;
+
+            //confirm there is enough gnd/air for perfect synergy
+            let airTemp = 0;
+            let groundTemp = 0;
+
+            array.forEach((item) => {
+                if (item.Type === 1) groundTemp++;
+                else airTemp++;
+            });
+
+            let bad_synergy_allowed = true;
+            if (airTemp > 1 && groundTemp > 1) {
+                bad_synergy_allowed = false;
+            }
 
 
             //Number of air/gnd pets that are manually placed -> default allow bad synergy
@@ -531,9 +544,6 @@ var helper = {
                             validTeam = false;
                         }
                         else {
-                            if (checkNum > 1) {
-                                let bigsad = -1;
-                            }
                             maxRel += checkNum;
                         }
                     }
@@ -541,7 +551,7 @@ var helper = {
                     let airMaxIncrease = reqAir > 2 ? reqAir - 2 : 0;
                     let gndMaxIncrease = reqGnd > 2 ? reqGnd - 2 : 0;
 
-                    if ((totalAir > (2 + airMaxIncrease) || totalGnd > (2 + gndMaxIncrease))) {
+                    if ((totalAir > (2 + airMaxIncrease) || totalGnd > (2 + gndMaxIncrease)) && !bad_synergy_allowed) {
                         validTeam = false;
                     }
 
