@@ -25,6 +25,9 @@
   opacity: 1;
 }
 
+.navItem{
+  margin: 12px 0 12px 0;
+}
 
 .navItem:hover {
   cursor: pointer;

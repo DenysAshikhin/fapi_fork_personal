@@ -1615,7 +1615,7 @@ const JSONDisplay = ({
                                                     display: 'flex',
                                                     justifyContent: 'space-between',
                                                     // alignContent: 'space-between',
-                                                    zIndex: '-1'
+                                                    zIndex: '1'
                                                 }}
 
                                             >

@@ -141,14 +141,18 @@ const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, de
                                     left: `${(100 / numHighlights.length) * index}%`,
                                     height: '100%',
                                     width: `${100 / numHighlights.length}%`,
-                                    zIndex: -1
+                                    zIndex: 1
                                 }}
                             >
 
                             </div>)
                         })}
                         {/* <div className="item-image"> */}
-                        <img src={img} alt={name} className='item-image' />
+                        <img src={img} alt={name} className='item-image'
+                            style={{
+                                zIndex: '2'
+                            }}
+                        />
                         {/* </div> */}
                     </div>
                 </div>

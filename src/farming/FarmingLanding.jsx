@@ -1440,7 +1440,7 @@ const FarmingLanding = ({ data }) => {
     let displayPicPerc = bestPlantCombo.pic != bestPlantCombo.picPerc;
 
     return (
-        <div style={{ height: '100%', display: 'flex', flex: 1, flexDirection: 'column' }}>
+        <div style={{ height: '100%', display: 'flex', flex: 1, flexDirection: 'column', paddingLeft: '6px' }}>
             <div style={{
                 display: 'flex', flex: 1,
                 flexDirection: 'column',

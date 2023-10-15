@@ -1,3 +1,52 @@
+@font-face {
+  font-family: 'Dobra';
+  src: local('Dobra Black'), local('Dobra-Black'),
+    url('./assets/fonts//dobra_black//Dobra-Black.woff2') format('woff2'),
+    url('./assets/fonts//dobra_black//Dobra-Black.woff') format('woff'),
+    url('./assets/fonts//dobra_black//Dobra-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+}
+
+.header {
+  /* background-color: rgba(255, 255, 255, 0.12); */
+  background-color: #1F1B24;
+}
+
+.headerBase {
+  background-color: #000000;
+}
+
+
+.dobra {
+  font-family: Dobra !important;
+  font-size: 24px;
+}
+
+.borderSquare {
+  box-shadow: 0 0 0 1px #4a5058;
+}
+
+.importantText {
+  color: #FFFFFF;
+  opacity: 90%;
+}
+
+.mediumImportantText {
+  color: #FFFFFF;
+  opacity: 85%;
+}
+
+.blackTextStroke {
+  -webkit-text-stroke: 2px black;
+}
+
+input[type="file"]::-webkit-file-upload-button {
+  height: 40px;
+  width: 150px;
+  font-size: 20px;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './App.css';
 import FileUpload from './FileUpload';
+import PageSelection from './page_selection/PageSelection.jsx';
 import JSONDisplay from './pets/JSONDisplay';
 import CardComponent from './cards/card';
 import { DefaultWeightMap, petNameArray, BonusMap } from './itemMapping';
@@ -12,8 +13,8 @@ import helper from './util/helper.js';
 import petHelper from './util/petHelper.js';
 
 import FarmingLanding from './farming/FarmingLanding.jsx';
+import Header from './header.jsx';
 import useLocalStorage from "use-local-storage";
-
 
 const theme = createTheme({
     palette: {
@@ -101,6 +102,8 @@ function App() {
 
     const selectComponent = () => {
         switch (tabSwitch) {
+            case 6:
+                return <PageSelection setTab={(num) => setTabSwitch(num)} />
             case 3:
                 return <FarmingLanding data={data} />;
             case 5:
@@ -264,7 +267,7 @@ function App() {
         setSelectedPets(tempPets);
 
         handleGroups(uploadedData, positiveRankedPets);
-        if (tabSwitch === 0) setTabSwitch(1);  // move upload to expedition when done
+        if (tabSwitch === 0) setTabSwitch(6);  // move upload to expedition when done
     };
 
     //Recalculate used to force the groups to be...recalculated
@@ -312,69 +315,95 @@ function App() {
             <div style={{
                 marginLeft: '0px', marginRight: '0px', maxWidth: '100000px !important',
                 // width: 'calc(100vw - 126px)',
-                width: '100%',
+                width: '100vw',
                 // maxHeight: `calc(100vh - 56px)`,
                 height: `100vh`,
                 padding: '0px',
-                display: 'flex'
+                display: 'flex',
+                flexDirection: 'column',
+                backgroundColor: 'rgb(243 240 245)',
             }}>
+                {/* header */}
+                <div
+                    className={`headerBase$${!!data ? ' hover' : ''}`}
+                    style={{
+                        width: '100vw'
+                    }}
+                    onClick={(e) => {
+                        if (!!data)
+                            setTabSwitch(6)
+                    }}
+                >
+                    <Header />
+                </div>
 
-                <div style={{
-                    height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', backgroundColor: '#fbfafc',
-                    boxShadow: `0 0 0 1px #ecf0f5`,
-                    margin: '0 6px 0 0'
-                }}>
+                <div
+                    style={{ display: 'flex', flex: '1' }}
+                >
+                    {/* navigation bar */}
+                    <div style={{
+                        width: '53px',
+                        display: 'flex', flexDirection: 'column', justifyContent: 'center',
+                        // backgroundColor: '#fbfafc',
+                        backgroundColor: '#1F1B24',
+                        // boxShadow: `0 0 0 1px #ecf0f5`,
+                        // boxShadow: `0 0 0 1px #4a5058`,
+                        // margin: '0 6px 0 0'
+                    }}>
 
-                    <div className="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
-                        onClick={() => setTabSwitch(0)}
-                    >
-                        <img style={{ width: '30px' }} src={`/fapi_fork_personal/file_upload.svg`} />
-                        <div style={{ textAlign: 'center' }}>Upload</div>
-                    </div>
-                    {!!data && (
-                        <div className="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
+                        <div className="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px', pointerEvents: !!data ? '' : 'none', opacity: !!data ? '' : '0.4' }}
+                            onClick={() => setTabSwitch(0)}
+                        >
+                            <img style={{ width: '38px' }} src={`/fapi_fork_personal/file_upload.svg`} />
+                            {/* <div className='importantText' style={{ textAlign: 'center' }}>Upload</div> */}
+                        </div>
+                        {/* {!!data && ( */}
+                        <div className="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px', pointerEvents: !!data ? '' : 'none', opacity: !!data ? '' : '0.4' }}
                             onClick={() => setTabSwitch(1)}
                         >
-                            <img style={{ width: '30px' }} src={`/fapi_fork_personal/signpost.svg`} />
-                            <div style={{ textAlign: 'center' }}>Expedit.</div>
+                            <img style={{ width: '38px' }} src={`/fapi_fork_personal/signpost.svg`} />
+                            {/* <div className='importantText' style={{ textAlign: 'center' }}>Exped.</div> */}
                         </div>
-                    )}
-                    {!!data && (
-                        <div className="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
+                        {/* )} */}
+                        {/* {!!data && ( */}
+                        <div className="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px', pointerEvents: !!data ? '' : 'none', opacity: !!data ? '' : '0.4' }}
                             onClick={() => setTabSwitch(2)}
                         >
-                            <img style={{ width: '30px' }} src={`/fapi_fork_personal/paw_plus.svg`} />
-                            <div style={{ textAlign: 'center' }}>Pet Combo</div>
+                            <img style={{ width: '38px' }} src={`/fapi_fork_personal/paw_plus.svg`} />
+                            {/* <div className='importantText' style={{ textAlign: 'center' }}>Pet Combo</div> */}
                         </div>
-                    )}
-                    {!!data && (
-                        <div className="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
+                        {/* )} */}
+                        {/* {!!data && ( */}
+                        <div className="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px', pointerEvents: !!data ? '' : 'none', opacity: !!data ? '' : '0.4' }}
                             onClick={() => setTabSwitch(3)}
                         >
-                            <img style={{ width: '30px' }} src={`/fapi_fork_personal/farming/farming.svg`} />
-                            <div style={{ textAlign: 'center' }}>Farm</div>
+                            <img style={{ width: '38px' }} src={`/fapi_fork_personal/farming.svg`} />
+                            {/* <div className='importantText' style={{ textAlign: 'center' }}>Farm</div> */}
                         </div>
-                    )}
-                    {!!data && (
-                        <div className="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
+                        {/* )} */}
+                        {/* {!!data && ( */}
+                        <div className="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px', pointerEvents: !!data ? '' : 'none', opacity: !!data ? '' : '0.4' }}
                             onClick={() => setTabSwitch(4)}
                         >
-                            <img style={{ width: '30px' }} src={`/fapi_fork_personal/badge.svg`} />
-                            <div style={{ textAlign: 'center' }}>Cards</div>
+                            <img style={{ width: '38px' }} src={`/fapi_fork_personal/badge.svg`} />
+                            {/* <div className='importantText' style={{ textAlign: 'center' }}>Cards</div> */}
                         </div>
-                    )}
-                    {/* {!!data && (
+                        {/* )} */}
+                        {/* {!!data && (
                         <div className="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
                             onClick={() => setTabSwitch(5)}
                         >
-                            <img style={{ width: '30px' }} src={`/fapi_fork_personal/scale.svg`} />
+                            <img style={{ width: '38px' }} src={`/fapi_fork_personal/scale.svg`} />
                             <div style={{ textAlign: 'center' }}>Weight</div>
                         </div>
                     )} */}
+                    </div>
+                    {/* actual page content */}
+                    <div style={{ overflow: 'auto', width: '100%', display: 'flex', flex: 1 }}>
+                        {selectComponent()}
+                    </div>
                 </div>
-                <div style={{ overflow: 'auto', width: '100%', display: 'flex', flex: 1 }}>
-                    {selectComponent()}
-                </div>
+
             </div>
         </ThemeProvider>
     );

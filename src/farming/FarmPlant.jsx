@@ -58,23 +58,24 @@ const FarmingPlant = ({ data }) => {
         padding: '0 0 0 0',
         display: 'flex',
         height: fake ? '179px' : useFutureValues ? '204px' : '179px',
-        width: fake ? '228px' : ''
+        width: fake ? '228px' : '',
+        backgroundColor: 'white'
         // maxHeight:'128px' 
     }}>
         <div style={{ height: '214px', width: '214px', position: 'relative' }}>
-            <img style={{ height: '214px', width: '214px', position: 'absolute', bottom: '0', left: '0', zIndex: '-1' }} src={`/fapi_fork_personal/farming/plants/P${index + 1}.png`} />
+            <img style={{ height: '214px', width: '214px', position: 'absolute', bottom: '0', left: '0', zIndex: '1' }} src={`/fapi_fork_personal/farming/plants/P${index + 1}.png`} />
 
 
-            <div style={{ background: 'black', borderRadius: '6px', fontSize: '16px', fontWeight: 'bold', padding: '0 1px 0 1px', color: 'white', top: '0%', left: fake ? `35%` : '43%', display: 'flex', position: 'absolute' }}>
+            <div style={{ zIndex: 2, background: 'black', borderRadius: '6px', fontSize: '16px', fontWeight: 'bold', padding: '0 1px 0 1px', color: 'white', top: '0%', left: fake ? `35%` : '43%', display: 'flex', position: 'absolute' }}>
                 {plantTitle}
             </div>
 
-            <div style={{ background: 'black', borderRadius: '6px', fontSize: '12px', padding: '0 1px 0 1px', color: 'white', top: '12%', left: '2%', display: 'flex', position: 'absolute' }}>
+            <div style={{ zIndex: 2, background: 'black', borderRadius: '6px', fontSize: '12px', padding: '0 1px 0 1px', color: 'white', top: '12%', left: '2%', display: 'flex', position: 'absolute' }}>
                 {harvestTime}
             </div>
 
 
-            <div style={{ background: 'black', borderRadius: '6px', padding: '0 1px 0 1px', color: 'white', top: '1%', right: '1%', display: 'flex', position: 'absolute' }}>
+            <div style={{ zIndex: 2, background: 'black', borderRadius: '6px', padding: '0 1px 0 1px', color: 'white', top: '1%', right: '1%', display: 'flex', position: 'absolute' }}>
                 <MouseOverPopover tooltip={
                     <div>
                         <div>Harvest Amount</div>
@@ -88,7 +89,7 @@ const FarmingPlant = ({ data }) => {
 
 
             {/* output mult */}
-            <div style={{ background: 'black', borderRadius: '6px', fontSize: '12px', padding: '0 1px 0 1px', color: 'white', top: '10%', right: '3%', display: 'flex', position: 'absolute' }}>
+            <div style={{ zIndex: 2, background: 'black', borderRadius: '6px', fontSize: '12px', padding: '0 1px 0 1px', color: 'white', top: '10%', right: '3%', display: 'flex', position: 'absolute' }}>
 
                 <MouseOverPopover tooltip={
                     <div>
@@ -102,7 +103,7 @@ const FarmingPlant = ({ data }) => {
             </div>
 
             {/* total harvest */}
-            <div style={{ background: 'black', borderRadius: '6px', fontSize: '12px', padding: '0 1px 0 1px', color: 'white', top: '20%', right: '1%', display: 'flex', position: 'absolute' }}>
+            <div style={{ zIndex: 2, background: 'black', borderRadius: '6px', fontSize: '12px', padding: '0 1px 0 1px', color: 'white', top: '20%', right: '1%', display: 'flex', position: 'absolute' }}>
 
                 <MouseOverPopover tooltip={
                     <div>
@@ -119,7 +120,7 @@ const FarmingPlant = ({ data }) => {
 
 
             {/* Rank */}
-            <div style={{ fontSize: '10px', padding: '0 1px 0 1px', color: 'white', bottom: '18%', left: '18%', display: 'flex', position: 'absolute' }}>
+            <div style={{ zIndex: 2, fontSize: '10px', padding: '0 1px 0 1px', color: 'white', bottom: '18%', left: '18%', display: 'flex', position: 'absolute' }}>
                 <div style={{ display: 'flex' }}>
                     <div style={{ display: 'flex' }}>
                         <div style={{ background: 'black', borderRadius: '6px', padding: '0 3px 0 3px', display: 'flex', alignItems: 'center' }} >
@@ -147,6 +148,7 @@ const FarmingPlant = ({ data }) => {
 
             {/* PIC */}
             <div style={{
+                zIndex: 2,
                 fontSize: '12px',
                 padding: '0 1px 0 1px',
                 color: 'white',
