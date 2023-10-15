@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/fapi_fork_personal/static/css/main.751114d9.css",
-    "main.js": "/fapi_fork_personal/static/js/main.fac7be26.js",
+    "main.css": "/fapi_fork_personal/static/css/main.a360050d.css",
+    "main.js": "/fapi_fork_personal/static/js/main.6141608e.js",
     "static/js/21.5e323631.chunk.js": "/fapi_fork_personal/static/js/21.5e323631.chunk.js",
     "static/js/520.939afb0d.chunk.js": "/fapi_fork_personal/static/js/520.939afb0d.chunk.js",
     "static/js/942.fef71056.chunk.js": "/fapi_fork_personal/static/js/942.fef71056.chunk.js",
@@ -17,6 +17,9 @@
     "static/js/496.963d3dc5.chunk.js": "/fapi_fork_personal/static/js/496.963d3dc5.chunk.js",
     "static/js/73.1bac8e58.chunk.js": "/fapi_fork_personal/static/js/73.1bac8e58.chunk.js",
     "static/js/359.84d8c589.chunk.js": "/fapi_fork_personal/static/js/359.84d8c589.chunk.js",
+    "static/media/Dobra-Black.ttf": "/fapi_fork_personal/static/media/Dobra-Black.b0acda3d3f950249db2b.ttf",
+    "static/media/Dobra-Black.woff": "/fapi_fork_personal/static/media/Dobra-Black.0bfb45a15a7e425fa551.woff",
+    "static/media/Dobra-Black.woff2": "/fapi_fork_personal/static/media/Dobra-Black.b2d74bbb9a58910f5b92.woff2",
     "static/media/fapi_save_file.png": "/fapi_fork_personal/static/media/fapi_save_file.7758c0e1820dcb28e9d8.png",
     "static/media/info_green.svg": "/fapi_fork_personal/static/media/info_green.ed71cceb338866f9736d06c315153a4d.svg",
     "static/media/info.svg": "/fapi_fork_personal/static/media/info.139c2f82dab0da08976c401dfcd42a77.svg",
@@ -25,8 +28,8 @@
     "static/media/trash-can-icon.svg": "/fapi_fork_personal/static/media/trash-can-icon.a18a8749ac54cca4c2f59b55d20cca81.svg",
     "static/media/x_icon.svg": "/fapi_fork_personal/static/media/x_icon.e6091a530d75adde1df68129a099b94d.svg",
     "index.html": "/fapi_fork_personal/index.html",
-    "main.751114d9.css.map": "/fapi_fork_personal/static/css/main.751114d9.css.map",
-    "main.fac7be26.js.map": "/fapi_fork_personal/static/js/main.fac7be26.js.map",
+    "main.a360050d.css.map": "/fapi_fork_personal/static/css/main.a360050d.css.map",
+    "main.6141608e.js.map": "/fapi_fork_personal/static/js/main.6141608e.js.map",
     "21.5e323631.chunk.js.map": "/fapi_fork_personal/static/js/21.5e323631.chunk.js.map",
     "520.939afb0d.chunk.js.map": "/fapi_fork_personal/static/js/520.939afb0d.chunk.js.map",
     "942.fef71056.chunk.js.map": "/fapi_fork_personal/static/js/942.fef71056.chunk.js.map",
@@ -44,7 +47,7 @@
     "359.84d8c589.chunk.js.map": "/fapi_fork_personal/static/js/359.84d8c589.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.751114d9.css",
-    "static/js/main.fac7be26.js"
+    "static/css/main.a360050d.css",
+    "static/js/main.6141608e.js"
   ]
 }
