@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/fapi_fork_personal/static/css/main.0b2e1088.css",
-    "main.js": "/fapi_fork_personal/static/js/main.440caa16.js",
+    "main.js": "/fapi_fork_personal/static/js/main.e0be7cf3.js",
     "static/js/21.5e323631.chunk.js": "/fapi_fork_personal/static/js/21.5e323631.chunk.js",
     "static/js/520.939afb0d.chunk.js": "/fapi_fork_personal/static/js/520.939afb0d.chunk.js",
     "static/js/942.fef71056.chunk.js": "/fapi_fork_personal/static/js/942.fef71056.chunk.js",
@@ -22,7 +22,7 @@
     "static/media/Dobra-Black.woff": "/fapi_fork_personal/static/media/Dobra-Black.0bfb45a15a7e425fa551.woff",
     "static/media/Dobra-Black.woff2": "/fapi_fork_personal/static/media/Dobra-Black.b2d74bbb9a58910f5b92.woff2",
     "static/media/fapi_save_file.png": "/fapi_fork_personal/static/media/fapi_save_file.7758c0e1820dcb28e9d8.png",
-    "static/media/info_black.svg": "/fapi_fork_personal/static/media/info_black.7b2269295df25f50bc1852c09bb63df3.svg",
+    "static/media/info_lightgray.svg": "/fapi_fork_personal/static/media/info_lightgray.c2806147a87b5dd144ee745b2fac895f.svg",
     "static/media/info_green.svg": "/fapi_fork_personal/static/media/info_green.ed71cceb338866f9736d06c315153a4d.svg",
     "static/media/info.svg": "/fapi_fork_personal/static/media/info.139c2f82dab0da08976c401dfcd42a77.svg",
     "static/media/info_red.svg": "/fapi_fork_personal/static/media/info_red.f95825f8c007ac4e06b59f3255812bf0.svg",
@@ -31,7 +31,7 @@
     "static/media/x_icon.svg": "/fapi_fork_personal/static/media/x_icon.e6091a530d75adde1df68129a099b94d.svg",
     "index.html": "/fapi_fork_personal/index.html",
     "main.0b2e1088.css.map": "/fapi_fork_personal/static/css/main.0b2e1088.css.map",
-    "main.440caa16.js.map": "/fapi_fork_personal/static/js/main.440caa16.js.map",
+    "main.e0be7cf3.js.map": "/fapi_fork_personal/static/js/main.e0be7cf3.js.map",
     "21.5e323631.chunk.js.map": "/fapi_fork_personal/static/js/21.5e323631.chunk.js.map",
     "520.939afb0d.chunk.js.map": "/fapi_fork_personal/static/js/520.939afb0d.chunk.js.map",
     "942.fef71056.chunk.js.map": "/fapi_fork_personal/static/js/942.fef71056.chunk.js.map",
@@ -50,6 +50,6 @@
   },
   "entrypoints": [
     "static/css/main.0b2e1088.css",
-    "static/js/main.440caa16.js"
+    "static/js/main.e0be7cf3.js"
   ]
 }
