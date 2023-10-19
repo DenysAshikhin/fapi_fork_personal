@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/fapi_fork_personal/static/css/main.84800bb2.css",
-    "main.js": "/fapi_fork_personal/static/js/main.92727705.js",
+    "main.css": "/fapi_fork_personal/static/css/main.8b6e8628.css",
+    "main.js": "/fapi_fork_personal/static/js/main.e3102c58.js",
     "static/js/21.5e323631.chunk.js": "/fapi_fork_personal/static/js/21.5e323631.chunk.js",
     "static/js/520.939afb0d.chunk.js": "/fapi_fork_personal/static/js/520.939afb0d.chunk.js",
     "static/js/942.fef71056.chunk.js": "/fapi_fork_personal/static/js/942.fef71056.chunk.js",
@@ -63,8 +63,8 @@
     "static/media/trash-can-icon.svg": "/fapi_fork_personal/static/media/trash-can-icon.a18a8749ac54cca4c2f59b55d20cca81.svg",
     "static/media/x_icon.svg": "/fapi_fork_personal/static/media/x_icon.e6091a530d75adde1df68129a099b94d.svg",
     "index.html": "/fapi_fork_personal/index.html",
-    "main.84800bb2.css.map": "/fapi_fork_personal/static/css/main.84800bb2.css.map",
-    "main.92727705.js.map": "/fapi_fork_personal/static/js/main.92727705.js.map",
+    "main.8b6e8628.css.map": "/fapi_fork_personal/static/css/main.8b6e8628.css.map",
+    "main.e3102c58.js.map": "/fapi_fork_personal/static/js/main.e3102c58.js.map",
     "21.5e323631.chunk.js.map": "/fapi_fork_personal/static/js/21.5e323631.chunk.js.map",
     "520.939afb0d.chunk.js.map": "/fapi_fork_personal/static/js/520.939afb0d.chunk.js.map",
     "942.fef71056.chunk.js.map": "/fapi_fork_personal/static/js/942.fef71056.chunk.js.map",
@@ -82,7 +82,7 @@
     "359.84d8c589.chunk.js.map": "/fapi_fork_personal/static/js/359.84d8c589.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.84800bb2.css",
-    "static/js/main.92727705.js"
+    "static/css/main.8b6e8628.css",
+    "static/js/main.e3102c58.js"
   ]
 }
