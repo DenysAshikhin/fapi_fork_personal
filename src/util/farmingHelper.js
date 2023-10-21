@@ -669,6 +669,55 @@ var farmingHelper = {
 
         return bonus;
     },
+    calcAssemblyLine: function (line, al_level) {
+        let bonus = 1;
+
+        if (line.StartingLevel <= al_level) {
+            let gain = line.Gain;
+            let level = Math.max(0, al_level - (line.StartingLevel - 1));
+            bonus = Math.pow(1 + gain, level);
+        }
+        return bonus;
+    },
+    calcAssemblyCost: function (id, data) {
+        let finalCost = mathHelper.createDecimal(-1);
+        let costReduction = mathHelper.createDecimal(data.AssemblyCostReductionBonus);
+        let assembly = data.AssemblerCollection[id];
+        let baseCost = mathHelper.createDecimal(assembly.BaseCost)
+
+        let step1 = mathHelper.addDecimal(
+            baseCost,
+            mathHelper.multiplyDecimal(baseCost, assembly.Level)
+        );
+
+        let temp = 1 + assembly.CostExpo + assembly.CostExpo * assembly.Level * 0.02
+        let powStepBase = mathHelper.createDecimal(temp);
+        let step2 = mathHelper.pow(powStepBase, assembly.Level)
+        finalCost = mathHelper.divideDecimal(mathHelper.multiplyDecimal(step1, step2), costReduction)
+        // finalCost =
+        //     (level + startingCost * level)
+        //     * pow(1 + assembly.CostExpo + assembly.CostExpo * assembly.BaseCost * 0.02, assembly.BaseCost)
+        //     / costReduction;
+
+        return finalCost;
+    },
+    calcProteinPerSecond: function (data) {
+        let finalRate = 1;
+        let proteinBonus = mathHelper.createDecimal(data.ProteinBonus);
+        let frenchTotal = mathHelper.createDecimal(data.FrenchFriesTotal);
+        let result;
+        if (frenchTotal.greaterThan(10000000000.0)) {
+            let log1 = mathHelper.logDecimal(frenchTotal, 5);
+            log1 = mathHelper.subtractDecimal(log1, 13.48);
+            let log2 = mathHelper.logDecimal(frenchTotal, 10.0);
+            log2 = mathHelper.subtractDecimal(log2, 8);
+            result = mathHelper.multiplyDecimal(
+                mathHelper.multiplyDecimal(log1, mathHelper.pow(1.1, log2)),
+                proteinBonus);
+        }
+        return result;
+        return finalRate;
+    },
     calcContagionBonus: function (data, index) {
         let bonus = 1;
 

@@ -13,22 +13,13 @@ import { Notifications } from 'react-push-notification';
 // ReactGA.pageview(window.location.pathname);
 
 
-import ReactGA from "react-ga4";
-
-ReactGA.initialize([{
-  trackingId: "G-QT1B9TZS0P",
-  // gaOptions: {...}, // optional
-  gtagOptions: {
-    send_page_view: false
-  },
-}]);
 
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <Notifications />
+    {/* <Notifications /> */}
     <App />
   </React.StrictMode>
 );

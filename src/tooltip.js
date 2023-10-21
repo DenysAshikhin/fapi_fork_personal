@@ -1,19 +1,38 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import Popover from '@mui/material/Popover';
 import Typography from '@mui/material/Typography';
 
-function MouseOverPopover({ tooltip, children, style, extraClasses, opacity }) {
+function MouseOverPopover({ tooltip, children, style, extraClasses, opacity, forceOpen, setForceOpen }) {
     const [anchorEl, setAnchorEl] = React.useState(null);
+    const [forceShow, setForceShow] = useState(false);
 
     const handlePopoverOpen = (event) => {
         setAnchorEl(event.currentTarget);
     };
 
     const handlePopoverClose = () => {
-        setAnchorEl(null);
+        if (!setForceOpen) {
+            setAnchorEl(null);
+        }
     };
     opacity = opacity ? opacity : '0.9';
-    const open = Boolean(anchorEl);
+    const open = !!setForceOpen ? forceOpen : Boolean(anchorEl);
+    let currCords = 0;
+    let screenX = window.innerWidth;
+    let screenY = window.innerHeight;
+    let xPlacement = 'left';
+    let yPlacement = 'bottom';
+
+    let xTransform = 'left';
+    let yTransform = 'top'
+
+    if (anchorEl) {
+        currCords = anchorEl.getBoundingClientRect();
+        if ((currCords.top / screenY) > 0.5) {
+            yPlacement = 'top';
+            yTransform = 'bottom'
+        }
+    }
 
     return (
         <div
@@ -37,28 +56,49 @@ function MouseOverPopover({ tooltip, children, style, extraClasses, opacity }) {
                 open={open}
                 anchorEl={anchorEl}
                 anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left',
+                    vertical: yPlacement,
+                    horizontal: xPlacement,
                 }}
                 transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'left',
+                    vertical: yTransform,
+                    horizontal: xTransform,
                 }}
                 onClose={handlePopoverClose}
-                marginThreshold={32}
-                disableRestoreFocus
+                // onMouseEnter={(e) => {
+                //     setForceShow(true);
+                // }}
+                // oneMouseExit={(e) => {
+                //     setForceShow(false);
+                // }}
+                // marginThreshold={1}
+                // disableRestoreFocus
                 // PaperProps={{
-                //     style: {
-                //       backgroundColor: "transparent",
-                //       boxShadow: "none"
-                //     },
-                //   }}
+                //     onMouseEnter: handleMouseEnter,
+                //     onMouseLeave: handleMouseLeave,
+                //     sx: {
+                //         pointerEvents: 'auto'
+                //     }
+                // }}
                 slotProps={{
                     paper: {
                         style: {
                             backgroundColor: `rgba(255,255,255,${opacity})`,
-                            padding: '6px'
-                        }
+                            padding: '6px',
+                            pointerEvents: 'auto'
+                        },
+                        // onMouseEnter: (e) => {
+                        //     if (setForceOpen) {
+                        //         setForceOpen(true);
+                        //     }
+                        // },
+                        // onMouseLeave: (e) => {
+                        //     if (setForceOpen) {
+                        //         setForceOpen(false);
+                        //     }
+                        // },
+                        // sx: {
+                        //     pointerEvents: 'auto'
+                        // }
                     }
                 }}
             >

@@ -6,15 +6,23 @@ import JSONDisplay from './pets/JSONDisplay';
 import CardComponent from './cards/card';
 import { DefaultWeightMap, petNameArray, BonusMap } from './itemMapping';
 
+import { Notifications } from 'react-push-notification';
+
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Weights from "./weights/weights";
 import PetComboList from "./pets/comboList";
 import helper from './util/helper.js';
 import petHelper from './util/petHelper.js';
+import ProteinPage from './farming/Protein.jsx';
+
+import gearIcon from './assets/images/gear_lightgray.svg';
 
 import FarmingLanding from './farming/FarmingLanding.jsx';
 import Header from './header.jsx';
 import useLocalStorage from "use-local-storage";
+
+import ReactGA from "react-ga4";
+
 
 const theme = createTheme({
     palette: {
@@ -40,6 +48,16 @@ let groupCache = {};
 function setGroupCache(newCache) {
     groupCache = newCache;
 }
+
+
+ReactGA.initialize([{
+    trackingId: "G-QT1B9TZS0P",
+    // gaOptions: {...}, // optional
+    gtagOptions: {
+        send_page_view: false
+    },
+}]);
+
 
 function App() {
     const [data, setData] = useState(null);
@@ -102,6 +120,8 @@ function App() {
 
     const selectComponent = () => {
         switch (tabSwitch) {
+            case 7:
+                return <ProteinPage data={data} />
             case 6:
                 return <PageSelection setTab={(num) => setTabSwitch(num)} />
             case 3:
@@ -311,7 +331,7 @@ function App() {
 
     return (
         <ThemeProvider theme={theme}>
-
+            <Notifications />
             <div style={{
                 marginLeft: '0px', marginRight: '0px', maxWidth: '100000px !important',
                 // width: 'calc(100vw - 126px)',
@@ -338,7 +358,7 @@ function App() {
                 </div>
 
                 <div
-                    style={{ display: 'flex', flex: '1' }}
+                    style={{ display: 'flex', flex: '1', maxWidth: '100%', maxHeight: 'calc(100% - 36px)' }}
                 >
                     {/* navigation bar */}
                     <div style={{
@@ -381,22 +401,20 @@ function App() {
                             {/* <div className='importantText' style={{ textAlign: 'center' }}>Farm</div> */}
                         </div>
                         {/* )} */}
-                        {/* {!!data && ( */}
+
                         <div className="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px', pointerEvents: !!data ? '' : 'none', opacity: !!data ? '' : '0.4' }}
                             onClick={() => setTabSwitch(4)}
                         >
                             <img style={{ width: '38px' }} src={`/fapi_fork_personal/badge.svg`} />
                             {/* <div className='importantText' style={{ textAlign: 'center' }}>Cards</div> */}
                         </div>
-                        {/* )} */}
-                        {/* {!!data && (
-                        <div className="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}
-                            onClick={() => setTabSwitch(5)}
+                        <div className="navItem" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px', pointerEvents: !!data ? '' : 'none', opacity: !!data ? '' : '0.4' }}
+                            onClick={() => setTabSwitch(7)}
                         >
-                            <img style={{ width: '38px' }} src={`/fapi_fork_personal/scale.svg`} />
-                            <div style={{ textAlign: 'center' }}>Weight</div>
+                            <img style={{ width: '38px' }} src={gearIcon} />
+                            {/* <div className='importantText' style={{ textAlign: 'center' }}>Protein</div> */}
                         </div>
-                    )} */}
+
                     </div>
                     {/* actual page content */}
                     <div style={{ overflow: 'auto', width: '100%', display: 'flex', flex: 1 }}>

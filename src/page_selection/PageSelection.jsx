@@ -45,7 +45,7 @@ const PageSelection = ({ onData, setTab }) => {
                 >
                     <PageCard page='farm' setTab={setTab} />
                     <PageCard page='cards' setTab={setTab} />
-
+                    <PageCard page='protein' setTab={setTab} />
                 </div>
             </div>
         </div>

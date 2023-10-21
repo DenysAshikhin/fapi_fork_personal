@@ -279,11 +279,11 @@ const JSONDisplay = ({
             className="grid-container"
             style={{
                 gridTemplateColumns: '4fr 4fr 4fr',
-                columnGap: '12px'
+                columnGap: '12px',
+                overflow: 'auto',
             }}
         >
-            <div
-                className="grid-left"
+            <div className="grid-left"
                 style={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -1637,7 +1637,8 @@ const JSONDisplay = ({
                                             <img
                                                 style={{
                                                     maxHeight: '12px',
-                                                    margin: '0 12px 0 auto'
+                                                    margin: '0 12px 0 auto',
+                                                    zIndex: '2'
                                                 }}
                                                 onClick={(e) => {
                                                     setPetWhiteList((curr) => {

@@ -228,7 +228,7 @@ const FarmingPlant = ({ data }) => {
 
             {/* Num Auto */}
             {!fake && useFutureValues && (
-                <div style={{ fontSize: '12px', marginTop: '0px', height: '12px', padding: '0 1px 0 1px', color: 'black', bottom: fake ? '7%' : '7%', left: '1%', display: 'flex', position: 'absolute' }}>
+                <div style={{ fontSize: '12px', marginTop: '0px', height: '12px', padding: '0 1px 0 1px', color: 'black', bottom: fake ? '7%' : '7%', left: '1%', display: 'flex', position: 'absolute',zIndex:'2' }}>
                     <div style={{
                         display: 'flex',
                         alignItems: fake ? '' : 'center',

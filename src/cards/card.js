@@ -904,7 +904,11 @@ const CardCard = ({ vertical, displayMode, data, card, weightMap, i, applyWeight
         }
     }, [resetWeights]);
 
-    const finalWeight = cardWeight === -1 ? cardIDMap[ID].weights[data.AscensionCount] : cardWeight;
+    let defaultWeight = cardIDMap[ID].weights[data.AscensionCount];
+    if (data.AscensionCount >= 15) {
+        defaultWeight /= 2;
+    }
+    const finalWeight = cardWeight === -1 ? defaultWeight : cardWeight;
 
     const permValueBefore = mathHelper.createDecimal(PowerPermaBD);
     const tempValueBefore = mathHelper.createDecimal(PowerTempBD);
@@ -1275,30 +1279,29 @@ export default function CardComponent({ data, weightMap, applyWeights }) {
                 display: 'flex',
                 flex: '1',
                 flexDirection: 'column',
+                paddingLeft: '6px'
             }}
         >
             <div
                 style={{
                     display: 'flex',
-                    width: '100%'
+                    width: '100%',
+                    height: '60px',
+                    marginBottom: '6px'
                 }}>
                 {/* Current Charge */}
                 <div
-                    style={{ display: 'flex', marginBottom: '12px', width: '455px', alignItems: 'center' }}
+                    style={{ display: 'flex', marginBottom: '0px', width: '455px', alignItems: 'center' }}
                 >
                     <div
                         style={{ display: 'flex', alignItems: 'center', fontSize: '48px' }}
                     >
                         {`Current Charges: ` + data?.CurrentCardCharge}
                     </div>
-                    <img src={`/fapi_fork_personal/cards/charge.png`} />
+                    <img style={{ height: '55px' }} src={`/fapi_fork_personal/cards/charge.png`} />
                 </div>
 
                 {/* Charges till Ascencion */}
-
-
-
-
                 <MouseOverPopover tooltip={
 
                     <div>
@@ -1308,14 +1311,14 @@ export default function CardComponent({ data, weightMap, applyWeights }) {
                     opacity={1}
                 >
                     <div
-                        style={{ display: 'flex', marginBottom: '12px', marginleft: '36px', alignItems: 'center' }}
+                        style={{ display: 'flex', marginBottom: '0px', marginleft: '36px', alignItems: 'center', height: '60px' }}
                     >
                         <div
                             style={{ display: 'flex', alignItems: 'center', fontSize: '48px' }}
                         >
                             {`Remaining Charges in ascencion: ${remainingCharges} `}
                         </div>
-                        <img src={`/fapi_fork_personal/cards/charge.png`} />
+                        <img style={{ height: '55px' }} src={`/fapi_fork_personal/cards/charge.png`} />
                         <img style={{ height: '32px', marginLeft: '6px' }} src={infoIcon} />
                     </div>
 
@@ -1469,7 +1472,6 @@ export default function CardComponent({ data, weightMap, applyWeights }) {
                     </div>
                 </div> */}
             </div>
-
         </div >
     );
 }

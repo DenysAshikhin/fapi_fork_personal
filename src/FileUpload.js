@@ -38,6 +38,8 @@ const FileUpload = ({ onData }) => {
         fileReader.readAsArrayBuffer(file);
     };
 
+    const [forceOpen, setForceOpen] = useState(false);
+
     return (
         <div
             // className="FileUpload"
@@ -55,33 +57,45 @@ const FileUpload = ({ onData }) => {
                 position: 'absolute', top: '0', left: '0', width: '100%', height: '100%', zIndex: '1',
                 opacity: '0.3'
             }} />
-            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginTop: 'calc(0px - 50vh)', zIndex: '2' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginTop: 'calc(0px - 50vh)', zIndex: '2' }}
+
+         
+
+            >
 
 
-                <MouseOverPopover tooltip={
-                    <>
-                        <h3 style={{ marginTop: '6px', marginBottom: '12px' }}>Your save file can be found at:</h3>
-                        <div style={{ display: 'flex' }}>
-                            <div
-                                style={{ fontWeight: 'bold', marginRight: '6px' }}>
-                                PC:
+                <MouseOverPopover
+                    forceOpen={forceOpen}
+                    setForceOpen={setForceOpen}
+                    tooltip={
+                        <div
+                        onMouseEnter={(e) => { if (!forceOpen) setForceOpen(true) }}
+                        onMouseLeave={(e) => { if (forceOpen) setForceOpen(false) }}
+                        >
+                            <h3 style={{ marginTop: '6px', marginBottom: '12px' }}>Your save file can be found at:</h3>
+                            <div style={{ display: 'flex' }}>
+                                <div
+                                    style={{ fontWeight: 'bold', marginRight: '6px' }}>
+                                    PC:
+                                </div>
+                                <div>
+                                    %APPDATA%\your_username_here\LocalLow\Oni Gaming\Farmer Against Potatoes Idle\fapi-save.txt
+                                </div>
                             </div>
-                            <div>
-                                %APPDATA%\your_username_here\LocalLow\Oni Gaming\Farmer Against Potatoes Idle\fapi-save.txt
+                            <div style={{ display: 'flex' }}>
+                                <div
+                                    style={{ fontWeight: 'bold', marginRight: '6px' }}>
+                                    Mobile:
+                                </div>
+                                <div>
+                                    /storage/emulated/0/Android/data/com.oninou.FAPI/files/fapi-save.txt
+                                </div>
                             </div>
                         </div>
-                        <div style={{ display: 'flex' }}>
-                            <div
-                                style={{ fontWeight: 'bold', marginRight: '6px' }}>
-                                Mobile:
-                            </div>
-                            <div>
-                                /storage/emulated/0/Android/data/com.oninou.FAPI/files/fapi-save.txt
-                            </div>
-                        </div>
-                    </>
-                }>
+                    }>
                     <div
+                           onMouseEnter={(e) => { if (!forceOpen) setForceOpen(true) }}
+                           onMouseLeave={(e) => { if (forceOpen) setForceOpen(false) }}
                         style={{ display: 'flex', alignItems: 'center' }}>
                         <div className="mediumImportantText blackTextStroke" style={{ margin: '0 0 0 0', fontSize: '60px', fontWeight: 'bold' }}>Upload save file to view calculator</div>
                         <img src={infoIcon} style={{ height: '36px', marginLeft: '6px', marginTop: '6px' }} />

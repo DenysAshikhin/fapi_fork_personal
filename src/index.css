@@ -32,6 +32,14 @@
   opacity: 90%;
 }
 
+.textMedium {
+  font-size: 20px;
+}
+
+.textMedium2 {
+  font-size: 16px;
+}
+
 .mediumImportantText {
   color: #FFFFFF;
   opacity: 85%;
@@ -39,6 +47,9 @@
 
 .blackTextStroke {
   -webkit-text-stroke: 2px black;
+}
+.blackTextStroke1 {
+  -webkit-text-stroke: 0.08rem black;
 }
 
 input[type="file"]::-webkit-file-upload-button {

@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import pako from 'pako';
-import saveFileImg from '../assets/images/fapi_save_file.png'
-import ReactGA from "react-ga4";
-import MouseOverPopover from "../tooltip";
+
+import gearIcon from '../assets/images/gear_lightgray.svg';
 
 
 const PageCard = ({ page, setTab }) => {
 
     let imgString = '';
     let nameString = '';
+    let imgSrc;
     let tabNum = 0;
 
     switch (page) {
@@ -36,18 +35,29 @@ const PageCard = ({ page, setTab }) => {
             nameString = `Cards`;
             tabNum = 4;
             break;
+        case 'protein':
+            // imgString = `badge`;
+            imgSrc = gearIcon;
+            nameString = `Protein`;
+            tabNum = 7;
+            break;
 
         default:
             imgString = `file_upload`;
+
             nameString = `Upload`;
             break;
-
     }
-
+    ///asd
+    let disabled = tabNum === 111;
     return (
         <div
-            className='hover'
-            style={{ height: '148px', width: '150px', marginRight: '48px', borderRadius: '6px', }}
+            className={disabled ? '' : 'hover'}
+            style={{
+                height: '148px', width: '150px', marginRight: '48px', borderRadius: '6px',
+                pointerEvents: disabled ? 'none' : '',
+                opacity: disabled ? '0.3' : '',
+            }}
             onClick={(e) => setTab(tabNum)}
         >
             <div
@@ -55,21 +65,23 @@ const PageCard = ({ page, setTab }) => {
                     height: '80%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255, 0.05)', borderTopRightRadius: '12px', borderTopLeftRadius: '12px',
                     padding: '6px 6px 6px 6px',
                     borderTop: '2px solid rgba(255,255,255,0.8)',
-                    borderLeft:'2px solid rgba(255,255,255,0.8)',
-                    borderRight:'2px solid rgba(255,255,255,0.8)',
+                    borderLeft: '2px solid rgba(255,255,255,0.8)',
+                    borderRight: '2px solid rgba(255,255,255,0.8)',
                 }}
             >
-                <img style={{ maxHeight: '100%' }} src={`/fapi_fork_personal/${imgString}.svg`} />
+                <img style={{ maxHeight: '100%' }} src={imgSrc ? imgSrc : `/fapi_fork_personal/${imgString}.svg`} />
             </div>
 
 
 
             {true && (
                 <div
-                    style={{ height: '20%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255, 0.12)', borderBottomRightRadius: '12px', borderBottomLeftRadius: '12px',
-                    borderBottom: '2px solid rgba(255,255,255,0.8)',
-                    borderLeft:'2px solid rgba(255,255,255,0.8)',
-                    borderRight:'2px solid rgba(255,255,255,0.8)', }}
+                    style={{
+                        height: '20%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255, 0.12)', borderBottomRightRadius: '12px', borderBottomLeftRadius: '12px',
+                        borderBottom: '2px solid rgba(255,255,255,0.8)',
+                        borderLeft: '2px solid rgba(255,255,255,0.8)',
+                        borderRight: '2px solid rgba(255,255,255,0.8)',
+                    }}
                 >
                     <div
                         className="importantText"
@@ -78,7 +90,6 @@ const PageCard = ({ page, setTab }) => {
                             fontSize: '20px'
                         }}
                     >
-
                         {nameString}
                     </div>
                 </div>
