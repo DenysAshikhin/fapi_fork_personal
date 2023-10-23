@@ -509,23 +509,30 @@ var farmingHelper = {
 
             if (modifiers.autoBuyPBC) {
                 let updateCosts = false;
-                if (currPotatoes.greaterThanOrEqualTo(modifiers.nextCosts.prodCost) === true) {
-                    currPotatoes = mathHelper.subtractDecimal(currPotatoes, modifiers.nextCosts.prodCost);
-                    modifiers.shopProdLevel++;
-                    modifiers.shopProdBonus = this.calcShopProdBonus(modifiers, modifiers.shopProdLevel);
-                    updateCosts = true;
-                }
-                if (currPotatoes.greaterThanOrEqualTo(modifiers.nextCosts.growthCost) === true) {
-                    // currPotatoes -= modifiers.nextCosts.growthCost;
-                    currPotatoes = mathHelper.subtractDecimal(currPotatoes, modifiers.nextCosts.growthCost);
-                    modifiers.shopGrowingSpeed++;
-                    updateCosts = true;
-                }
-                if (currPotatoes.greaterThanOrEqualTo(modifiers.nextCosts.expCost) === true) {
-                    currPotatoes = mathHelper.subtractDecimal(currPotatoes, modifiers.nextCosts.expCost);
-                    modifiers.shopRankLevel++;
-                    modifiers.shopRankEXP = 1 + modifiers.shopRankLevel * 0.1;
-                    updateCosts = true;
+                let boughtUpgrade = true;
+                while (boughtUpgrade) {
+                    boughtUpgrade = false;
+                    if (currPotatoes.greaterThanOrEqualTo(modifiers.nextCosts.prodCost) === true) {
+                        currPotatoes = mathHelper.subtractDecimal(currPotatoes, modifiers.nextCosts.prodCost);
+                        modifiers.shopProdLevel++;
+                        modifiers.shopProdBonus = this.calcShopProdBonus(modifiers, modifiers.shopProdLevel);
+                        updateCosts = true;
+                        boughtUpgrade = true;
+                    }
+                    if (currPotatoes.greaterThanOrEqualTo(modifiers.nextCosts.growthCost) === true) {
+                        // currPotatoes -= modifiers.nextCosts.growthCost;
+                        currPotatoes = mathHelper.subtractDecimal(currPotatoes, modifiers.nextCosts.growthCost);
+                        modifiers.shopGrowingSpeed++;
+                        updateCosts = true;
+                        boughtUpgrade = true;
+                    }
+                    if (currPotatoes.greaterThanOrEqualTo(modifiers.nextCosts.expCost) === true) {
+                        currPotatoes = mathHelper.subtractDecimal(currPotatoes, modifiers.nextCosts.expCost);
+                        modifiers.shopRankLevel++;
+                        modifiers.shopRankEXP = 1 + modifiers.shopRankLevel * 0.1;
+                        updateCosts = true;
+                        boughtUpgrade = true;
+                    }
                 }
                 if (updateCosts) {
                     let nextCosts = this.getNextShopCosts(modifiers);

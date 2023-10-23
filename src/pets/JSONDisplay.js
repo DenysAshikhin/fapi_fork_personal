@@ -22,12 +22,17 @@ import petHelper from '../util/petHelper.js';
 
 
 function ScoreSection({ data, group, totalScore, defaultRank }) {
-    const { baseGroupScore, groupScoreMax, dmgCount, timeCount, synergyBonus } = petHelper.calculateGroupScore(group, defaultRank);
+    const { baseGroupScore, groupScoreMax, dmgCount, timeCount, synergyBonus, groupScore } = petHelper.calculateGroupScore(group, defaultRank);
+    const score = groupScore;
+    const displayedDamage = (score * 5 * data.PetDamageBonuses).toExponential(2);
     return (
         <React.Fragment>
             <ul>
-                <li key="totalScore">
+                {/* <li key="totalScore">
                     {`True Damage: ${(5 * groupScoreMax * Number(data?.PetDamageBonuses)).toExponential(2)}`}
+                </li> */}
+                <li key="totalScore">
+                    {`Rank 1 Damage: ${displayedDamage}`}
                 </li>
                 <li key="baseGroupScore">
                     Group Base: {Number(baseGroupScore).toExponential(2)}
@@ -280,7 +285,7 @@ const JSONDisplay = ({
             style={{
                 gridTemplateColumns: '4fr 4fr 4fr',
                 columnGap: '12px',
-                width:'calc(100% - 0px)'
+                width: 'calc(100% - 0px)'
                 // overflow: 'auto',
             }}
         >
@@ -342,6 +347,7 @@ const JSONDisplay = ({
                             let tokenScore = (tempTokenScore.tokenHR / tempTokenScore.hours).toExponential(3);
                             const score = groupTotal.groupScore;
                             const displayedDamage = (score * 5 * data.PetDamageBonuses).toExponential(3);
+                            const trueDamage = (5 * groupTotal.groupScoreMax * Number(data?.PetDamageBonuses)).toExponential(2);
 
                             let tokenInfo = ``;
 
@@ -351,20 +357,23 @@ const JSONDisplay = ({
                             switch (groupRankCritera) {
                                 case 1://damage
                                     groupLabel = `Group ${index + 1}`;
-                                    groupLabelDamage = `Damage: ${displayedDamage}`
+                                    // groupLabelDamage = `Damage: ${displayedDamage}`
+                                    groupLabelDamage = `Damage: ${trueDamage}`
                                     groupLabelToken = `Token/hr: ${tokenScore}`
                                     tokenInfo = petHelper.calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken, data: data }, comboSelector);
 
                                     break;
                                 case 2://token
                                     groupLabel = `Group ${index + 1}`;
-                                    groupLabelDamage = `Damage: ${displayedDamage}`
+                                    // groupLabelDamage = `Damage: ${displayedDamage}`
+                                    groupLabelDamage = `Damage: ${trueDamage}`
                                     groupLabelToken = `Token/hr: ${tokenScore}`
                                     tokenInfo = petHelper.calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken, data: data }, comboSelector);
                                     break;
                                 case 3://Advanced
                                     groupLabel = `Group ${index + 1}`;
-                                    groupLabelDamage = `Damage: ${displayedDamage}`
+                                    // groupLabelDamage = `Damage: ${displayedDamage}`
+                                    groupLabelDamage = `Damage: ${trueDamage}`
                                     groupLabelToken = `Token/hr: ${tokenScore}`
                                     tokenInfo = petHelper.calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken, data: data }, comboSelector);
                                     break;
