@@ -280,85 +280,159 @@ const JSONDisplay = ({
             style={{
                 gridTemplateColumns: '4fr 4fr 4fr',
                 columnGap: '12px',
-                overflow: 'auto',
+                width:'calc(100% - 0px)'
+                // overflow: 'auto',
             }}
         >
-            <div className="grid-left"
+            {/* Grid Left */}
+            <div
                 style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    minWidth: '300px'
-                    // width: '100%'
+                    height: 'calc(100vh - 52px)',
+                    border: '2px solid black',
+                    // borderRadius: '6px',
+                    margin: '6px',
+                    padding: '0px 0 2px 0px'
                 }}
             >
-                <div>
-                    <Typography variant={"h5"} >Best Teams {` || Total tokens/hr: ${helper.roundThreeDecimal(totalTokensHR)} || Total Damage: ${damageTotal.toExponential(3)}`}</Typography>
-                </div>
-
-                {groups.reduce((accum, group, index) => {
-                    let groupLabel = ``;
-
-                    const groupTotal = petHelper.calculateGroupScore(group, defaultRank);
-                    // let tokenScore = groupTotal.tokenMult * (Math.pow(1 + petHelper.SOUL_CLOVER_STEP, data.SoulGoldenClover)) * (1 + 0.05 * data.SoulGoldenClover) * comboSelector;s
-                    // let tokenScore = groupTotal.tokenMult * (Math.pow(1 + petHelper.SOUL_CLOVER_STEP, data.SoulGoldenClover)) * comboSelector * data.ExpeditionTokenBonuses;
-                    // tokenScore = tokenScore.toExponential(3);
-                    let tempTokenScore = petHelper.calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken, data: data }, comboSelector)[tokenSelections[index]]
-                    let tokenScore = (tempTokenScore.tokenHR / tempTokenScore.hours).toExponential(3);
-                    const score = groupTotal.groupScore;
-                    const displayedDamage = (score * 5 * data.PetDamageBonuses).toExponential(3);
-
-                    let tokenInfo = ``;
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        minWidth: '300px',
 
 
-                    switch (groupRankCritera) {
-                        case 1://damage
-                            groupLabel = `Group ${index + 1} Damage: ${displayedDamage} || Token/hr: ${tokenScore}`;
-                            tokenInfo = petHelper.calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken, data: data }, comboSelector);
-                            break;
-                        case 2://token
-                            groupLabel = `Group ${index + 1} Token/hr: ${tokenScore} || Damage: ${displayedDamage}`;
-                            tokenInfo = petHelper.calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken, data: data }, comboSelector);
-                            break;
-                        case 3://Advanced
-                            groupLabel = `Group ${index + 1} Damage: ${displayedDamage}`;
-                            tokenInfo = petHelper.calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken, data: data }, comboSelector);
-                            break;
-                        default:
-                            break;
 
-                    }
+                        // height:'calc(100vh - 52px)',
+                        height: '100%',
 
-                    const totalScore = Number(Number(data?.PetDamageBonuses) * score * 5).toExponential(3);
-                    const groupTooltip = (
-                        <div className="groups-tooltip">
-                            <span className="groups-tooltip-content">
-                                <h3>Group Score ({totalScore})</h3>
-                                <ScoreSection data={data} group={group} totalScore={totalScore} defaultRank={defaultRank} />
-                            </span>
+
+                        // width: '100%'
+                    }}
+                >
+                    <div>
+
+                        <div
+                            style={{ fontSize: '32px', fontWeight: 'bold', width: '100%', borderBottom: '0px solid black' }}>
+                            Best Teams
                         </div>
-                    );
-
-                    let GroupTitle = <div
-                        className="grid-row"
-                        key={(1 + index) * 9001}
-                        style={{
-                            // height: '1px'
-                            // marginTop: '12px',
-                            marginBottom: '6px'
-                        }}
-                    >
-                        <MouseOverPopover tooltip={groupTooltip}>
-                            <div
-                                style={{ display: 'flex', alignItems: 'center' }}
-                            >
-                                {groupLabel}
-                                <img style={{ height: '16px', margin: '-2px 0 0 6px' }} src={infoIcon} />
+                        <div style={{
+                            display: 'flex', fontSize: '20px', fontWeight: 'bold',
+                            borderTop: '2px solid black',
+                            borderBottom: '2px solid black'
+                        }}>
+                            <div style={{ width: '50%', borderRight: '2px solid black' }}>
+                                {`Total Damage: ${damageTotal.toExponential(3)}`}
                             </div>
-                        </MouseOverPopover>
+                            <div style={{ width: '50%' }}>
+                                {`Total tokens/hr: ${helper.roundThreeDecimal(totalTokensHR)}`}
+                            </div>
+                        </div>
+                    </div>
 
-                        {/* {groupRankCritera === 2 && ( */}
-                        {/* best hours */}
-                        {/* <div style={{ display: "flex" }}>
+                    <div style={{ overflow: 'auto' }}>
+
+                        {groups.reduce((accum, group, index) => {
+                            let groupLabel = ``;
+
+                            const groupTotal = petHelper.calculateGroupScore(group, defaultRank);
+                            // let tokenScore = groupTotal.tokenMult * (Math.pow(1 + petHelper.SOUL_CLOVER_STEP, data.SoulGoldenClover)) * (1 + 0.05 * data.SoulGoldenClover) * comboSelector;s
+                            // let tokenScore = groupTotal.tokenMult * (Math.pow(1 + petHelper.SOUL_CLOVER_STEP, data.SoulGoldenClover)) * comboSelector * data.ExpeditionTokenBonuses;
+                            // tokenScore = tokenScore.toExponential(3);
+                            let tempTokenScore = petHelper.calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken, data: data }, comboSelector)[tokenSelections[index]]
+                            let tokenScore = (tempTokenScore.tokenHR / tempTokenScore.hours).toExponential(3);
+                            const score = groupTotal.groupScore;
+                            const displayedDamage = (score * 5 * data.PetDamageBonuses).toExponential(3);
+
+                            let tokenInfo = ``;
+
+                            let groupLabelDamage = ``;
+                            let groupLabelToken = ``;
+
+                            switch (groupRankCritera) {
+                                case 1://damage
+                                    groupLabel = `Group ${index + 1}`;
+                                    groupLabelDamage = `Damage: ${displayedDamage}`
+                                    groupLabelToken = `Token/hr: ${tokenScore}`
+                                    tokenInfo = petHelper.calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken, data: data }, comboSelector);
+
+                                    break;
+                                case 2://token
+                                    groupLabel = `Group ${index + 1}`;
+                                    groupLabelDamage = `Damage: ${displayedDamage}`
+                                    groupLabelToken = `Token/hr: ${tokenScore}`
+                                    tokenInfo = petHelper.calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken, data: data }, comboSelector);
+                                    break;
+                                case 3://Advanced
+                                    groupLabel = `Group ${index + 1}`;
+                                    groupLabelDamage = `Damage: ${displayedDamage}`
+                                    groupLabelToken = `Token/hr: ${tokenScore}`
+                                    tokenInfo = petHelper.calculateBestHours(group, null, { clover: data.SoulGoldenClover, residueToken: data.CowShopExpeditionToken, data: data }, comboSelector);
+                                    break;
+                                default:
+                                    break;
+
+                            }
+
+                            const totalScore = Number(Number(data?.PetDamageBonuses) * score * 5).toExponential(3);
+                            const groupTooltip = (
+                                <div className="groups-tooltip">
+                                    <span className="groups-tooltip-content">
+                                        <h3>Group Score ({totalScore})</h3>
+                                        <ScoreSection data={data} group={group} totalScore={totalScore} defaultRank={defaultRank} />
+                                    </span>
+                                </div>
+                            );
+
+                            let GroupTitle = <div
+                                className="grid-row"
+                                key={(1 + index) * 9001}
+                                style={{
+                                    // height: '1px'
+                                    // marginTop: '12px',
+                                    marginBottom: '6px'
+                                }}
+                            >
+
+                                <div
+                                    style={{ display: 'flex', width: '100%', borderBottom: '1px solid black' }}
+                                >
+                                    <div
+                                        style={{ borderRight: '1px solid black', width: '25%', }}>
+                                        <MouseOverPopover tooltip={groupTooltip}>
+                                            <div
+                                                style={{ display: 'flex', alignItems: 'center', margin: '0 12px', }}
+                                            >
+                                                {groupLabel}
+                                                <img style={{ height: '16px', margin: '0 0 0 6px' }} src={infoIcon} />
+                                            </div>
+                                        </MouseOverPopover>
+                                    </div>
+
+
+                                    <div
+                                        style={{ width: '37.5%', borderRight: '1px solid black', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                    >
+                                        <div style={{ margin: '0 12px' }}>
+
+                                            {groupLabelDamage}
+                                        </div>
+                                    </div>
+                                    <div
+                                        style={{ width: '37.5%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                    >
+                                        <div style={{ margin: '0 12px' }}>
+
+                                            {groupLabelToken}
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+
+                                {/* {groupRankCritera === 2 && ( */}
+                                {/* best hours */}
+                                {/* <div style={{ display: "flex" }}>
                             <div style={{ marginRight: '12px' }}>Best hours:</div>
                             <select
                                 style={{ maxWidth: '312px' }}
@@ -381,348 +455,306 @@ const JSONDisplay = ({
                                 })}
                             </select>
                         </div> */}
-                        {/* )} */}
+                                {/* )} */}
+                            </div>
+
+
+                            let GroupIcons =
+                                <div
+                                    style={{
+                                        display: 'flex', padding: '0 6px 3px 6px'
+                                    }}
+                                >
+                                    {!!group && group.map((petData, idx) => {
+                                        const { ID } = petData;
+                                        let staticPetData = petNameArray.find(staticPetDatum => staticPetDatum.petId === ID)
+
+                                        if (!staticPetData) {
+                                            staticPetData = {
+                                                img: '/fapi_fork_personal/pets/missing.png',
+                                                location: '??-??',
+                                                name: 'Unknown',
+                                                petId: ID
+                                            }
+                                        }
+
+                                        return (
+                                            <div
+                                                style={{
+                                                    position: 'relative',
+                                                    display: 'flex',
+                                                    // flex: '1',
+                                                    width: 'calc(25% - 3px)',
+                                                    height: 'auto',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center'
+                                                }}
+                                            >
+                                                <PetItem
+                                                    key={ID}
+                                                    petData={staticPetData}
+                                                    fullPetData={petData}
+                                                    data={data}
+                                                    isSelected={true}
+                                                    onClick={() => { }}
+                                                    weightMap={weightMap}
+                                                    defaultRank={defaultRank}
+                                                    borderActive={petData.BonusList.find((a) => a.ID === hoveredBonus) || ID === activePet}
+                                                    enabledBonusHighlight={enabledBonusHighlight}
+                                                />
+                                                <div
+                                                    className="hover"
+                                                    style={{
+                                                        position: 'absolute', top: '0', right: '0',
+                                                        // width: '20px',
+                                                        // height: '20px'
+                                                    }}
+                                                    onClick={(e) => {
+
+                                                        setPetWhiteList((curr) => {
+                                                            let temp = [...curr];
+
+                                                            let pet_inner = temp.find((sample_pet) => sample_pet.id === petData.ID);
+                                                            if (!pet_inner) {
+                                                                temp.push({ label: staticPetData.name, id: staticPetData.petId, placement: 'team', parameters: { team: index, damageBias: 17 }, pet: petData });
+                                                            }
+                                                            else {
+                                                                pet_inner.placement = 'team';
+                                                                pet_inner.parameters = { team: index };
+                                                                pet_inner.pet = petData;
+                                                            }
+
+
+                                                            return temp;
+                                                        })
+
+                                                        setRefreshGroups(true);
+                                                        return;
+
+                                                    }}
+                                                >
+
+                                                    <img
+                                                        style={{ width: '20px' }}
+                                                        src={pinIcon} />
+                                                </div>
+                                                <div
+                                                    className="hover"
+                                                    style={{
+                                                        position: 'absolute', bottom: '0', right: '0',
+                                                        // width: '20px',
+                                                        // height: '20px'
+                                                    }}
+                                                    onClick={(e) => {
+
+                                                        setPetWhiteList((curr) => {
+                                                            let temp = [...curr];
+
+                                                            let pet_inner = temp.find((sample_pet) => sample_pet.id === petData.ID);
+                                                            if (!pet_inner) {
+                                                                temp.push({ label: staticPetData.name, id: staticPetData.petId, placement: 'blacklist', parameters: { team: 0, damageBias: 17 }, pet: petData });
+                                                            }
+                                                            else {
+                                                                pet_inner.placement = 'blacklist';
+                                                                pet_inner.parameters = { team: 0 }
+                                                                pet_inner.pet = petData;
+                                                            }
+
+                                                            return temp;
+                                                        })
+
+                                                        setRefreshGroups(true);
+                                                        return;
+
+                                                    }}
+                                                >
+
+                                                    <img
+                                                        style={{ width: '20px' }}
+                                                        src={trashIcon} />
+                                                </div>
+                                            </div>
+
+                                        );
+                                    })}
+                                </div>
+                            let finalRow = <div
+                                key={'group' + index}
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    border: groupRankCritera === 2 && groupTotal.tokenRewardCount > 0 ? '1px black solid' : 'none',
+                                    marginTop: index === 0 ? '12px' : '24px',
+                                    marginLeft: '6px',
+                                    marginRight: '6px',
+                                    border: '1px solid black'
+                                }}>
+                                {GroupTitle}
+                                {GroupIcons}
+                            </div>
+                            accum.push(finalRow);
+
+                            return accum;
+                        }, [])}
                     </div>
-
-
-                    let GroupIcons =
-                        <div
-                            style={{
-                                display: 'flex',
-                            }}
-                        >
-                            {!!group && group.map((petData, idx) => {
-                                const { ID } = petData;
-                                let staticPetData = petNameArray.find(staticPetDatum => staticPetDatum.petId === ID)
-
-                                if (!staticPetData) {
-                                    staticPetData = {
-                                        img: '/fapi_fork_personal/pets/missing.png',
-                                        location: '??-??',
-                                        name: 'Unknown',
-                                        petId: ID
-                                    }
-                                }
-
-                                return (
-                                    <div
-                                        style={{
-                                            position: 'relative',
-                                            display: 'flex',
-                                            flex: '1',
-                                            width: 'auto',
-                                            height: 'auto',
-                                            alignItems: 'center',
-                                            justifyContent: 'center'
-                                        }}
-                                    >
-                                        <PetItem
-                                            key={ID}
-                                            petData={staticPetData}
-                                            fullPetData={petData}
-                                            data={data}
-                                            isSelected={true}
-                                            onClick={() => { }}
-                                            weightMap={weightMap}
-                                            defaultRank={defaultRank}
-                                            borderActive={petData.BonusList.find((a) => a.ID === hoveredBonus) || ID === activePet}
-                                            enabledBonusHighlight={enabledBonusHighlight}
-                                        />
-                                        <div
-                                            className="hover"
-                                            style={{
-                                                position: 'absolute', top: '0', right: '0',
-                                                // width: '20px',
-                                                // height: '20px'
-                                            }}
-                                            onClick={(e) => {
-
-                                                setPetWhiteList((curr) => {
-                                                    let temp = [...curr];
-
-                                                    let pet_inner = temp.find((sample_pet) => sample_pet.id === petData.ID);
-                                                    if (!pet_inner) {
-                                                        temp.push({ label: staticPetData.name, id: staticPetData.petId, placement: 'team', parameters: { team: index, damageBias: 17 }, pet: petData });
-                                                    }
-                                                    else {
-                                                        pet_inner.placement = 'team';
-                                                        pet_inner.parameters = { team: index };
-                                                        pet_inner.pet = petData;
-                                                    }
-
-
-                                                    return temp;
-                                                })
-
-                                                setRefreshGroups(true);
-                                                return;
-
-                                            }}
-                                        >
-
-                                            <img
-                                                style={{ width: '20px' }}
-                                                src={pinIcon} />
-                                        </div>
-                                        <div
-                                            className="hover"
-                                            style={{
-                                                position: 'absolute', bottom: '0', right: '0',
-                                                // width: '20px',
-                                                // height: '20px'
-                                            }}
-                                            onClick={(e) => {
-
-                                                setPetWhiteList((curr) => {
-                                                    let temp = [...curr];
-
-                                                    let pet_inner = temp.find((sample_pet) => sample_pet.id === petData.ID);
-                                                    if (!pet_inner) {
-                                                        temp.push({ label: staticPetData.name, id: staticPetData.petId, placement: 'blacklist', parameters: { team: 0, damageBias: 17 }, pet: petData });
-                                                    }
-                                                    else {
-                                                        pet_inner.placement = 'blacklist';
-                                                        pet_inner.parameters = { team: 0 }
-                                                        pet_inner.pet = petData;
-                                                    }
-
-                                                    return temp;
-                                                })
-
-                                                setRefreshGroups(true);
-                                                return;
-
-                                            }}
-                                        >
-
-                                            <img
-                                                style={{ width: '20px' }}
-                                                src={trashIcon} />
-                                        </div>
-                                    </div>
-
-                                );
-                            })}
-                        </div>
-                    let finalRow = <div
-                        key={'group' + index}
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            border: groupRankCritera === 2 && groupTotal.tokenRewardCount > 0 ? '1px black solid' : 'none'
-                        }}>
-                        {GroupTitle}
-                        {GroupIcons}
-                    </div>
-                    accum.push(finalRow);
-
-                    return accum;
-                }, [])}
+                </div>
             </div>
-            <div className="grid-center"
+
+            <div
                 style={{
-                    border: '1px black solid',
+                    border: '2px black solid',
                     marginRight: '6px',
-                    padding: '0 12px 0 12px'
+                    marginTop: '6px',
+                    maxHeight: 'calc(100vh - 50px)'
+                    // padding: '0 12px 0 12px'
                 }}>
-                <Typography variant={"h4"} >{`If you have a large number of pets, please be patient`}</Typography>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ display: 'flex' }}>
-                        <div
-                            style={{
-                                marginRight: '12px',
-                                color: 'blue',
-                                fontWeight: 'bold'
-                            }}
-                        >Filter</div>
-                        <select
-                            style={{ maxWidth: '144px' }}
-                            disabled={refreshGroups}
-                            onChange={async (e) => {
-
-
-                                ReactGA.event({
-                                    category: "expedition_filter",
-                                    action: 'changed_filter',
-                                    label: 'expedition'
-                                })
-
-                                switch (e.target.value) {
-                                    case 'damage':
-
-                                        ReactGA.event({
-                                            category: "expedition_filter",
-                                            action: 'filter_damage',
-                                            label: 'expedition'
-                                        })
-                                        setGroupRankCriteria(1);
-                                        break;
-                                    case 'token':
-
-                                        ReactGA.event({
-                                            category: "expedition_filter",
-                                            action: 'filter_token',
-                                            label: 'expedition'
-                                        })
-                                        setGroupRankCriteria(2);
-                                        break;
-                                    case 'advanced':
-
-                                        ReactGA.event({
-                                            category: "expedition_filter",
-                                            action: 'filter_advanced',
-                                            label: 'expedition'
-                                        })
-                                        setGroupRankCriteria(3);
-                                        break;
-                                    default:
-                                        throw new Error('invalid dropdown selector');
-                                }
-                            }}
-                            value={groupRankCritera === 1 ? 'damage' : 'token'}
-                        >
-                            <option value="damage">Max Damage</option>
-                            <option value="token">Max Tokens {`->`} Damage</option>
-                            {/* <option value="advanced">Advanced</option> */}
-                        </select>
-                    </div>
-                    <div style={{ display: 'flex' }}>
-
-                        <div>{`Ignore Pets Rank`}</div>
-                        <input
-                            disabled={refreshGroups}
-                            type="checkbox"
-                            onChange={(e) => {
-                                setDefaultRank(e.target.checked ? 1 : 0)
-                            }}
-                            checked={!!defaultRank}
-                            value={!!defaultRank}
-                        />
-                    </div>
-                    <div style={{ display: 'flex' }}>
-                        <div style={{ marginRight: '12px' }}>
-
-                            {`Golden Clover Level: ${data.SoulGoldenClover}`}
-                        </div>
-                        <div>
-
-                            {`Token Bonuses: ${helper.roundTwoDecimal(data.ExpeditionTokenBonuses)}`}
-                        </div>
-                    </div>
-                    <div style={{ display: 'flex', }}>
-
-                        <MouseOverPopover tooltip={
-                            <div>
-                                Expedition reward from active pets special combo (0, 10%, 20%)
-                            </div>
-                        }>
-                            <div style={{ marginRight: '12px' }}>
-                                Expedition Reward Combo
-                            </div>
-                        </MouseOverPopover>
-
-
-
-                        <select
-                            style={{ maxWidth: '144px' }}
-                            disabled={refreshGroups}
-                            onChange={
-                                (e) => {
-                                    setComboSelector(Number(e.target.value))
-                                }
-                            }
-                            defaultValue={comboSelector + ''}
-                        >
-                            <option
-                                value="1">1.0</option>
-                            <option
-                                value="1.1">1.1</option>
-                            <option
-                                value="1.2">1.2</option>
-                        </select>
-
-                    </div>
+                <div style={{ fontSize: '32px', fontWeight: 'bold', width: '100%', borderBottom: '2px solid black' }}>
+                    Configuration
                 </div>
                 <div
-                    style={{
-                        display: 'flex'
-                    }}
+                    style={{ padding: '6px 3px 1px 3px', overflow: 'auto', maxHeight: 'calc(100% - 50px)' }}
                 >
-                    <div
-                        style={{
-                            marginRight: '12px'
-                        }}>
-                        Number of teams:
-                    </div>
-                    <input id='prepFormInput'
-                        type='number'
-                        className='prepNumber'
-                        value={numTeams}
-                        onChange={
-                            (e) => {
-                                try {
-                                    let x = Number(e.target.value);
-                                    x = Math.floor(x);
-                                    if (x < 1 || x > 7) {
-                                        return;
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ display: 'flex' }}>
+                            <div
+                                style={{
+                                    marginRight: '12px',
+                                    color: 'blue',
+                                    fontWeight: 'bold'
+                                }}
+                            >Filter</div>
+                            <select
+                                style={{ maxWidth: '144px' }}
+                                disabled={refreshGroups}
+                                onChange={async (e) => {
+
+
+                                    ReactGA.event({
+                                        category: "expedition_filter",
+                                        action: 'changed_filter',
+                                        label: 'expedition'
+                                    })
+
+                                    switch (e.target.value) {
+                                        case 'damage':
+
+                                            ReactGA.event({
+                                                category: "expedition_filter",
+                                                action: 'filter_damage',
+                                                label: 'expedition'
+                                            })
+                                            setGroupRankCriteria(1);
+                                            break;
+                                        case 'token':
+
+                                            ReactGA.event({
+                                                category: "expedition_filter",
+                                                action: 'filter_token',
+                                                label: 'expedition'
+                                            })
+                                            setGroupRankCriteria(2);
+                                            break;
+                                        case 'advanced':
+
+                                            ReactGA.event({
+                                                category: "expedition_filter",
+                                                action: 'filter_advanced',
+                                                label: 'expedition'
+                                            })
+                                            setGroupRankCriteria(3);
+                                            break;
+                                        default:
+                                            throw new Error('invalid dropdown selector');
                                     }
-                                    setNumTeams(e.target.value);
+                                }}
+                                value={groupRankCritera === 1 ? 'damage' : 'token'}
+                            >
+                                <option value="damage">Max Damage</option>
+                                <option value="token">Max Tokens {`->`} Damage</option>
+                                {/* <option value="advanced">Advanced</option> */}
+                            </select>
+                        </div>
+                        <div style={{ display: 'flex' }}>
+
+                            <div>{`Ignore Pets Rank`}</div>
+                            <input
+                                disabled={refreshGroups}
+                                type="checkbox"
+                                onChange={(e) => {
+                                    setDefaultRank(e.target.checked ? 1 : 0)
+                                }}
+                                checked={!!defaultRank}
+                                value={!!defaultRank}
+                            />
+                        </div>
+                        <div style={{ display: 'flex' }}>
+                            <div style={{ marginRight: '12px' }}>
+
+                                {`Golden Clover Level: ${data.SoulGoldenClover}`}
+                            </div>
+                            <div>
+
+                                {`Token Bonuses: ${helper.roundTwoDecimal(data.ExpeditionTokenBonuses)}`}
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', }}>
+
+                            <MouseOverPopover tooltip={
+                                <div>
+                                    Expedition reward from active pets special combo (0, 10%, 20%)
+                                </div>
+                            }>
+                                <div style={{ marginRight: '12px' }}>
+                                    Expedition Reward Combo
+                                </div>
+                            </MouseOverPopover>
+
+
+
+                            <select
+                                style={{ maxWidth: '144px' }}
+                                disabled={refreshGroups}
+                                onChange={
+                                    (e) => {
+                                        setComboSelector(Number(e.target.value))
+                                    }
                                 }
-                                catch (err) {
-                                    console.log(err);
-                                }
-                                // console.log(`pressed: ${e.target.value}`)
+                                defaultValue={comboSelector + ''}
+                            >
+                                <option
+                                    value="1">1.0</option>
+                                <option
+                                    value="1.1">1.1</option>
+                                <option
+                                    value="1.2">1.2</option>
+                            </select>
 
-                            }}
-                        placeholder={numTeams + ''}
-                        min="1"
-                        max="7"
-                    />
-                </div>
-
-
-                {/* Damage Bias */}
-                {groupRankCritera === 2 && (
+                        </div>
+                    </div>
                     <div
                         style={{
                             display: 'flex'
                         }}
                     >
-                        <MouseOverPopover tooltip={
-                            <div>
-                                <div>
-                                    Importance of token teams' damage priority
-                                </div>
-                                <div>
-                                    Higher value means higher generated damage (by giving higher damage pets to token teams)
-                                </div>
-                                <div>
-                                    Recommended range: 5-40
-                                </div>
-                            </div>
-                        }>
-                            <div
-                                style={{
-                                    marginRight: '12px',
-                                    color: 'red'
-                                }}>
-                                Token Team Damage Bias:
-                            </div>
-                        </MouseOverPopover>
-
+                        <div
+                            style={{
+                                marginRight: '12px'
+                            }}>
+                            Number of teams:
+                        </div>
                         <input id='prepFormInput'
                             type='number'
                             className='prepNumber'
-                            value={tokenDamageBias}
+                            value={numTeams}
                             onChange={
                                 (e) => {
                                     try {
                                         let x = Number(e.target.value);
                                         x = Math.floor(x);
-                                        if (x < 1 || x > 100) {
+                                        if (x < 1 || x > 7) {
                                             return;
                                         }
-                                        setTokenDamageBias(x);
+                                        setNumTeams(e.target.value);
                                     }
                                     catch (err) {
                                         console.log(err);
@@ -730,38 +762,94 @@ const JSONDisplay = ({
                                     // console.log(`pressed: ${e.target.value}`)
 
                                 }}
-                            placeholder={tokenDamageBias + ''}
-                            min="0"
-                            max="100"
-                            step={5}
-
+                            placeholder={numTeams + ''}
+                            min="1"
+                            max="7"
                         />
                     </div>
-                )}
-                {groupRankCritera === 1 && (
-                    <div style={{ display: 'flex', marginTop: '12px' }}>
 
-                        <div>{`Show all bonus totals`}</div>
-                        <input disabled={refreshGroups} type="checkbox" onChange={(e) => {
-                            setShowAllBonusTally(e.target.checked ? true : false)
-                        }} />
-                    </div>
-                )}
-                {/* Advanced filter table */}
-                {groupRankCritera === 1 && (
-                    <div
-                        style={{
-                            margin: '0px 0 12px 0',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            flex: '1',
-                            border: 'black 1px solid',
-                            padding: '6px 6px 6px 6px'
-                        }}
-                    >
 
-                        {/* Bonus headers */}
-                        {/* <div
+                    {/* Damage Bias */}
+                    {groupRankCritera === 2 && (
+                        <div
+                            style={{
+                                display: 'flex'
+                            }}
+                        >
+                            <MouseOverPopover tooltip={
+                                <div>
+                                    <div>
+                                        Importance of token teams' damage priority
+                                    </div>
+                                    <div>
+                                        Higher value means higher generated damage (by giving higher damage pets to token teams)
+                                    </div>
+                                    <div>
+                                        Recommended range: 5-40
+                                    </div>
+                                </div>
+                            }>
+                                <div
+                                    style={{
+                                        marginRight: '12px',
+                                        color: 'red'
+                                    }}>
+                                    Token Team Damage Bias:
+                                </div>
+                            </MouseOverPopover>
+
+                            <input id='prepFormInput'
+                                type='number'
+                                className='prepNumber'
+                                value={tokenDamageBias}
+                                onChange={
+                                    (e) => {
+                                        try {
+                                            let x = Number(e.target.value);
+                                            x = Math.floor(x);
+                                            if (x < 1 || x > 100) {
+                                                return;
+                                            }
+                                            setTokenDamageBias(x);
+                                        }
+                                        catch (err) {
+                                            console.log(err);
+                                        }
+                                        // console.log(`pressed: ${e.target.value}`)
+
+                                    }}
+                                placeholder={tokenDamageBias + ''}
+                                min="0"
+                                max="100"
+                                step={5}
+
+                            />
+                        </div>
+                    )}
+                    {groupRankCritera === 1 && (
+                        <div style={{ display: 'flex', marginTop: '12px' }}>
+
+                            <div>{`Show all bonus totals`}</div>
+                            <input disabled={refreshGroups} type="checkbox" onChange={(e) => {
+                                setShowAllBonusTally(e.target.checked ? true : false)
+                            }} />
+                        </div>
+                    )}
+                    {/* Advanced filter table */}
+                    {groupRankCritera === 1 && (
+                        <div
+                            style={{
+                                margin: '0px 0 12px 0',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                flex: '1',
+                                border: 'black 1px solid',
+                                padding: '6px 6px 6px 6px'
+                            }}
+                        >
+
+                            {/* Bonus headers */}
+                            {/* <div
                             style={{
                                 display: 'flex',
                                 boxShadow: `0 0 0 1px #ecf0f5`,
@@ -862,8 +950,8 @@ const JSONDisplay = ({
                             </div>
                         </div> */}
 
-                        {/* Active bonuses list */}
-                        {/* {activeCustomBonuses.map((e) => {
+                            {/* Active bonuses list */}
+                            {/* {activeCustomBonuses.map((e) => {
 
                             let bonusName = e.label;
                             let currentBonus = activeCustomBonuses.find((a) => a.id === e.id);
@@ -1061,199 +1149,127 @@ const JSONDisplay = ({
 
 
 
-                        {/* Total bonuses pet amounts */}
-                        <div
-                            style={{
-                                margin: '6px 0 6px 0',
-                                display: 'flex',
-                                flexDirection: 'column'
-                            }}>
-                            {totalMessages.map((e, index) => {
-                                if (index % 2 !== 0 && index > 0) return;
+                            {/* Total bonuses pet amounts */}
+                            <div
+                                style={{
+                                    margin: '6px 0 6px 0',
+                                    display: 'flex',
+                                    flexDirection: 'column'
+                                }}>
+                                {totalMessages.map((e, index) => {
+                                    if (index % 2 !== 0 && index > 0) return;
 
-                                let firstDmgBias = Number(e.bonus);
-                                let secondDmgBias = (index + 1) < totalMessages.length ? Number(totalMessages[index + 1].bonus) : null;
+                                    let firstDmgBias = Number(e.bonus);
+                                    let secondDmgBias = (index + 1) < totalMessages.length ? Number(totalMessages[index + 1].bonus) : null;
 
-                                let firstFailMsg = failedFilters[e.bonus];
-                                let secondFailMsg = secondDmgBias ? failedFilters[totalMessages[index + 1].bonus] : null;
+                                    let firstFailMsg = failedFilters[e.bonus];
+                                    let secondFailMsg = secondDmgBias ? failedFilters[totalMessages[index + 1].bonus] : null;
 
-                                if (firstFailMsg) {
-                                    console.log(`aaa`)
-                                }
+                                    if (firstFailMsg) {
+                                        console.log(`aaa`)
+                                    }
 
-                                activeCustomBonuses.forEach((active_bon) => {
-                                    if (active_bon.placement !== 'rel') return null;
-                                    // return;
-                                    if (active_bon.id === firstDmgBias) {
-                                        firstDmgBias = <div
-                                            style={{
-                                                // margin: '6px 0 6px 0',
-                                                display: 'flex'
-                                            }}
-                                        >
-                                            <div
+                                    activeCustomBonuses.forEach((active_bon) => {
+                                        if (active_bon.placement !== 'rel') return null;
+                                        // return;
+                                        if (active_bon.id === firstDmgBias) {
+                                            firstDmgBias = <div
                                                 style={{
-                                                    marginRight: '12px'
+                                                    // margin: '6px 0 6px 0',
+                                                    display: 'flex'
                                                 }}
                                             >
-                                                {`damage bias`}
-                                            </div>
-                                            <input
-                                                type='number'
-                                                className='prepNumber'
-                                                value={active_bon.relThresh}
-                                                onChange={
-                                                    (num) => {
-                                                        try {
-                                                            let x = Number(num.target.value);
-                                                            x = Math.floor(x);
-                                                            if (x < 0 || x > 100) {
-                                                                return;
-                                                            };
-
-                                                            setActiveCustomBonuses((bonuses) => {
-                                                                let newBonuses = [...bonuses];
-                                                                let bonus = newBonuses.find((a) => a.id === active_bon.id);
-                                                                bonus.relThresh = x;
-                                                                return newBonuses;
-                                                            })
-                                                        }
-                                                        catch (err) {
-                                                            console.log(err);
-                                                        }
+                                                <div
+                                                    style={{
+                                                        marginRight: '12px'
                                                     }}
-                                                placeholder={1 + ''}
-                                                min="0"
-                                                max="100"
-                                            />
-                                        </div>
-                                    }
-                                    if (active_bon.id === secondDmgBias) {
-                                        secondDmgBias = <div
-                                            style={{
-                                                // margin: '6px 0 6px 0',
-                                                display: 'flex'
-                                            }}
-                                        >
-                                            <div
+                                                >
+                                                    {`damage bias`}
+                                                </div>
+                                                <input
+                                                    type='number'
+                                                    className='prepNumber'
+                                                    value={active_bon.relThresh}
+                                                    onChange={
+                                                        (num) => {
+                                                            try {
+                                                                let x = Number(num.target.value);
+                                                                x = Math.floor(x);
+                                                                if (x < 0 || x > 100) {
+                                                                    return;
+                                                                };
+
+                                                                setActiveCustomBonuses((bonuses) => {
+                                                                    let newBonuses = [...bonuses];
+                                                                    let bonus = newBonuses.find((a) => a.id === active_bon.id);
+                                                                    bonus.relThresh = x;
+                                                                    return newBonuses;
+                                                                })
+                                                            }
+                                                            catch (err) {
+                                                                console.log(err);
+                                                            }
+                                                        }}
+                                                    placeholder={1 + ''}
+                                                    min="0"
+                                                    max="100"
+                                                />
+                                            </div>
+                                        }
+                                        if (active_bon.id === secondDmgBias) {
+                                            secondDmgBias = <div
                                                 style={{
-                                                    marginRight: '12px'
+                                                    // margin: '6px 0 6px 0',
+                                                    display: 'flex'
                                                 }}
                                             >
-                                                {`damage bias`}
-                                            </div>
-                                            <input
-                                                type='number'
-                                                className='prepNumber'
-                                                value={active_bon.relThresh}
-                                                onChange={
-                                                    (num) => {
-                                                        try {
-                                                            let x = Number(num.target.value);
-                                                            x = Math.floor(x);
-                                                            if (x < 0 || x > 100) {
-                                                                return;
-                                                            };
-
-                                                            setActiveCustomBonuses((bonuses) => {
-                                                                let newBonuses = [...bonuses];
-                                                                let bonus = newBonuses.find((a) => a.id === active_bon.id);
-                                                                bonus.relThresh = x;
-                                                                return newBonuses;
-                                                            })
-                                                        }
-                                                        catch (err) {
-                                                            console.log(err);
-                                                        }
+                                                <div
+                                                    style={{
+                                                        marginRight: '12px'
                                                     }}
-                                                placeholder={1 + ''}
-                                                min="0"
-                                                max="100"
-                                            />
-                                        </div>
-                                    }
-                                })
+                                                >
+                                                    {`damage bias`}
+                                                </div>
+                                                <input
+                                                    type='number'
+                                                    className='prepNumber'
+                                                    value={active_bon.relThresh}
+                                                    onChange={
+                                                        (num) => {
+                                                            try {
+                                                                let x = Number(num.target.value);
+                                                                x = Math.floor(x);
+                                                                if (x < 0 || x > 100) {
+                                                                    return;
+                                                                };
 
-                                return (
-                                    <div
-                                        key={e.bonus}
-                                        style={{
-                                            display: 'flex'
-                                        }}
-                                    >
+                                                                setActiveCustomBonuses((bonuses) => {
+                                                                    let newBonuses = [...bonuses];
+                                                                    let bonus = newBonuses.find((a) => a.id === active_bon.id);
+                                                                    bonus.relThresh = x;
+                                                                    return newBonuses;
+                                                                })
+                                                            }
+                                                            catch (err) {
+                                                                console.log(err);
+                                                            }
+                                                        }}
+                                                    placeholder={1 + ''}
+                                                    min="0"
+                                                    max="100"
+                                                />
+                                            </div>
+                                        }
+                                    })
+
+                                    return (
                                         <div
+                                            key={e.bonus}
                                             style={{
-                                                width: '50%'
+                                                display: 'flex'
                                             }}
                                         >
                                             <div
-                                                style={{
-                                                    // margin: '6px 0 6px 0'
-                                                    // color: helper.bonusColorMap[e.bonus].color
-                                                }}
-                                                onMouseEnter={(e_inner) => {
-                                                    setHoveredBonus(Number(e.bonus))
-                                                }}
-                                                onMouseLeave={(e_inner) => {
-                                                    setHoveredBonus(-1);
-                                                }}
-
-                                            >
-                                                {totalMessages[index].text}
-                                                <div>
-                                                    <div style={{ display: 'flex' }}>
-                                                        <div>{`Enable highlight`}</div>
-                                                        <input
-                                                            type="checkbox"
-                                                            onChange={(e_inner) => {
-                                                                setEnabledBonusHighlight({ ...enabledBonusHighlight, [e.bonus]: e_inner.target.checked ? 1 : 0 })
-                                                            }}
-                                                            checked={enabledBonusHighlight[e.bonus]}
-                                                        />
-                                                        <div
-                                                            style={{
-                                                                width: '24px',
-                                                                background: helper.bonusColorMap[e.bonus].color
-                                                            }}
-                                                        />
-                                                    </div>
-                                                </div>
-                                                <div className="dmgBias">
-                                                    {isNaN(firstDmgBias) &&
-
-
-                                                        <MouseOverPopover tooltip={
-                                                            <div>
-                                                                <div>
-                                                                    How aggressively to slot in these pets
-                                                                </div>
-                                                                <div>
-                                                                    Higher value means these pets need to be stronger to considered, lower means smaller threshold to slot them in
-                                                                </div>
-                                                                <div>
-                                                                    This is based on the best team at each step without these pets, vs with it.
-                                                                </div>
-                                                            </div>
-                                                        }>
-                                                            {firstDmgBias}
-                                                        </MouseOverPopover>
-
-
-
-                                                    }
-                                                </div>
-                                                {!!firstFailMsg &&
-                                                    <div
-                                                        style={{ color: 'red' }}>
-                                                        {firstFailMsg}
-                                                    </div>
-                                                }
-
-                                            </div>
-                                        </div>
-                                        {(index + 1 < totalMessages.length) && (
-                                            <div
-                                                key={totalMessages[index + 1].bonus}
                                                 style={{
                                                     width: '50%'
                                                 }}
@@ -1261,550 +1277,626 @@ const JSONDisplay = ({
                                                 <div
                                                     style={{
                                                         // margin: '6px 0 6px 0'
+                                                        // color: helper.bonusColorMap[e.bonus].color
                                                     }}
                                                     onMouseEnter={(e_inner) => {
-                                                        setHoveredBonus(Number(totalMessages[index + 1].bonus))
+                                                        setHoveredBonus(Number(e.bonus))
                                                     }}
                                                     onMouseLeave={(e_inner) => {
                                                         setHoveredBonus(-1);
                                                     }}
+
                                                 >
-                                                    {totalMessages[index + 1].text}
+                                                    {totalMessages[index].text}
                                                     <div>
                                                         <div style={{ display: 'flex' }}>
                                                             <div>{`Enable highlight`}</div>
                                                             <input
                                                                 type="checkbox"
                                                                 onChange={(e_inner) => {
-                                                                    setEnabledBonusHighlight({ ...enabledBonusHighlight, [totalMessages[index + 1].bonus]: e_inner.target.checked ? 1 : 0 })
+                                                                    setEnabledBonusHighlight({ ...enabledBonusHighlight, [e.bonus]: e_inner.target.checked ? 1 : 0 })
                                                                 }}
-                                                                checked={enabledBonusHighlight[totalMessages[index + 1].bonus]}
+                                                                checked={enabledBonusHighlight[e.bonus]}
                                                             />
                                                             <div
                                                                 style={{
                                                                     width: '24px',
-                                                                    background: helper.bonusColorMap[totalMessages[index + 1].bonus].color
+                                                                    background: helper.bonusColorMap[e.bonus].color
                                                                 }}
                                                             />
                                                         </div>
                                                     </div>
-                                                    <div className='dmgBias'>
+                                                    <div className="dmgBias">
+                                                        {isNaN(firstDmgBias) &&
 
-                                                        {isNaN(secondDmgBias) && secondDmgBias}
+
+                                                            <MouseOverPopover tooltip={
+                                                                <div>
+                                                                    <div>
+                                                                        How aggressively to slot in these pets
+                                                                    </div>
+                                                                    <div>
+                                                                        Higher value means these pets need to be stronger to considered, lower means smaller threshold to slot them in
+                                                                    </div>
+                                                                    <div>
+                                                                        This is based on the best team at each step without these pets, vs with it.
+                                                                    </div>
+                                                                </div>
+                                                            }>
+                                                                {firstDmgBias}
+                                                            </MouseOverPopover>
+
+
+
+                                                        }
                                                     </div>
-                                                    {!!secondFailMsg &&
+                                                    {!!firstFailMsg &&
                                                         <div
                                                             style={{ color: 'red' }}>
-                                                            {secondFailMsg}
+                                                            {firstFailMsg}
                                                         </div>
                                                     }
+
                                                 </div>
                                             </div>
-                                        )}
-                                    </div>
-                                )
+                                            {(index + 1 < totalMessages.length) && (
+                                                <div
+                                                    key={totalMessages[index + 1].bonus}
+                                                    style={{
+                                                        width: '50%'
+                                                    }}
+                                                >
+                                                    <div
+                                                        style={{
+                                                            // margin: '6px 0 6px 0'
+                                                        }}
+                                                        onMouseEnter={(e_inner) => {
+                                                            setHoveredBonus(Number(totalMessages[index + 1].bonus))
+                                                        }}
+                                                        onMouseLeave={(e_inner) => {
+                                                            setHoveredBonus(-1);
+                                                        }}
+                                                    >
+                                                        {totalMessages[index + 1].text}
+                                                        <div>
+                                                            <div style={{ display: 'flex' }}>
+                                                                <div>{`Enable highlight`}</div>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    onChange={(e_inner) => {
+                                                                        setEnabledBonusHighlight({ ...enabledBonusHighlight, [totalMessages[index + 1].bonus]: e_inner.target.checked ? 1 : 0 })
+                                                                    }}
+                                                                    checked={enabledBonusHighlight[totalMessages[index + 1].bonus]}
+                                                                />
+                                                                <div
+                                                                    style={{
+                                                                        width: '24px',
+                                                                        background: helper.bonusColorMap[totalMessages[index + 1].bonus].color
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div className='dmgBias'>
+
+                                                            {isNaN(secondDmgBias) && secondDmgBias}
+                                                        </div>
+                                                        {!!secondFailMsg &&
+                                                            <div
+                                                                style={{ color: 'red' }}>
+                                                                {secondFailMsg}
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )
 
 
-                            })}
-                        </div>
-                        <h4 style={{ margin: '0' }}>Pet Whitelist</h4>
-                        {/* Pet whitelist stuff */}
-                        <div style={{ margin: '0 0 0 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '36px' }}>
-                            <SearchBox data={{
-                                list: filterablePets
-                            }}
-                                onSelect={(e) => {
-                                    setPetWhiteList((curr) => {
-                                        let temp = [...curr];
-                                        let petObj = originalPets.find((search_pet) => search_pet.ID === e.id)
-                                        temp.push({ ...e, placement: 'blacklist', parameters: { team: 0, damageBias: 17 }, pet: petObj });
-                                        return temp;
-                                    })
-                                    setRefreshGroups(true);
+                                })}
+                            </div>
+                            <h4 style={{ margin: '0' }}>Pet Whitelist</h4>
+                            {/* Pet whitelist stuff */}
+                            <div style={{ margin: '0 0 0 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '36px' }}>
+                                <SearchBox data={{
+                                    list: filterablePets
                                 }}
-                            />
-                            <div
-                                style={{ display: 'flex' }}
-                            >
+                                    onSelect={(e) => {
+                                        setPetWhiteList((curr) => {
+                                            let temp = [...curr];
+                                            let petObj = originalPets.find((search_pet) => search_pet.ID === e.id)
+                                            temp.push({ ...e, placement: 'blacklist', parameters: { team: 0, damageBias: 17 }, pet: petObj });
+                                            return temp;
+                                        })
+                                        setRefreshGroups(true);
+                                    }}
+                                />
                                 <div
-                                    style={{ marginRight: '6px' }}
+                                    style={{ display: 'flex' }}
                                 >
-                                    Team Presets
-                                </div>
-                                <select
-                                    style={{ maxWidth: '144px', }}
-                                    onChange={
-                                        (e) => {
+                                    <div
+                                        style={{ marginRight: '6px' }}
+                                    >
+                                        Team Presets
+                                    </div>
+                                    <select
+                                        style={{ maxWidth: '144px', }}
+                                        onChange={
+                                            (e) => {
 
-                                            let selectedTeam = data.PetsLoadout[Number(e.target.value)]
-                                            console.log(selectedTeam);
+                                                let selectedTeam = data.PetsLoadout[Number(e.target.value)]
+                                                console.log(selectedTeam);
 
-                                            setPetWhiteList((curr) => {
-                                                let temp = [...curr];
-                                                // temp.push({ ...e, placement: 'blacklist', parameters: { team: 0, damageBias: 17 } });
+                                                setPetWhiteList((curr) => {
+                                                    let temp = [...curr];
+                                                    // temp.push({ ...e, placement: 'blacklist', parameters: { team: 0, damageBias: 17 } });
 
-                                                for (let x = 0; x < selectedTeam.IDs.length; x++) {
-                                                    let selected = selectedTeam.IDs[x];
-                                                    if (selected > 0) {
-                                                        let base = { id: selected, label: petNames[selected].name, placement: 'rel', parameters: { team: 0, damageBias: 17 } }
-                                                        if (!temp.find((inner_find) => inner_find.id === base.id)) {
-                                                            temp.push(base);
+                                                    for (let x = 0; x < selectedTeam.IDs.length; x++) {
+                                                        let selected = selectedTeam.IDs[x];
+                                                        if (selected > 0) {
+                                                            let base = { id: selected, label: petNames[selected].name, placement: 'rel', parameters: { team: 0, damageBias: 17 } }
+                                                            if (!temp.find((inner_find) => inner_find.id === base.id)) {
+                                                                temp.push(base);
+                                                            }
                                                         }
                                                     }
-                                                }
-                                                return temp;
-                                            })
-                                            setRefreshGroups(true);
+                                                    return temp;
+                                                })
+                                                setRefreshGroups(true);
 
+                                            }
                                         }
-                                    }
-                                    value={''}
-                                >
-                                    {
-                                        [<option value='' selected>Select Team</option>, ...data.PetsLoadout.map((cur, index) => {
+                                        value={''}
+                                    >
+                                        {
+                                            [<option value='' selected>Select Team</option>, ...data.PetsLoadout.map((cur, index) => {
 
-                                            if (cur.Locked === 0) return;
+                                                if (cur.Locked === 0) return;
 
-                                            return (
-                                                <option
-                                                    value={index}>{cur.Name}</option>
-                                            )
-                                        })]
-                                    }
-                                </select>
+                                                return (
+                                                    <option
+                                                        value={index}>{cur.Name}</option>
+                                                )
+                                            })]
+                                        }
+                                    </select>
+                                </div>
                             </div>
-                        </div>
-                        {/* Pet white/black list */}
-                        <div
-                            style={{
-                                display: 'flex',
-                                boxShadow: `0 0 0 1px #ecf0f5`,
-                                backgroundColor: '#fbfafc',
-                                margin: '12px 1px 0 1px'
-                            }}
-                        >
+                            {/* Pet white/black list */}
                             <div
                                 style={{
-                                    // background: 'red',
-                                    width: '40%',
-                                    display: 'flex',
-                                    // boxShadow: `0 2px 1px -1px #ecf0f5`,
-                                    // boxShadow: `0 0 0 1px #ecf0f5`,
-                                    backgroundColor: '#fbfafc',
-                                    justifyContent: 'center',
-                                    alignItems: 'center'
-                                }}
-                            >
-                                Pet
-                            </div>
-
-                            {/* placement */}
-                            <div
-                                style={{
-                                    // background: 'yellow',
-                                    width: '30%',
                                     display: 'flex',
                                     boxShadow: `0 0 0 1px #ecf0f5`,
                                     backgroundColor: '#fbfafc',
-                                    justifyContent: 'center',
-                                    alignItems: 'center'
+                                    margin: '12px 1px 0 1px'
                                 }}
                             >
-                                <MouseOverPopover tooltip={
-                                    <div style={{ padding: '6px' }}>
-                                        <div>
-                                            Determines the order in which the pets are slotted in:
-                                        </div>
-                                        <div>
-                                            Blacklist: Omits this pet from any group
-                                        </div>
-                                        <div>
-                                            Group: Forces the pet to go into a certain group
-                                        </div>
-                                        <div>
-                                            Relative: Tries to find optimal placement automatically based on `damage bias`
-                                        </div>
-                                    </div>
-                                }>
-                                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                                        <div>
-                                            Placement
-                                        </div>
-                                        <img style={{ height: '16px', marginLeft: '6px' }} src={infoIcon} />
-                                    </div>
-                                </MouseOverPopover>
+                                <div
+                                    style={{
+                                        // background: 'red',
+                                        width: '40%',
+                                        display: 'flex',
+                                        // boxShadow: `0 2px 1px -1px #ecf0f5`,
+                                        // boxShadow: `0 0 0 1px #ecf0f5`,
+                                        backgroundColor: '#fbfafc',
+                                        justifyContent: 'center',
+                                        alignItems: 'center'
+                                    }}
+                                >
+                                    Pet
+                                </div>
 
-                            </div>
-                            {/* Parameters */}
-                            <div
-                                style={{
-                                    // background: 'blue',
-                                    width: '30%',
-                                    display: 'flex',
-                                    // boxShadow: `0 0 0 1px #ecf0f5`,
-                                    justifyContent: 'center',
-                                    alignItems: 'center'
-                                }}
-                            >
-                                <MouseOverPopover tooltip={
-                                    <div style={{ padding: '6px' }}>
-                                        <div>
+                                {/* placement */}
+                                <div
+                                    style={{
+                                        // background: 'yellow',
+                                        width: '30%',
+                                        display: 'flex',
+                                        boxShadow: `0 0 0 1px #ecf0f5`,
+                                        backgroundColor: '#fbfafc',
+                                        justifyContent: 'center',
+                                        alignItems: 'center'
+                                    }}
+                                >
+                                    <MouseOverPopover tooltip={
+                                        <div style={{ padding: '6px' }}>
                                             <div>
-                                                In Placement=Group, determines which group the pet is placed in
+                                                Determines the order in which the pets are slotted in:
                                             </div>
                                             <div>
-                                                In Placement=Relative, determines which group the pet is placed in based on the bias number (higher means more damage necessary to placed in)
+                                                Blacklist: Omits this pet from any group
+                                            </div>
+                                            <div>
+                                                Group: Forces the pet to go into a certain group
+                                            </div>
+                                            <div>
+                                                Relative: Tries to find optimal placement automatically based on `damage bias`
                                             </div>
                                         </div>
-                                    </div>
-                                }>
-
-                                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                                        <div>
-                                            Parameters
+                                    }>
+                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                            <div>
+                                                Placement
+                                            </div>
+                                            <img style={{ height: '16px', marginLeft: '6px' }} src={infoIcon} />
                                         </div>
-                                        <img style={{ height: '16px', marginLeft: '6px' }} src={infoIcon} />
-                                    </div>
-                                </MouseOverPopover>
+                                    </MouseOverPopover>
+
+                                </div>
+                                {/* Parameters */}
+                                <div
+                                    style={{
+                                        // background: 'blue',
+                                        width: '30%',
+                                        display: 'flex',
+                                        // boxShadow: `0 0 0 1px #ecf0f5`,
+                                        justifyContent: 'center',
+                                        alignItems: 'center'
+                                    }}
+                                >
+                                    <MouseOverPopover tooltip={
+                                        <div style={{ padding: '6px' }}>
+                                            <div>
+                                                <div>
+                                                    In Placement=Group, determines which group the pet is placed in
+                                                </div>
+                                                <div>
+                                                    In Placement=Relative, determines which group the pet is placed in based on the bias number (higher means more damage necessary to placed in)
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }>
+
+                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                            <div>
+                                                Parameters
+                                            </div>
+                                            <img style={{ height: '16px', marginLeft: '6px' }} src={infoIcon} />
+                                        </div>
+                                    </MouseOverPopover>
+                                </div>
                             </div>
-                        </div>
-                        <div style={{ margin: '0 1px 0 1px', boxShadow: `0 0 0 1px #ecf0f5`, }}>
-                            {petWhiteList.map((pet, index) => {
-                                let petLabel = pet.label;
-                                let petGroup = ``
-                                if (pet.id in relWhiteListMap) {
-                                    // petLabel += ` (Group: ${relWhiteListMap[pet.id].finalGroup + 1})`
-                                    petGroup += `(Group: ${relWhiteListMap[pet.id].finalGroup + 1})`
-                                }
-
-                                let showRed = false;//Too high
-                                let showGreen = false;// Too low
-                                let hoverMsg = ``;
-
-                                //Check whether this pet is placed too low or too high
-                                if (pet.placement !== `blacklist`) {
-                                    let bigsad = -1;//
-
-                                    let group_index = groups.findIndex((temp_e) => {
-                                        return temp_e.find((temp_e2) => temp_e2.ID === pet.id)
-                                    });
-
-                                    if (group_index > -1) {
-
-                                        //Check if this pet got put in too high
-
-                                        let group = groups[group_index];
-
-                                        try {
-                                            //Can only check if not on bottom
-                                            if (group_index !== (groups.length - 1)) {
-                                                //By default only need to check twice (2gnd or 2air)
-                                                const maxChecks = 2;
-                                                let originalGroupScore = petHelper.calculateGroupScore(group, defaultRank).groupScore;
-                                                let tempGroup = [];
-                                                let triedPets = {};
-
-                                                for (let i = 0; i < maxChecks; i++) {//
-                                                    let foundNew = false;
-
-                                                    for (let j = 0; j < groups[group_index + 1].length; j++) {
-
-                                                        let temp_pet = groups[group_index + 1][j];
-                                                        if (temp_pet.Type === pet.pet.Type) {
-                                                            let bigsad = -1;
-                                                            if (!(temp_pet.ID in triedPets) && !foundNew) {
-                                                                triedPets[temp_pet.ID] = true;
-                                                                foundNew = true;
-                                                                tempGroup = [...group];
-                                                                let ind = tempGroup.findIndex((temp_repl) => temp_repl.ID === pet.pet.ID)
-                                                                tempGroup[ind] = temp_pet;
-                                                            }
-                                                        }
-                                                    }
-
-                                                    let newGroupScore = petHelper.calculateGroupScore(tempGroup, defaultRank).groupScore;
-
-                                                    if (newGroupScore > originalGroupScore) {
-                                                        showRed = true;
-                                                        hoverMsg = `${petLabel} might be too high, try ${pet.placement === 'rel' ? `increase` : `lowering`} the value to drop them to a lower team`
-                                                    }
-                                                    tempGroup = [];
-                                                }
-                                            }
-                                        }
-                                        catch (err) {
-                                            let temppp = group_index;
-                                            console.log(err);
-                                        }
-                                        try {
-                                            //If they are not too high, check if they are too low (except for team 1)
-                                            if (!showRed && group_index > 0) {
-                                                //By default only need to check twice (2gnd or 2air)
-                                                const maxChecks = 2;
-                                                let originalGroupScore = petHelper.calculateGroupScore(groups[group_index - 1], defaultRank).groupScore;
-                                                let tempGroup = [];
-                                                let triedPets = {};
-
-                                                for (let i = 0; i < maxChecks; i++) {//
-                                                    let foundNew = false;
-
-                                                    for (let j = 0; j < groups[group_index - 1].length; j++) {
-
-                                                        let temp_pet = groups[group_index - 1][j];
-                                                        if (temp_pet.Type === pet.pet.Type) {
-                                                            let bigsad = -1;
-                                                            if (!(temp_pet.ID in triedPets) && !foundNew) {
-                                                                triedPets[temp_pet.ID] = true;
-                                                                foundNew = true;
-                                                                tempGroup = [...groups[group_index - 1]];
-                                                                let ind = tempGroup.findIndex((temp_repl) => temp_repl.ID === temp_pet.ID)
-                                                                tempGroup[ind] = pet.pet;
-                                                            }
-                                                        }
-                                                    }
-
-                                                    let newGroupScore = petHelper.calculateGroupScore(tempGroup, defaultRank).groupScore;
-
-                                                    if (newGroupScore > originalGroupScore) {
-                                                        showGreen = true;
-                                                        hoverMsg = ` ${petLabel} might be too low, try ${pet.placement === 'rel' ? `lowering` : `increasing`} the value to bump them to a higher team`
-                                                    }
-                                                    tempGroup = [];
-                                                }
-                                            }
-                                        }
-                                        catch (err) {
-                                            let tempy = group_index;
-                                            console.log(err);
-                                        }
-                                    }
-                                    //Has a nan placement -> suggest decreasing the rel value
-                                    else {
-                                        hoverMsg = `Try lowering this value until ${petLabel} is put in`;
-                                        showGreen = true;
+                            <div style={{ margin: '0 1px 0 1px', boxShadow: `0 0 0 1px #ecf0f5`, }}>
+                                {petWhiteList.map((pet, index) => {
+                                    let petLabel = pet.label;
+                                    let petGroup = ``
+                                    if (pet.id in relWhiteListMap) {
+                                        // petLabel += ` (Group: ${relWhiteListMap[pet.id].finalGroup + 1})`
+                                        petGroup += `(Group: ${relWhiteListMap[pet.id].finalGroup + 1})`
                                     }
 
-                                }
+                                    let showRed = false;//Too high
+                                    let showGreen = false;// Too low
+                                    let hoverMsg = ``;
+
+                                    //Check whether this pet is placed too low or too high
+                                    if (pet.placement !== `blacklist`) {
+                                        let bigsad = -1;//
+
+                                        let group_index = groups.findIndex((temp_e) => {
+                                            return temp_e.find((temp_e2) => temp_e2.ID === pet.id)
+                                        });
+
+                                        if (group_index > -1) {
+
+                                            //Check if this pet got put in too high
+
+                                            let group = groups[group_index];
+
+                                            try {
+                                                //Can only check if not on bottom
+                                                if (group_index !== (groups.length - 1)) {
+                                                    //By default only need to check twice (2gnd or 2air)
+                                                    const maxChecks = 2;
+                                                    let originalGroupScore = petHelper.calculateGroupScore(group, defaultRank).groupScore;
+                                                    let tempGroup = [];
+                                                    let triedPets = {};
+
+                                                    for (let i = 0; i < maxChecks; i++) {//
+                                                        let foundNew = false;
+
+                                                        for (let j = 0; j < groups[group_index + 1].length; j++) {
+
+                                                            let temp_pet = groups[group_index + 1][j];
+                                                            if (temp_pet.Type === pet.pet.Type) {
+                                                                let bigsad = -1;
+                                                                if (!(temp_pet.ID in triedPets) && !foundNew) {
+                                                                    triedPets[temp_pet.ID] = true;
+                                                                    foundNew = true;
+                                                                    tempGroup = [...group];
+                                                                    let ind = tempGroup.findIndex((temp_repl) => temp_repl.ID === pet.pet.ID)
+                                                                    tempGroup[ind] = temp_pet;
+                                                                }
+                                                            }
+                                                        }
+
+                                                        let newGroupScore = petHelper.calculateGroupScore(tempGroup, defaultRank).groupScore;
+
+                                                        if (newGroupScore > originalGroupScore) {
+                                                            showRed = true;
+                                                            hoverMsg = `${petLabel} might be too high, try ${pet.placement === 'rel' ? `increase` : `lowering`} the value to drop them to a lower team`
+                                                        }
+                                                        tempGroup = [];
+                                                    }
+                                                }
+                                            }
+                                            catch (err) {
+                                                let temppp = group_index;
+                                                console.log(err);
+                                            }
+                                            try {
+                                                //If they are not too high, check if they are too low (except for team 1)
+                                                if (!showRed && group_index > 0) {
+                                                    //By default only need to check twice (2gnd or 2air)
+                                                    const maxChecks = 2;
+                                                    let originalGroupScore = petHelper.calculateGroupScore(groups[group_index - 1], defaultRank).groupScore;
+                                                    let tempGroup = [];
+                                                    let triedPets = {};
+
+                                                    for (let i = 0; i < maxChecks; i++) {//
+                                                        let foundNew = false;
+
+                                                        for (let j = 0; j < groups[group_index - 1].length; j++) {
+
+                                                            let temp_pet = groups[group_index - 1][j];
+                                                            if (temp_pet.Type === pet.pet.Type) {
+                                                                let bigsad = -1;
+                                                                if (!(temp_pet.ID in triedPets) && !foundNew) {
+                                                                    triedPets[temp_pet.ID] = true;
+                                                                    foundNew = true;
+                                                                    tempGroup = [...groups[group_index - 1]];
+                                                                    let ind = tempGroup.findIndex((temp_repl) => temp_repl.ID === temp_pet.ID)
+                                                                    tempGroup[ind] = pet.pet;
+                                                                }
+                                                            }
+                                                        }
+
+                                                        let newGroupScore = petHelper.calculateGroupScore(tempGroup, defaultRank).groupScore;
+
+                                                        if (newGroupScore > originalGroupScore) {
+                                                            showGreen = true;
+                                                            hoverMsg = ` ${petLabel} might be too low, try ${pet.placement === 'rel' ? `lowering` : `increasing`} the value to bump them to a higher team`
+                                                        }
+                                                        tempGroup = [];
+                                                    }
+                                                }
+                                            }
+                                            catch (err) {
+                                                let tempy = group_index;
+                                                console.log(err);
+                                            }
+                                        }
+                                        //Has a nan placement -> suggest decreasing the rel value
+                                        else {
+                                            hoverMsg = `Try lowering this value until ${petLabel} is put in`;
+                                            showGreen = true;
+                                        }
+
+                                    }
 
 
-                                return (
-                                    <div
-                                        key={pet.label}
-                                        style={{
-                                            boxShadow: `0 2px 1px -1px #ecf0f5`,
-                                            display: 'flex',
-                                            width: '100%'
-                                        }}
-                                    >
-                                        {/* Pet name + delete */}
-                                        <div style={{
-                                            width: 'calc(40% - 1px)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
-                                            boxShadow: `2px 0 2px -1px #ecf0f5`
-                                        }}
-                                            onMouseEnter={() => {
-                                                setActivePet(pet.id)
-                                            }}
-                                            onMouseLeave={() => {
-                                                setActivePet(-1);
+                                    return (
+                                        <div
+                                            key={pet.label}
+                                            style={{
+                                                boxShadow: `0 2px 1px -1px #ecf0f5`,
+                                                display: 'flex',
+                                                width: '100%'
                                             }}
                                         >
-                                            <div
-                                                style={{
-                                                    position: 'absolute',
-                                                    width: '100%',
-                                                    display: 'flex',
-                                                    justifyContent: 'space-between',
-                                                    // alignContent: 'space-between',
-                                                    zIndex: '1'
+                                            {/* Pet name + delete */}
+                                            <div style={{
+                                                width: 'calc(40% - 1px)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
+                                                boxShadow: `2px 0 2px -1px #ecf0f5`
+                                            }}
+                                                onMouseEnter={() => {
+                                                    setActivePet(pet.id)
                                                 }}
-
+                                                onMouseLeave={() => {
+                                                    setActivePet(-1);
+                                                }}
                                             >
                                                 <div
                                                     style={{
-                                                        marginLeft: '6px'
+                                                        position: 'absolute',
+                                                        width: '100%',
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between',
+                                                        // alignContent: 'space-between',
+                                                        zIndex: '1'
                                                     }}
-                                                >
-                                                    {petLabel}
-                                                </div>
-                                                <div
-                                                    style={{
-                                                        marginRight: '34px'
-                                                    }}
-                                                >
-                                                    {petGroup}
-                                                </div>
-                                            </div>
-                                            <img
-                                                style={{
-                                                    maxHeight: '12px',
-                                                    margin: '0 12px 0 auto',
-                                                    zIndex: '2'
-                                                }}
-                                                onClick={(e) => {
-                                                    setPetWhiteList((curr) => {
-                                                        let temp = [...curr];
-                                                        temp = temp.filter((inner_pet) => {
-                                                            return inner_pet.id !== pet.id
-                                                        });
-                                                        return temp;
-                                                    })
-                                                    setRefreshGroups(true);
-                                                }}
-                                                src={xIcon}
-                                            />
-                                        </div>
-                                        {/* Pet Placement */}
-                                        <div style={{ width: 'calc(30% + 1px)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `2px 0 2px -1px #ecf0f5`, }}>
 
-                                            <select
-                                                style={{ maxWidth: '144px' }}
-                                                value={pet.placement}
-                                                onChange={
-                                                    (choice) => {
-                                                        console.log(choice);
+                                                >
+                                                    <div
+                                                        style={{
+                                                            marginLeft: '6px'
+                                                        }}
+                                                    >
+                                                        {petLabel}
+                                                    </div>
+                                                    <div
+                                                        style={{
+                                                            marginRight: '34px'
+                                                        }}
+                                                    >
+                                                        {petGroup}
+                                                    </div>
+                                                </div>
+                                                <img
+                                                    style={{
+                                                        maxHeight: '12px',
+                                                        margin: '0 12px 0 auto',
+                                                        zIndex: '2'
+                                                    }}
+                                                    onClick={(e) => {
                                                         setPetWhiteList((curr) => {
                                                             let temp = [...curr];
-                                                            let tempPet = temp.find((inner_pet) => inner_pet.id === pet.id);
-                                                            tempPet.placement = choice.target.value;
+                                                            temp = temp.filter((inner_pet) => {
+                                                                return inner_pet.id !== pet.id
+                                                            });
                                                             return temp;
                                                         })
                                                         setRefreshGroups(true);
-                                                    }
-                                                }
-                                            >
-                                                <option value={'blacklist'}>Blacklist</option>
-                                                <option value={'team'}>Group</option>
-                                                <option value={`rel`}>Relative</option>
-                                            </select>
+                                                    }}
+                                                    src={xIcon}
+                                                />
+                                            </div>
+                                            {/* Pet Placement */}
+                                            <div style={{ width: 'calc(30% + 1px)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `2px 0 2px -1px #ecf0f5`, }}>
 
-                                        </div>
-                                        {/* parameters */}
-                                        <div
-                                            disabled={pet.placement === 'blacklist'}
-                                            style={{ width: '30%', opacity: pet.placement === 'blacklist' ? '0.4' : '', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-                                        >
-                                            {pet.placement === 'team' && (
-                                                <div>
-                                                    <select
-                                                        style={{ maxWidth: '144px' }}
-                                                        value={pet.parameters.team}
-                                                        onChange={
-                                                            (choice) => {
-                                                                setPetWhiteList((curr) => {
-                                                                    let temp = [...curr];
-                                                                    let tempPet = temp.find((inner_pet) => inner_pet.id === pet.id);
-                                                                    tempPet.parameters.team = Number(choice.target.value);
-                                                                    return temp;
-                                                                })
-                                                                setRefreshGroups(true);
-                                                            }
+                                                <select
+                                                    style={{ maxWidth: '144px' }}
+                                                    value={pet.placement}
+                                                    onChange={
+                                                        (choice) => {
+                                                            console.log(choice);
+                                                            setPetWhiteList((curr) => {
+                                                                let temp = [...curr];
+                                                                let tempPet = temp.find((inner_pet) => inner_pet.id === pet.id);
+                                                                tempPet.placement = choice.target.value;
+                                                                return temp;
+                                                            })
+                                                            setRefreshGroups(true);
                                                         }
-                                                    >
-                                                        {Array(numTeams).fill(numTeams).map((e, index) => {
-                                                            return <option value={index}>{index + 1}</option>
-                                                        })}
-
-
-                                                    </select>
-
-                                                </div>
-                                            )}
-                                            {pet.placement === `rel` && (
-                                                <div
-
+                                                    }
                                                 >
-                                                    <input
-                                                        style={{ maxWidth: '36px' }}
-                                                        type='number'
-                                                        // className='prepNumber'
-                                                        value={pet.parameters.damageBias}
-                                                        onChange={
-                                                            (e) => {
-                                                                try {
-                                                                    let x = Number(e.target.value);
-                                                                    x = Math.floor(x);
-                                                                    if (x < 0 || x > 100) {
-                                                                        return;
-                                                                    }
+                                                    <option value={'blacklist'}>Blacklist</option>
+                                                    <option value={'team'}>Group</option>
+                                                    <option value={`rel`}>Relative</option>
+                                                </select>
 
+                                            </div>
+                                            {/* parameters */}
+                                            <div
+                                                disabled={pet.placement === 'blacklist'}
+                                                style={{
+                                                    width: '30%',
+                                                    position: 'relative',
+                                                    opacity: pet.placement === 'blacklist' ? '0.4' : '', display: 'flex', justifyContent: 'center', alignItems: 'center'
+                                                }}
+                                            >
+                                                {pet.placement === 'team' && (
+                                                    <div>
+                                                        <select
+                                                            style={{ maxWidth: '144px' }}
+                                                            value={pet.parameters.team}
+                                                            onChange={
+                                                                (choice) => {
                                                                     setPetWhiteList((curr) => {
                                                                         let temp = [...curr];
                                                                         let tempPet = temp.find((inner_pet) => inner_pet.id === pet.id);
-                                                                        tempPet.parameters.damageBias = Number(x);
+                                                                        tempPet.parameters.team = Number(choice.target.value);
                                                                         return temp;
                                                                     })
                                                                     setRefreshGroups(true);
                                                                 }
-                                                                catch (err) {
-                                                                    console.log(err);
-                                                                }
-                                                            }}
-                                                        placeholder={pet.parameters.damageBias + ''}
-                                                        min="0"
-                                                        max="100"
-                                                    />
-                                                </div>
-                                            )}
-                                            {pet.placement === 'blacklist' && (
-                                                <>Unavailable</>
-                                            )}
-                                            {(showGreen || showRed) && (
+                                                            }
+                                                        >
+                                                            {Array(numTeams).fill(numTeams).map((e, index) => {
+                                                                return <option value={index}>{index + 1}</option>
+                                                            })}
 
-                                                <MouseOverPopover muiHeight={'18px'} tooltip={<div>{hoverMsg}</div>} style={{ display: 'flex', alignItems: 'center', height: '18px' }}>
-                                                    <img style={{ height: '18px', marginLeft: '6px', marginTop: '2px' }} src={showGreen ? infoIconGreen : infoIconRed} />
-                                                </MouseOverPopover>
 
-                                            )}
+                                                        </select>
+
+                                                    </div>
+                                                )}
+                                                {pet.placement === `rel` && (
+                                                    <div
+
+                                                    >
+                                                        <input
+                                                            style={{ maxWidth: '36px' }}
+                                                            type='number'
+                                                            // className='prepNumber'
+                                                            value={pet.parameters.damageBias}
+                                                            onChange={
+                                                                (e) => {
+                                                                    try {
+                                                                        let x = Number(e.target.value);
+                                                                        x = Math.floor(x);
+                                                                        if (x < 0 || x > 100) {
+                                                                            return;
+                                                                        }
+
+                                                                        setPetWhiteList((curr) => {
+                                                                            let temp = [...curr];
+                                                                            let tempPet = temp.find((inner_pet) => inner_pet.id === pet.id);
+                                                                            tempPet.parameters.damageBias = Number(x);
+                                                                            return temp;
+                                                                        })
+                                                                        setRefreshGroups(true);
+                                                                    }
+                                                                    catch (err) {
+                                                                        console.log(err);
+                                                                    }
+                                                                }}
+                                                            placeholder={pet.parameters.damageBias + ''}
+                                                            min="0"
+                                                            max="100"
+                                                        />
+                                                    </div>
+                                                )}
+                                                {pet.placement === 'blacklist' && (
+                                                    <>Unavailable</>
+                                                )}
+                                                {(showGreen || showRed) && (
+                                                    <div style={{ position: 'absolute', right: '34px' }}>
+                                                        <MouseOverPopover muiHeight={'18px'} tooltip={<div>{hoverMsg}</div>} style={{ display: 'flex', alignItems: 'center', height: '18px' }}>
+                                                            <img style={{ height: '18px', marginLeft: '6px', marginTop: '2px' }} src={showGreen ? infoIconGreen : infoIconRed} />
+                                                        </MouseOverPopover>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
-
-
-                        {/* Alerting overall impossible filters combinations */}
-                        {failedFilters['generic'] && (
-                            <div
-                                style={{ fontWeight: 'bold', color: 'red', display: 'flex', width: '100%', justifyContent: 'center' }}
-
-                            >
-                                {failedFilters['generic']}
+                                    )
+                                })}
                             </div>
-                        )}
 
-                        {/* left over pets */}
-                        {(
-                            <div
-                                style={{ display: 'flex', width: '100%', marginTop: '12px', flexDirection: 'column' }}
-                            >
-                                {/* Title */}
+
+                            {/* Alerting overall impossible filters combinations */}
+                            {failedFilters['generic'] && (
                                 <div
-                                    style={{ display: 'flex', width: '100%' }}
-                                >
-                                    <h4 style={{ margin: '0' }}> Leftover Pets</h4>
+                                    style={{ fontWeight: 'bold', color: 'red', display: 'flex', width: '100%', justifyContent: 'center' }}
 
+                                >
+                                    {failedFilters['generic']}
                                 </div>
+                            )}
 
-                                {/* Table */}
+                            {/* left over pets */}
+                            {(
                                 <div
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        margin: '6px 0 0 0',
-                                        // paddingLeft: '6px'
-                                    }}
+                                    style={{ display: 'flex', width: '100%', marginTop: '12px', flexDirection: 'column' }}
                                 >
+                                    {/* Title */}
+                                    <div
+                                        style={{ display: 'flex', width: '100%' }}
+                                    >
+                                        <h4 style={{ margin: '0' }}> Leftover Pets</h4>
 
+                                    </div>
+
+                                    {/* Table */}
                                     <div
                                         style={{
-                                            // margin: '6px 12px 0 12px'
-                                            marginRight: '6px'
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            margin: '6px 0 0 0',
+                                            // paddingLeft: '6px'
                                         }}
                                     >
-                                        Select Bonus:
-                                    </div>
 
-                                    {/* <select
+                                        <div
+                                            style={{
+                                                // margin: '6px 12px 0 12px'
+                                                marginRight: '6px'
+                                            }}
+                                        >
+                                            Select Bonus:
+                                        </div>
+
+                                        {/* <select
                                         style={{ maxWidth: '144px' }}
                                         disabled={refreshGroups}
                                         onChange={
@@ -1821,190 +1913,202 @@ const JSONDisplay = ({
                                             })
                                         }
                                     </select> */}
-                                    <SearchBox
-                                        updateBox={true}
-                                        placeholder='Enter a bonus'
-                                        data={{
-                                            list: filterableBonuses
-                                        }}
-                                        onSelect={(e) => {
-                                            console.log(e);
-                                            setLeftOverBonus1(Number(e.id));
-                                        }}
-                                    />
-                                </div>
-
-                                {/* Headers */}
-                                <div
-                                    style={{
-                                        display: 'flex',
-                                        boxShadow: `0 0 0 1px #ecf0f5`,
-                                        backgroundColor: '#fbfafc',
-                                        margin: '6px 1px 0 1px'
-                                    }}
-                                >
-                                    <div
-                                        style={{
-                                            // background: 'red',
-                                            width: '70%',
-                                            display: 'flex',
-                                            // boxShadow: `0 2px 1px -1px #ecf0f5`,
-                                            // boxShadow: `0 0 0 1px #ecf0f5`,
-                                            backgroundColor: '#fbfafc',
-                                            justifyContent: 'center',
-                                            alignItems: 'center'
-                                        }}
-                                    >
-                                        Pet
+                                        <SearchBox
+                                            updateBox={true}
+                                            placeholder='Enter a bonus'
+                                            data={{
+                                                list: filterableBonuses
+                                            }}
+                                            onSelect={(e) => {
+                                                console.log(e);
+                                                setLeftOverBonus1(Number(e.id));
+                                            }}
+                                        />
                                     </div>
 
-                                    {/* placement */}
+                                    {/* Headers */}
                                     <div
                                         style={{
-                                            // background: 'yellow',
-                                            width: '30%',
                                             display: 'flex',
                                             boxShadow: `0 0 0 1px #ecf0f5`,
                                             backgroundColor: '#fbfafc',
-                                            justifyContent: 'center',
-                                            alignItems: 'center'
+                                            margin: '6px 1px 0 1px'
                                         }}
                                     >
-                                        <MouseOverPopover tooltip={
-                                            <div style={{ padding: '6px' }}>
-                                                <div>The pet's damage </div>
-                                            </div>
-                                        }>
-                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                <div>
-                                                    Damage
+                                        <div
+                                            style={{
+                                                // background: 'red',
+                                                width: '70%',
+                                                display: 'flex',
+                                                // boxShadow: `0 2px 1px -1px #ecf0f5`,
+                                                // boxShadow: `0 0 0 1px #ecf0f5`,
+                                                backgroundColor: '#fbfafc',
+                                                justifyContent: 'center',
+                                                alignItems: 'center'
+                                            }}
+                                        >
+                                            Pet
+                                        </div>
+
+                                        {/* placement */}
+                                        <div
+                                            style={{
+                                                // background: 'yellow',
+                                                width: '30%',
+                                                display: 'flex',
+                                                boxShadow: `0 0 0 1px #ecf0f5`,
+                                                backgroundColor: '#fbfafc',
+                                                justifyContent: 'center',
+                                                alignItems: 'center'
+                                            }}
+                                        >
+                                            <MouseOverPopover tooltip={
+                                                <div style={{ padding: '6px' }}>
+                                                    <div>The pet's damage </div>
                                                 </div>
-                                                {/* <img style={{ height: '16px', marginLeft: '6px' }} src={infoIcon} /> */}
-                                            </div>
-                                        </MouseOverPopover>
+                                            }>
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <div>
+                                                        Damage
+                                                    </div>
+                                                    {/* <img style={{ height: '16px', marginLeft: '6px' }} src={infoIcon} /> */}
+                                                </div>
+                                            </MouseOverPopover>
+                                        </div>
+
                                     </div>
+                                    {/* Pets */}
+                                    <div style={{ margin: '0 1px 0 1px', boxShadow: `0 0 0 1px #ecf0f5`, }}>
+                                        {leftOver1Pets.map((pet) => {
+                                            let staticPetData = petNameArray.find(staticPetDatum => staticPetDatum.petId === pet.ID)
 
-                                </div>
-                                {/* Pets */}
-                                <div style={{ margin: '0 1px 0 1px', boxShadow: `0 0 0 1px #ecf0f5`, }}>
-                                    {leftOver1Pets.map((pet) => {
-                                        let staticPetData = petNameArray.find(staticPetDatum => staticPetDatum.petId === pet.ID)
-
-                                        if (!staticPetData) {
-                                            staticPetData = {
-                                                img: '/fapi_fork_personal/pets/missing.png',
-                                                location: '??-??',
-                                                name: 'Unknown',
-                                                petId: pet.ID
+                                            if (!staticPetData) {
+                                                staticPetData = {
+                                                    img: '/fapi_fork_personal/pets/missing.png',
+                                                    location: '??-??',
+                                                    name: 'Unknown',
+                                                    petId: pet.ID
+                                                }
                                             }
-                                        }
-                                        return (
-                                            <div
-                                                key={pet.label}
-                                                style={{
-                                                    boxShadow: `0 2px 1px -1px #ecf0f5`,
-                                                    display: 'flex',
-                                                    width: '100%'
-                                                }}
-                                            >
-                                                {/* Pet name + pin */}
-                                                <div style={{
-                                                    width: 'calc(70% - 1px)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
-                                                    boxShadow: `2px 0 2px -1px #ecf0f5`
-                                                }}
+                                            return (
+                                                <div
+                                                    key={pet.label}
+                                                    style={{
+                                                        boxShadow: `0 2px 1px -1px #ecf0f5`,
+                                                        display: 'flex',
+                                                        width: '100%'
+                                                    }}
                                                 >
-                                                    <div
-                                                        style={{
-                                                            // position: 'absolute',
-                                                            width: '100%',
-                                                            display: 'flex',
-                                                            flex: '1',
-                                                            justifyContent: 'space-between',
-                                                            // alignContent: 'space-between',
-                                                            // zIndex: '-1'
-                                                        }}
-
+                                                    {/* Pet name + pin */}
+                                                    <div style={{
+                                                        width: 'calc(70% - 1px)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
+                                                        boxShadow: `2px 0 2px -1px #ecf0f5`
+                                                    }}
                                                     >
                                                         <div
                                                             style={{
-                                                                marginLeft: '6px',
-                                                                width: '100%'
-                                                            }}
-                                                        >
-                                                            {/* {petNames[pet.ID].name} */}
-                                                            <PetItem
-                                                                showNameOnly={true}
-                                                                grayBackground={pet.equipped}
-                                                                key={pet.ID}
-                                                                petData={staticPetData}
-                                                                fullPetData={pet}
-                                                                data={data}
-                                                                onClick={() => { }}
-                                                                weightMap={weightMap}
-                                                                defaultRank={defaultRank}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    {/* Pin icon */}
-                                                    {!pet.whitelisted && (
-                                                        <div
-                                                            style={{
-                                                                height: '100%',
-                                                                width: '24px',
+                                                                // position: 'absolute',
+                                                                width: '100%',
                                                                 display: 'flex',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'center'
+                                                                flex: '1',
+                                                                justifyContent: 'space-between',
+                                                                // alignContent: 'space-between',
+                                                                // zIndex: '-1'
                                                             }}
+
                                                         >
-                                                            <img
+                                                            <div
                                                                 style={{
-                                                                    maxHeight: '12px',
-
+                                                                    marginLeft: '6px',
+                                                                    width: '100%'
                                                                 }}
-                                                                onClick={(e) => {
-                                                                    setPetWhiteList((curr) => {
-                                                                        let temp = [...curr];
-
-                                                                        let pet_inner = temp.find((sample_pet) => sample_pet.id === pet.ID);
-                                                                        if (!pet_inner) {
-                                                                            temp.push({ label: petNames[pet.ID].name, id: pet.ID, placement: 'rel', parameters: { team: 0, damageBias: 17 } });
-                                                                        }
-                                                                        else {
-                                                                            throw new Error(`should not have an existing pet in this list!`)
-                                                                        }
-                                                                        return temp;
-                                                                    })
-
-                                                                    setRefreshGroups(true);
-                                                                    return;
-
-                                                                }}
-                                                                src={pinIcon}
-                                                            />
+                                                            >
+                                                                {/* {petNames[pet.ID].name} */}
+                                                                <PetItem
+                                                                    showNameOnly={true}
+                                                                    grayBackground={pet.equipped}
+                                                                    key={pet.ID}
+                                                                    petData={staticPetData}
+                                                                    fullPetData={pet}
+                                                                    data={data}
+                                                                    onClick={() => { }}
+                                                                    weightMap={weightMap}
+                                                                    defaultRank={defaultRank}
+                                                                />
+                                                            </div>
                                                         </div>
-                                                    )}
+                                                        {/* Pin icon */}
+                                                        {!pet.whitelisted && (
+                                                            <div
+                                                                style={{
+                                                                    height: '100%',
+                                                                    width: '24px',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center'
+                                                                }}
+                                                            >
+                                                                <img
+                                                                    style={{
+                                                                        maxHeight: '12px',
+
+                                                                    }}
+                                                                    onClick={(e) => {
+                                                                        setPetWhiteList((curr) => {
+                                                                            let temp = [...curr];
+
+                                                                            let pet_inner = temp.find((sample_pet) => sample_pet.id === pet.ID);
+                                                                            if (!pet_inner) {
+                                                                                temp.push({ label: petNames[pet.ID].name, id: pet.ID, placement: 'rel', parameters: { team: 0, damageBias: 17 } });
+                                                                            }
+                                                                            else {
+                                                                                throw new Error(`should not have an existing pet in this list!`)
+                                                                            }
+                                                                            return temp;
+                                                                        })
+
+                                                                        setRefreshGroups(true);
+                                                                        return;
+
+                                                                    }}
+                                                                    src={pinIcon}
+                                                                />
+                                                            </div>
+                                                        )}
+
+                                                    </div>
+                                                    {/* Pet Damage */}
+                                                    <div style={{ width: 'calc(30% + 1px)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `2px 0 2px -1px #ecf0f5`, }}>
+                                                        {helper.roundTwoDecimal(petHelper.calculatePetBaseDamage(pet, defaultRank))}
+                                                    </div>
 
                                                 </div>
-                                                {/* Pet Damage */}
-                                                <div style={{ width: 'calc(30% + 1px)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `2px 0 2px -1px #ecf0f5`, }}>
-                                                    {helper.roundTwoDecimal(petHelper.calculatePetBaseDamage(pet, defaultRank))}
-                                                </div>
-
-                                            </div>
-                                        )
-                                    })}
+                                            )
+                                        })}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-                    </div>
-                )}
+                            )}
+                        </div>
+                    )}
+                </div>
+
             </div>
-            <div className="grid-right">
-                <div style={{ display: 'flex' }}>
-                    <Typography variant={"h5"} style={{ marginRight: '12px', fontSize: '22px' }}>Click a pet to enable/disable</Typography>
+            <div
+                style={{ border: '2px solid black', marginTop: '6px', marginRight: '6px', maxHeight: 'calc(100vh - 50px)' }}
+            >
+                <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '6px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', width: '100%', borderBottom: '2px solid black' }}>
+                        <div style={{ fontWeight: 'bold', fontSize: '30px' }}>
+                            Pets
+                        </div>
+                        <div style={{ fontWeight: 'bold', alignSelf: 'end', marginLeft: '6px', marginBottom: '5px', fontSize: '16px' }}>
+                            (click to enable/disable)
+                        </div>
+                    </div>
                     <div style={{ display: 'flex' }}>
-                        <button
-                            onClick={(e) => {
+
+                        <div className='hover' style={{ width: '100%', borderBottom: '2px solid black', display: 'flex', backgroundColor: 'rgba(255,255,255,0.6)' }}>
+                            <div style={{ width: '25%', borderRight: '2px solid black', display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '1px' }} onClick={(e) => {
                                 ReactGA.event({
                                     category: "expedition_pets",
                                     action: 'enabled_all',
@@ -2018,49 +2122,56 @@ const JSONDisplay = ({
                                     handleItemSelected(petArr);
                                 }
 
-                            }}
-                        >Enable All</button>
-                        <button
-                            onClick={(e) => {
-                                ReactGA.event({
-                                    category: "expedition_pets",
-                                    action: 'disabled_all',
-                                    label: 'expedition'
-                                })
-                                if (data.PetsCollection) {
-                                    handleItemSelected([]);
-                                }
-
-                            }}
-                        >Disable All</button>
-                        <button
-                            onClick={(e) => {
-                                ReactGA.event({
-                                    category: "expedition_pets",
-                                    action: 'reset_all',
-                                    label: 'expedition'
-                                })
-                                if (data.PetsCollection) {
-                                    let petArr = [];
-                                    for (let i = 0; i < originalPets.length; i++) {
-                                        petArr.push(originalPets[i].ID)
+                            }}>
+                                Enable All
+                            </div>
+                            <div className='hover' style={{ width: '25%', borderRight: '2px solid black', display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '1px' }}
+                                onClick={(e) => {
+                                    ReactGA.event({
+                                        category: "expedition_pets",
+                                        action: 'disabled_all',
+                                        label: 'expedition'
+                                    })
+                                    if (data.PetsCollection) {
+                                        handleItemSelected([]);
                                     }
-                                    handleItemSelected(petArr);
-                                }
 
-                            }}
-                        >Reset</button>
-                        <button
-                            onClick={(e) => {
-                                ReactGA.event({
-                                    category: "expedition_pets",
-                                    action: 'toggle_hide_locked',
-                                    label: hideLocked ? 'show_locked' : 'hide_locked',
-                                    value: hideLocked
-                                })
-                                setHideLocked(!hideLocked);
-                            }}
-                        >{hideLocked ? `Show Locked` : `Hide Locked`}</button>
+                                }}>
+                                Disable All
+                            </div>
+                            <div className='hover' style={{ width: '25%', borderRight: '2px solid black', display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '1px' }}
+                                onClick={(e) => {
+                                    ReactGA.event({
+                                        category: "expedition_pets",
+                                        action: 'reset_all',
+                                        label: 'expedition'
+                                    })
+                                    if (data.PetsCollection) {
+                                        let petArr = [];
+                                        for (let i = 0; i < originalPets.length; i++) {
+                                            petArr.push(originalPets[i].ID)
+                                        }
+                                        handleItemSelected(petArr);
+                                    }
+
+                                }}>
+                                Reset
+                            </div>
+                            <div className='hover' style={{ width: '25%', display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '1px' }}
+                                onClick={(e) => {
+                                    ReactGA.event({
+                                        category: "expedition_pets",
+                                        action: 'toggle_hide_locked',
+                                        label: hideLocked ? 'show_locked' : 'hide_locked',
+                                        value: hideLocked
+                                    })
+                                    setHideLocked(!hideLocked);
+                                }}
+                            >
+                                {hideLocked ? `Show Locked` : `Hide Locked`}
+                            </div>
+                        </div>
+
                     </div>
                 </div>
                 <ItemSelection

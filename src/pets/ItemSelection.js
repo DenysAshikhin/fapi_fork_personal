@@ -3,7 +3,7 @@ import './ItemSelection.css';
 import { petNameArray } from '../itemMapping';
 import PetItem from './PetItem';
 
-const ItemSelection = ({ selectedItems, onItemSelected, data, weightMap, defaultRank, showLocked }) => {
+const ItemSelection = ({ selectedItems, onItemSelected, data, weightMap, defaultRank, showLocked, }) => {
     const isSelected = (petId) => {
         return selectedItems.includes(petId);
     };
@@ -87,7 +87,7 @@ const ItemSelection = ({ selectedItems, onItemSelected, data, weightMap, default
 
 
     return (
-        <div className="item-selection">
+        <div className="item-selection" style={{ overflowY: 'auto', maxHeight: 'calc(100% - 66px)', }}>
             {newPetArray.map(
                 (petData) => {
                     const { petId } = petData;
@@ -95,9 +95,8 @@ const ItemSelection = ({ selectedItems, onItemSelected, data, weightMap, default
 
                     return (
                         <div
-                            style={{ display: "flex", alignItems: 'center', justifyContent: 'center' }}
+                            style={{ display: "flex", alignItems: 'center', justifyContent: 'center', margin:'0 3px'}}
                         >
-
                             <PetItem
                                 key={petId}
                                 petData={petData}
@@ -106,6 +105,8 @@ const ItemSelection = ({ selectedItems, onItemSelected, data, weightMap, default
                                 onClick={() => handleItemClick(petId)}
                                 weightMap={weightMap}
                                 defaultRank={defaultRank}
+
+                                circleBorder={true}
                             />
                         </div>
                     );

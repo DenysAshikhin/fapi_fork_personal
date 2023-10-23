@@ -3,7 +3,7 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { petNameArray } from "../itemMapping";
+import { petNameArray, BonusMap, petNames } from "../itemMapping";
 import { StaticPetItem } from './PetItem';
 import ReactGA from "react-ga4";
 
@@ -199,12 +199,146 @@ function PetComboDisplay({ petCombos, unlockedPets, petMap }) {
         </Accordion >
     );
 }
+
+function populatePets(data, parameters) {
+    let petList = {};
+    let petBonusMap = {};
+
+    let groundAllowed = parameters.ground;
+    let airAllowed = parameters.air;
+    let bannedPets = parameters.banned;
+
+
+    for (let i = 0; i < data.PetsCollection.length; i++) {
+        let pet = data.PetsCollection[i];
+        if (pet.Locked === 0) {
+            continue;
+        }
+        else if (!groundAllowed && pet.Type === 1) {
+            continue;
+        }
+        else if (!airAllowed && pet.Type === 2) {
+            continue;
+        }
+        else if (bannedPets[pet.ID]) {
+            continue;
+        }
+
+        petList[pet.ID] = pet;
+        pet.BonusList.forEach((e) => {
+            if (!petBonusMap[e.ID]) {
+                petBonusMap[e.ID] = {};
+            }
+            petBonusMap[e.ID][pet.ID] = pet;
+        })
+    }
+    return { petList, petBonusMap };
+}
+
+function calcCurrentBonuses(groundPets, airPets) {
+    let currentBonuses = {};
+    for (let i = 0; i < groundPets.length; i++) {
+        let pet = groundPets[i];
+        pet.BonusList.forEach((e) => {
+            if (!currentBonuses[e.ID]) {
+                currentBonuses[e.ID] = { ...e, count: 0 };
+            }
+            currentBonuses[e.ID].count++;
+        })
+    }
+    for (let i = 0; i < airPets.length; i++) {
+        let pet = airPets[i];
+        pet.BonusList.forEach((e) => {
+            if (!currentBonuses[e.ID]) {
+                currentBonuses[e.ID] = { ...e, count: 0 };
+            }
+            currentBonuses[e.ID].count++;
+        })
+    }
+    return currentBonuses;
+}
+
+function findBestTeam(data, parameters) {
+
+    let res;
+    let petList = {};
+    let petBonusMap = {};
+    let currentBonuses = {};
+    let bannedPets = {};
+
+    let groundPets = [];
+    const groundLimit = data.SlotGround;
+    let airPets = [];
+    const airLimit = data.SlotAir;
+
+    res = populatePets(data, { ground: groundPets.length < groundLimit, air: airPets.length < airLimit, banned: bannedPets });
+    petList = res.petList;
+    petBonusMap = res.petBonusMap;
+    currentBonuses = calcCurrentBonuses(groundPets, airPets);
+
+    while ((groundPets.length < groundLimit || airPets.length < airLimit) && Object.values(petList).length > 0) {
+
+        let pets = [];
+
+
+        for (const [ID, value] of Object.entries(petList)) {
+            let pet = { ...value, score: 0 };
+            pet.BonusList.forEach((e) => {
+                if (!currentBonuses[e.ID]) {
+                    pet.score++;
+                }
+            });
+            pets.push(pet);
+        }
+        pets.sort((a, b) => b.score - a.score);
+        let bestPet = pets[0];
+        bestPet.name = petNames[bestPet.ID].name;
+        console.log(`adding: ${bestPet.name}`);
+        if (bestPet.Type === 1) {
+            groundPets.push(bestPet);
+        }
+        else {
+            airPets.push(bestPet);
+        }
+        bannedPets[bestPet.ID] = bestPet;
+
+        res = populatePets(data, { ground: groundPets.length < groundLimit, air: airPets.length < airLimit, banned: bannedPets });
+        petList = res.petList;
+        petBonusMap = res.petBonusMap;
+        currentBonuses = calcCurrentBonuses(groundPets, airPets);
+    }
+
+    let bigsad = -1;
+
+
+    let stringy = ``;
+    for (let i = 0; i < groundPets.length; i++) {
+        stringy += `${groundPets[i].name}, `
+    }
+    console.log(`ground pets: ${stringy}`)
+    stringy = ``;
+    for (let i = 0; i < airPets.length; i++) {
+        stringy += `${airPets[i].name}, `
+    }
+    console.log(`air pets: ${stringy}`);
+
+    let numBonuses = 0;
+    for (const [key, value] of Object.entries(currentBonuses)) {
+        numBonuses++;
+        value.label = BonusMap[key].label;
+    }
+
+    console.log(`number of bonuses: ${numBonuses}`);
+}
+
+
 export default function PetComboList({ data }) {
 
     useEffect(() => {
         ReactGA.send({ hitType: "pageview", page: "/pet_combos", title: "Pet Combos Page" });
     }, [])
 
+    findBestTeam(data, {});
 
     const comboList = data.PetsSpecial;
     const comboByBonusId = comboList.reduce((accum, combo, i) => {

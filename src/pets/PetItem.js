@@ -10,7 +10,7 @@ const filterBonuses = (bonuses, filterFn) => {
         .filter(filterFn);
 };
 
-const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, defaultRank, borderActive, enabledBonusHighlight, fullPetData, showNameOnly, grayBackground }) => {
+const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, defaultRank, borderActive, enabledBonusHighlight, fullPetData, showNameOnly, grayBackground, circleBorder }) => {
     if (!!data === false) return <div></div>;
     const { petId, location, img, name } = petData;
 
@@ -84,6 +84,23 @@ const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, de
         }
     }
 
+    const scalingOverrides = {
+        'Niord': '65px',
+        'Cocorico': '63px',
+        'Apollo': '60px',
+        'Abby': '60px'
+    }
+
+    let maxDimension = '';
+    if (circleBorder) {
+        if (scalingOverrides[name]) {
+            maxDimension = scalingOverrides[name];
+        }
+        else {
+            maxDimension = '75px';
+        }
+    }
+
     return (
 
         <MouseOverPopover
@@ -118,42 +135,67 @@ const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, de
                 </div>
             }>
             {!showNameOnly && (
-                <div
-                    key={petId}
-                    onClick={onClick}
-                    style={{ display: 'flex' }}
-                    className={`item-tile${pet.Type === 1 ? '-ground ' : '-air '} ${isSelected ? '' : 'unselected'}`}
-                // className={`item-tile ${isSelected ? '' : 'unselected'}`}
-                >
+                <div style={
+                    circleBorder ? {
+                        borderRadius: '45px',
+                        border: '2px solid black',
+                        overflow: 'hidden',
+                        // position: 'relative',
+                        width: '80px',
+                        height: '80px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }
+                        : {}}>
                     <div
-                        className="item-image-container"
+                        key={petId}
+                        onClick={onClick}
                         style={{
-                            border: borderActive ? 'black 1px solid' : '',
-                            position: 'relative',
-                            display: 'flex'
-                        }}>
-                        {numHighlights.map((item, index) => {
-                            return (<div
-                                style={{
-                                    background: helper.bonusColorMap[item].color,
-                                    position: 'absolute',
-                                    top: '0%',
-                                    left: `${(100 / numHighlights.length) * index}%`,
-                                    height: '100%',
-                                    width: `${100 / numHighlights.length}%`,
-                                    zIndex: 1
-                                }}
-                            >
-
-                            </div>)
-                        })}
-                        {/* <div className="item-image"> */}
-                        <img src={img} alt={name} className='item-image'
+                            display: 'flex',
+                            // position: circleBorder ? 'absolute' : '',
+                            // top: circleBorder ? '-10px' : ''
+                        }}
+                        className={`item-tile${pet.Type === 1 ? '-ground ' : '-air '} ${isSelected ? '' : 'unselected'}`}
+                    // className={`item-tile ${isSelected ? '' : 'unselected'}`}
+                    >
+                        <div
+                            className="item-image-container"
                             style={{
-                                zIndex: '2'
-                            }}
-                        />
-                        {/* </div> */}
+                                border: borderActive ? 'black 1px solid' : '',
+                                position: 'relative',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                maxHeight: maxDimension,
+                                maxWidth: maxDimension
+                            }}>
+                            {numHighlights.map((item, index) => {
+                                return (<div
+                                    style={{
+                                        background: helper.bonusColorMap[item].color,
+                                        position: 'absolute',
+                                        top: '0%',
+                                        left: `${(100 / numHighlights.length) * index}%`,
+                                        height: '100%',
+                                        width: `${100 / numHighlights.length}%`,
+                                        zIndex: 1
+                                    }}
+                                >
+
+                                </div>)
+                            })}
+                            {/* <div className="item-image"> */}
+                            <img src={img} alt={name}
+                                className={circleBorder ? '' : 'item-image'}
+                                style={{
+                                    zIndex: '2',
+                                    objectFit: 'contain',
+                                    maxHeight: circleBorder ? maxDimension : '',
+                                    maxWidth: circleBorder ? maxDimension : '',
+                                }}
+                            />
+                            {/* </div> */}
+                        </div>
                     </div>
                 </div>
             )}
