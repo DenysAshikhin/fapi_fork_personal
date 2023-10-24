@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import FileUpload from './FileUpload';
 import PageSelection from './page_selection/PageSelection.jsx';
@@ -14,7 +14,7 @@ import PetComboList from "./pets/comboList";
 import helper from './util/helper.js';
 import petHelper from './util/petHelper.js';
 import ProteinPage from './farming/Protein.jsx';
-
+import tempSave from './tempSave.json';
 import gearIcon from './assets/images/gear_lightgray.svg';
 
 import FarmingLanding from './farming/FarmingLanding.jsx';
@@ -60,7 +60,8 @@ ReactGA.initialize([{
 
 
 function App() {
-    const [data, setData] = useState(null);
+    const [data, setData] = useState(tempSave);
+    const [dataUploaded, setDataUploaded] = useState(false);
     const [groups, setGroups] = useState([]);
     // const [defaultRank, setDefaultRank] = useState(1);
     const [defaultRank, setDefaultRank] = useLocalStorage("defaultRank", 1);
@@ -249,7 +250,7 @@ function App() {
         console.log(uploadedData)
         uploadedData.PetDamageBonuses = helper.calcPOW(uploadedData.PetDamageBonusesBD);
         // uploadedData.PetDamageBonuses = 1;
-
+        setDataUploaded(true);
         setData(uploadedData);
 
         let specialPetCombo = 1;
@@ -326,6 +327,15 @@ function App() {
         setRefreshGroups(false);
         handleGroups(data, selectedItems, true);
     }
+
+    useEffect(() => {
+
+        if (!dataUploaded && tabSwitch !== 0) {
+            console.log(`data: ${dataUploaded}`)
+            setDataUploaded(true);
+            handleData(data);
+        }
+    }, [dataUploaded, data, tabSwitch])
 
 
 

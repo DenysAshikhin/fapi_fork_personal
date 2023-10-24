@@ -36,32 +36,6 @@ const Protein = ({ data }) => {
     })
 
     tempList.sort((a, b) => a.label.localeCompare(b.label));
-    // return (
-    //     <div
-    //         style={{
-    //             display: 'flex',
-    //             flex: '1',
-    //             backgroundColor: 'black',
-    //             position: 'relative',
-    //         }}
-    //     >
-    //         <div style={{
-    //             paddingLeft: '6px',
-    //             display: 'flex',
-    //             flexDirection: 'column',
-    //             flex: '1',
-    //             // alignItems: 'center',
-    //             // justifyContent: 'center',
-    //             backgroundColor: 'rgba(255,255,255, 0.05)',
-    //             paddingLeft: '12px'
-    //         }}>
-    //             <div className='importantText' style={{ fontSize: '48px' }}>
-    //                 Coming Soon!
-    //             </div>
-    //         </div>
-    //     </div>
-    // )
-
 
     let tempData = JSON.parse(JSON.stringify(data));
     let runningTime = 0;
@@ -147,9 +121,7 @@ const Protein = ({ data }) => {
             });
 
 
-
-
-            let cost = farmingHelper.calcAssemblyCost(assembliesMap[0].ID, data);
+            let cost = farmingHelper.calcAssemblyCost(assembliesMap[0].ID, tempData);
             let timeToPurchase = mathHelper.subtractDecimal(cost, currProtein);
 
             if (currProtein.greaterThan(cost)) {
