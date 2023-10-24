@@ -107,7 +107,11 @@ const FarmingLanding = ({ data }) => {
     const [timeCompleted, setTimeCompleted] = useState(null);
 
     useEffect(() => {
-        ReactGA.send({ hitType: "pageview", page: "/farming", title: "Farming Calculator Page" });
+        let timeout = setTimeout(() => {
+
+            ReactGA.send({ hitType: "pageview", page: "/farming", title: "Farming Calculator Page" });
+        }, 5000);
+        return () => { clearTimeout(timeout) };
     }, [])
 
     let petPlantCombo = 1;

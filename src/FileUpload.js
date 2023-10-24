@@ -8,10 +8,13 @@ import backgroundImage from './assets/images/coming_soon.png';
 
 
 const FileUpload = ({ onData }) => {
-
     useEffect(() => {
-        ReactGA.send({ hitType: "pageview", page: "/file_upload", title: "Landing Page (Upload)" });
-    }, [])
+        let timeout = setTimeout(() => {
+
+            ReactGA.send({ hitType: "pageview", page: "/file_upload", title: "Landing Page (Upload)" });
+        }, 5000);
+        return () => { clearTimeout(timeout) };
+    }, []);
 
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];

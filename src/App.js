@@ -68,7 +68,7 @@ function App() {
   // const [defaultRank, setDefaultRank] = useState(1);
   const [defaultRank, setDefaultRank] = useLocalStorage("defaultRank", 1);
   // const [includeLocked, setIncludeLocked] = useState(false);
-  const includeLocked = true;
+  const includeLocked = false;
   const [selectedItems, setSelectedItems] = useState(defaultPetSelection);
   const [tabSwitch, setTabSwitch] = useState(0);
   const [weightMap, setWeightMap] = useState(DefaultWeightMap);

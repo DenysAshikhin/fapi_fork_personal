@@ -333,9 +333,12 @@ function findBestTeam(data, parameters) {
 
 
 export default function PetComboList({ data }) {
-
     useEffect(() => {
-        ReactGA.send({ hitType: "pageview", page: "/pet_combos", title: "Pet Combos Page" });
+        let timeout = setTimeout(() => {
+
+            ReactGA.send({ hitType: "pageview", page: "/pet_combos", title: "Pet Combos Page" });
+        }, 5000);
+        return () => { clearTimeout(timeout) };
     }, [])
 
     findBestTeam(data, {});

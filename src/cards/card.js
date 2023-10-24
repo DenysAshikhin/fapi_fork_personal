@@ -1128,7 +1128,7 @@ const CardCard = ({ vertical, displayMode, data, card, weightMap, i, applyWeight
                     }
                         opacity={1}
                     >
-                        <img alt='on hover I in a cirlce icon, shows more information on hover'  style={{ height: '16px', marginLeft: '6px' }} src={infoIcon} />
+                        <img alt='on hover I in a cirlce icon, shows more information on hover' style={{ height: '16px', marginLeft: '6px' }} src={infoIcon} />
                     </MouseOverPopover>
                 </div>
             )}
@@ -1144,8 +1144,13 @@ export default function CardComponent({ data, weightMap, applyWeights }) {
     const [resetCardWeights, setResetCardWeights] = useState(-1);
 
     useEffect(() => {
-        ReactGA.send({ hitType: "pageview", page: "/cards", title: "Card Calculator Page" });
+        let timeout = setTimeout(() => {
+
+            ReactGA.send({ hitType: "pageview", page: "/cards", title: "Card Calculator Page" });
+        }, 5000);
+        return () => { clearTimeout(timeout) };
     }, [])
+
 
     if (!!data === false) return <div></div>;
 
@@ -1319,7 +1324,7 @@ export default function CardComponent({ data, weightMap, applyWeights }) {
                             {`Remaining Charges in ascencion: ${remainingCharges} `}
                         </div>
                         <img alt='in game charge (battery) image' style={{ height: '55px' }} src={`/fapi_fork_personal/cards/charge.png`} />
-                        <img alt='on hover I in a cirlce icon, shows more information on hover'  style={{ height: '32px', marginLeft: '6px' }} src={infoIcon} />
+                        <img alt='on hover I in a cirlce icon, shows more information on hover' style={{ height: '32px', marginLeft: '6px' }} src={infoIcon} />
                     </div>
 
                 </MouseOverPopover >

@@ -9,9 +9,12 @@ import PageCard from './page_card.jsx';
 const PageSelection = ({ onData, setTab }) => {
 
     useEffect(() => {
-        ReactGA.send({ hitType: "pageview", page: "/page_selection", title: "Page Selection" });
-    }, [])
+        let timeout = setTimeout(() => {
 
+            ReactGA.send({ hitType: "pageview", page: "/page_selection", title: "Page Selection" });
+        }, 5000);
+        return () => { clearTimeout(timeout) };
+    }, []);
 
     return (
         <div

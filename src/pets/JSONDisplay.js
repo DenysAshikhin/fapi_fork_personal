@@ -95,9 +95,12 @@ const JSONDisplay = ({
     const [activePet, setActivePet] = useState(-1);
 
     useEffect(() => {
-        ReactGA.send({ hitType: "pageview", page: "/expeditions", title: "Expedition Calculator Page" });
-    }, [])
+        let timeout = setTimeout(() => {
 
+            ReactGA.send({ hitType: "pageview", page: "/expeditions", title: "Expedition Calculator Page" });
+        }, 5000);
+        return () => { clearTimeout(timeout) };
+    }, [])
     if (!!data === false || !!data.PetsCollection === false) {
         return <div>Loading...</div>; // You can replace this with null or another element if you prefer
     }

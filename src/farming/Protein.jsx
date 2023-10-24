@@ -18,10 +18,13 @@ const Protein = ({ data }) => {
     const [cumulativeTime, setCumulativeTime] = useLocalStorage(`cumulativeTime`, false);
     const [numAL, setNumAl] = useLocalStorage(`numAL`, 5);
 
-
     useEffect(() => {
-        ReactGA.send({ hitType: "pageview", page: "/protein", title: "Protein" });
-    }, []);
+        let timeout = setTimeout(() => {
+
+            ReactGA.send({ hitType: "pageview", page: "/protein", title: "Protein" });
+        }, 3500);
+        return () => { clearTimeout(timeout) };
+    }, [])
 
     let tempList = [];
 
