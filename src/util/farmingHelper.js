@@ -80,22 +80,40 @@ var farmingHelper = {
 
         return output;
     },
-    calcFryOutput: function (potatoes) {
-
-        // BigDouble.Round((BigDouble.Log(GM.PD.HealthyPotatoTotal, 10.0) - 15.75) * (20 - BigDouble.Min(BigDouble.Log(GM.PD.HealthyPotatoTotal, 10.0), 31) + 16) * BigDouble.Pow(1.15, BigDouble.Log(GM.PD.HealthyPotatoTotal, 10.0) - 16.0) * GM.PD.FrenchFriesBonus * GM.PD.TimerFriesPrestigeBonuses);
+    calcFryOutput: function (potatoes, modifiers) {
+        if (potatoes.lessThan(10000000000000000)) return 0;
+        // BigDouble.Round(
+        // (Log10(HealthyPotatoTotal) - 15.75)
+        //  * (36 - Min(Log10(HealthyPotatoTotal), 31))
+        //  * Pow(1.15, Log10(HealthyPotatoTotal) - 16.0)
+        //  * FrenchFriesBonus 
+        //  * TimerFriesPrestigeBonuses);
         // BigDouble.Round(step1 * step2 * step3  * GM.PD.FrenchFriesBonus * GM.PD.TimerFriesPrestigeBonuses);
         let log10 = mathHelper.logDecimal(potatoes, 10);
-        let step1 = mathHelper.subtractDecimal(mathHelper.logDecimal(potatoes, 10), 15.75);
-        let inter1 = log10;
-        inter1 = inter1.lessThan(31) ? inter1 : 31;
-        let step2 = mathHelper.subtractDecimal(mathHelper.createDecimal(36), inter1);
-        let step3 = mathHelper.pow(
-            mathHelper.createDecimal(1.15),
-            mathHelper.subtractDecimal(
-                log10, 16.0
-            )
-        );
-        return mathHelper.multiplyDecimal(step1, mathHelper.multiplyDecimal(step2, step3));
+        let step1 = mathHelper.subtractDecimal(log10, 15.75);
+
+        let log2 = log10;
+        log2 = log2.lessThan(31) ? log2 : 31;
+        let step2 = mathHelper.subtractDecimal(36, log2);
+
+        let log3 = mathHelper.subtractDecimal(log10, 16);
+        let step3 = mathHelper.pow(1.15, log3);
+
+        let inter1 = mathHelper.multiplyDecimal(step1, step2);
+        let inter2 = mathHelper.multiplyDecimal(inter1, step3);
+        let frenchBonus = mathHelper.createDecimal(modifiers.fryBonus);
+        let step4 = mathHelper.multiplyDecimal(inter2, frenchBonus);
+        return step4;
+
+        // inter1 = inter1.lessThan(31) ? inter1 : 31;
+        // let step2 = mathHelper.subtractDecimal(mathHelper.createDecimal(36), inter1);
+        // let step3 = mathHelper.pow(
+        //     mathHelper.createDecimal(1.15),
+        //     mathHelper.subtractDecimal(
+        //         log10, 16.0
+        //     )
+        // );
+        // return mathHelper.multiplyDecimal(step1, mathHelper.multiplyDecimal(step2, step3));
     },
     calcCarryOverEXP_OLD: function ({ plant, numAutos, expTick }) {
 
@@ -533,17 +551,18 @@ var farmingHelper = {
                         updateCosts = true;
                         boughtUpgrade = true;
                     }
+                    if (updateCosts) {
+                        let nextCosts = this.getNextShopCosts(modifiers);
+                        modifiers.nextCosts = nextCosts
+                    }
                 }
-                if (updateCosts) {
-                    let nextCosts = this.getNextShopCosts(modifiers);
-                    modifiers.nextCosts = nextCosts
-                }
+
             }
 
 
             if (i % dataPointThreshold === 0 && curTime >= tickStart && curTime <= (simulationTime + runningTime)) {
                 dataPointsPotatoes.push({ "time": curTime, "production": totalPotatoes })
-                dataPointsFries.push({ "time": curTime, "fries": farmingHelper.calcFryOutput(totalPotatoes) })
+                dataPointsFries.push({ "time": curTime, "fries": farmingHelper.calcFryOutput(totalPotatoes, modifiers) })
             }
 
             if (!modifiers.skipFinal) {
@@ -563,7 +582,7 @@ var farmingHelper = {
             //Handling rare case when you have to add, but only once due to intervals duration, but only at the end, and didn't fit in the for loop above
             if (dataPointsPotatoes.length === 0) {
                 dataPointsPotatoes.push({ "time": curTime, "production": totalPotatoes })
-                dataPointsFries.push({ "time": curTime, "fries": farmingHelper.calcFryOutput(totalPotatoes) })
+                dataPointsFries.push({ "time": curTime, "fries": farmingHelper.calcFryOutput(totalPotatoes, modifiers) })
             }
             else if (dataPointsPotatoes[dataPointsPotatoes.length - 1].production !== totalPotatoes) {
                 if (curTime > (simulationTime + runningTime)) {
@@ -592,7 +611,7 @@ var farmingHelper = {
                     let newObj = { time: dataPointsPotatoes[dataPointsPotatoes.length - 1].time + trueTimeIncrease, production: finalPotatoes };
                     dataPointsPotatoes.push(newObj);
 
-                    dataPointsFries.push({ "time": dataPointsPotatoes[dataPointsPotatoes.length - 1].time + trueTimeIncrease, "fries": farmingHelper.calcFryOutput(finalPotatoes) })
+                    dataPointsFries.push({ "time": dataPointsPotatoes[dataPointsPotatoes.length - 1].time + trueTimeIncrease, "fries": farmingHelper.calcFryOutput(finalPotatoes, modifiers) })
 
                     //This means the `current` potatoes aren't updated to reflect the backwards fill/fix but it shouldn't be a big deal, and not used for anything atm
                     totalPotatoes = finalPotatoes;

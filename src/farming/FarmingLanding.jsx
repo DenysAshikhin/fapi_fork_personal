@@ -214,7 +214,8 @@ const FarmingLanding = ({ data }) => {
             manualHarvestBonus: mathHelper.createDecimal(data.PlantManualHarvestBonus).toNumber(),
             potionRank: potionRank,
             potionRankTime: potionRankTime,
-            forceRankPotion: forceRankPotion
+            forceRankPotion: forceRankPotion,
+            fryBonus: data.FrenchFriesBonus
         }
 
 
@@ -371,7 +372,8 @@ const FarmingLanding = ({ data }) => {
             tickRate: Math.floor((futureTime * secondsHour) * 0.01) < 1 ? 1 : Math.floor((futureTime * secondsHour) * 0.01),
             potionRankTime: potionRankTime,
             potionRank: potionRank,
-            forceRankPotion: forceRankPotion
+            forceRankPotion: forceRankPotion,
+            fryBonus: data.FrenchFriesBonus
         }
         tempy.originalShopProdBonus = data.PlantTotalProductionBonus;
         return tempy
@@ -509,6 +511,8 @@ const FarmingLanding = ({ data }) => {
         }
         console.log(`future plants:`);
         console.log(result);
+        let finalFry = farmingHelper.calcFryOutput(result.totalPotatoes, result.finalModifiers);
+        console.log(`rough fry final (pre time bonus): ${finalFry.toExponential(3)}`)
         return result;
     },
         [finalPlants, modifiers, futureTime, plantAutos, secondsHour]);
@@ -909,10 +913,10 @@ const FarmingLanding = ({ data }) => {
                     }
 
                     if (bestProd.result) {
-                        bestProd.finalFry = farmingHelper.calcFryOutput(bestProd.result.result.totalPotatoes);
-                        bestPot.finalFry = farmingHelper.calcFryOutput(bestPot.result.result.totalPotatoes);
-                        bestPic.finalFry = farmingHelper.calcFryOutput(bestPic.result.result.totalPotatoes);
-                        bestPicPerc.finalFry = farmingHelper.calcFryOutput(bestPicPerc.result.result.totalPotatoes);
+                        bestProd.finalFry = farmingHelper.calcFryOutput(bestProd.result.result.totalPotatoes, bestProd.result.result.finalModifiers);
+                        bestPot.finalFry = farmingHelper.calcFryOutput(bestPot.result.result.totalPotatoes, bestPot.result.result.finalModifiers);
+                        bestPic.finalFry = farmingHelper.calcFryOutput(bestPic.result.result.totalPotatoes, bestPic.result.result.finalModifiers);
+                        bestPicPerc.finalFry = farmingHelper.calcFryOutput(bestPicPerc.result.result.totalPotatoes, bestPicPerc.result.result.finalModifiers);
 
                         for (let i = 0; i < bestPic.result.plants.length; i++) {
 
