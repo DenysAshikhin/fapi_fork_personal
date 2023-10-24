@@ -1049,7 +1049,7 @@ const CardCard = ({ vertical, displayMode, data, card, weightMap, i, applyWeight
                     <div style={{ fontWeight: 'bold' }}>
                         {cardIDMap[ID].label}
                     </div>
-                    <img style={{ height: '75px' }} src={`/fapi_fork_personal/cards/card${ID}.png`} />
+                    <img alt={`picture of the in game ${cardIDMap[ID].label} card`} style={{ height: '75px' }} src={`/fapi_fork_personal/cards/card${ID}.png`} />
 
                     <div
                         style={{ color: isPositiveChargeRatio ? 'green' : 'red', marginTop: '-5px', marginBottom: '-2px' }}
@@ -1128,7 +1128,7 @@ const CardCard = ({ vertical, displayMode, data, card, weightMap, i, applyWeight
                     }
                         opacity={1}
                     >
-                        <img style={{ height: '16px', marginLeft: '6px' }} src={infoIcon} />
+                        <img alt='on hover I in a cirlce icon, shows more information on hover'  style={{ height: '16px', marginLeft: '6px' }} src={infoIcon} />
                     </MouseOverPopover>
                 </div>
             )}
@@ -1298,7 +1298,7 @@ export default function CardComponent({ data, weightMap, applyWeights }) {
                     >
                         {`Current Charges: ` + data?.CurrentCardCharge}
                     </div>
-                    <img style={{ height: '55px' }} src={`/fapi_fork_personal/cards/charge.png`} />
+                    <img alt='in game charge (battery) image' style={{ height: '55px' }} src={`/fapi_fork_personal/cards/charge.png`} />
                 </div>
 
                 {/* Charges till Ascencion */}
@@ -1318,8 +1318,8 @@ export default function CardComponent({ data, weightMap, applyWeights }) {
                         >
                             {`Remaining Charges in ascencion: ${remainingCharges} `}
                         </div>
-                        <img style={{ height: '55px' }} src={`/fapi_fork_personal/cards/charge.png`} />
-                        <img style={{ height: '32px', marginLeft: '6px' }} src={infoIcon} />
+                        <img alt='in game charge (battery) image' style={{ height: '55px' }} src={`/fapi_fork_personal/cards/charge.png`} />
+                        <img alt='on hover I in a cirlce icon, shows more information on hover'  style={{ height: '32px', marginLeft: '6px' }} src={infoIcon} />
                     </div>
 
                 </MouseOverPopover >

@@ -63,7 +63,7 @@ const FarmingPlant = ({ data }) => {
         // maxHeight:'128px' 
     }}>
         <div style={{ height: '214px', width: '214px', position: 'relative' }}>
-            <img style={{ height: '214px', width: '214px', position: 'absolute', bottom: '0', left: '0', zIndex: '1' }} src={`/fapi_fork_personal/farming/plants/P${index + 1}.png`} />
+            <img alt={`in game plant #${index + 1} image`} style={{ height: '214px', width: '214px', position: 'absolute', bottom: '0', left: '0', zIndex: '1' }} src={`/fapi_fork_personal/farming/plants/P${index + 1}.png`} />
 
 
             <div style={{ zIndex: 2, background: 'black', borderRadius: '6px', fontSize: '16px', fontWeight: 'bold', padding: '0 1px 0 1px', color: 'white', top: '0%', left: fake ? `35%` : '43%', display: 'flex', position: 'absolute' }}>
@@ -126,7 +126,7 @@ const FarmingPlant = ({ data }) => {
                         <div style={{ background: 'black', borderRadius: '6px', padding: '0 3px 0 3px', display: 'flex', alignItems: 'center' }} >
                             {originalRank}
                         </div>
-                        <img
+                        <img alt='arrow point up'
                             style={{ height: '16px', width: '12px', zIndex: '-1', transform: 'rotate(90deg)', margin: '0 3px 0 3px' }}
                             src={`/fapi_fork_personal/up_arrow.svg`}
                         />
@@ -135,7 +135,7 @@ const FarmingPlant = ({ data }) => {
                         </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '10px', margin: '0 3px' }}>
-                        <img
+                        <img alt='arrow pointing up'
                             style={{ height: '16px', width: '24px', zIndex: '-1' }}
                             src={`/fapi_fork_personal/up_arrow.svg`}
                         />
@@ -168,7 +168,7 @@ const FarmingPlant = ({ data }) => {
                     }>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
 
-                            <img
+                            <img alt='yellow start in an red/orange filled circle, in game prestige icon'
                                 style={{
                                     height: '16px', width: '16px', zIndex: '-1'
                                 }}
@@ -177,7 +177,7 @@ const FarmingPlant = ({ data }) => {
                             <div style={{ background: 'black', borderRadius: '6px', padding: '0 3px 0 3px' }}>
                                 {pic}
                             </div>
-                            <img
+                            <img alt='yellow filled arrow point up with a red trim'
                                 style={{ height: '16px', width: '16px', zIndex: '-1', transform: 'rotate(90deg)', margin: '0 3px 0 6px' }}
                                 src={`/fapi_fork_personal/up_arrow_yellow.svg`}
                             />
@@ -191,8 +191,8 @@ const FarmingPlant = ({ data }) => {
                         </div>
                     }>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-
-                            <img
+                       
+                            <img  alt='yellow start in an red/orange filled circle, in game prestige icon'
                                 style={{
                                     height: '16px', width: '16px', zIndex: '-1'
                                 }}
@@ -211,7 +211,7 @@ const FarmingPlant = ({ data }) => {
                             </div>
                         }>
                             <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <img
+                            <img alt='yellow filled arrow point up with a red trim'
                                     style={{ height: '16px', width: '16px', zIndex: '-1' }}
                                     src={`/fapi_fork_personal/up_arrow_yellow.svg`}
                                 />
@@ -228,7 +228,7 @@ const FarmingPlant = ({ data }) => {
 
             {/* Num Auto */}
             {!fake && useFutureValues && (
-                <div style={{ fontSize: '12px', marginTop: '0px', height: '12px', padding: '0 1px 0 1px', color: 'black', bottom: fake ? '7%' : '7%', left: '1%', display: 'flex', position: 'absolute',zIndex:'2' }}>
+                <div style={{ fontSize: '12px', marginTop: '0px', height: '12px', padding: '0 1px 0 1px', color: 'black', bottom: fake ? '7%' : '7%', left: '1%', display: 'flex', position: 'absolute', zIndex: '2' }}>
                     <div style={{
                         display: 'flex',
                         alignItems: fake ? '' : 'center',

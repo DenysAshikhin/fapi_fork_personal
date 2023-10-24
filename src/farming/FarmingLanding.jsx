@@ -47,30 +47,6 @@ function generateCombinations(objects, people) {
     return result;
 }
 
-function splitArray(arr, x) {
-    if (x <= 0) {
-        return "Invalid value for x";
-    }
-
-    const n = arr.length;
-    if (n < x) {
-        return "Array size is smaller than x";
-    }
-
-    const chunkSize = Math.floor(n / x);
-    const remainder = n % x;
-
-    const result = [];
-    let start = 0;
-    for (let i = 0; i < x; i++) {
-        const end = start + chunkSize + (i < remainder ? 1 : 0);
-        result.push(arr.slice(start, end));
-        start = end;
-    }
-
-    return result;
-}
-
 function splitArrayIndices(arr, x) {
     if (x <= 0) {
         return "Invalid value for x";
@@ -100,9 +76,6 @@ const FarmingLanding = ({ data }) => {
 
     const [customMultipliers, setCustomMultipliers] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]);
     const [futureTime, setFutureTime] = useState(0.01);
-    // const [numAuto, setNumAuto] = useState(1);
-    const [password, setPassword] = useState('');
-    const [futureGrasshopper, setFutureGrasshopper] = useState(1);
     const [plantAutos, setPlantAutos] = useLocalStorage("plantAutos", [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
     const secondsHour = 3600;
     const farmCalcStarted = useRef({});
@@ -118,8 +91,11 @@ const FarmingLanding = ({ data }) => {
 
     const [farmCalcProgress, setFarmCalcProgress] = useState({ current: 0, max: 0 });
     const [bestPlantCombo, setBestPlantCombo] = useState([]);//holds the best production, total made, pic and pic% after a calculation
-    const [bestRunningCombo, setBestRunningCombo] = useState({});//same as above, but used to make the graph update during the loading
-    const [forceGraphUpdate, setForceGraphUpdate] = useState(false);
+    // const [bestRunningCombo, setBestRunningCombo] = useState({});//same as above, but used to make the graph update during the loading
+    const bestRunningCombo = useMemo(() => {
+        return {}
+    }, []);//same as above, but used to make the graph update during the loading
+
     const [autoBuyPBC, setAutoBuyPBC] = useLocalStorage("autoBuyPBC", data.ASCFarmingShopAutoPage1 === 1);
     const [lockCustomAuto, setLockCustomAuto] = useLocalStorage("lockCustomAuto", false);
     const [forceRankPotion, setForceRankPotion] = useLocalStorage("forceRankPotion", false);
@@ -127,119 +103,6 @@ const FarmingLanding = ({ data }) => {
     const [calcStep, setCalcStep] = useState(false);
 
     const [timeCompleted, setTimeCompleted] = useState(null);
-
-    useEffect(() => {
-
-        let petPlantCombo = 1;
-        let contagionPlantEXP = 1;
-        let contagionPlantGrowth = 1;
-
-        if (data.GrasshopperCollection[2].Locked > 0) {
-            let base = helper.calcPOW(data.GrasshopperCollection[2].BaseBonus);
-            let level = helper.calcPOW(data.GrasshopperCollection[2].Level);
-            contagionPlantEXP = Math.pow(1 + base * 0.01, level);
-        }
-
-        if (data.GrasshopperCollection[4].Locked > 0) {
-            let base = helper.calcPOW(data.GrasshopperCollection[4].BaseBonus);
-            let level = helper.calcPOW(data.GrasshopperCollection[4].Level);
-            contagionPlantGrowth = Math.pow(1 + base * 0.01, level);
-        }
-
-
-        let soulPlantEXP = Math.pow(1.25, data.SoulLeafTreatment);
-
-        let shopGrowingSpeed = data.FarmingShopPlantGrowingSpeed;
-        let manualHarvestFormula = data.FarmingShopPlantManualHarvestFormula;
-        let shopRankEXP = 1 + data.FarmingShopPlantRankExpEarned * 0.1;
-        let picPlants = data.FarmingShopPlantImprovement;
-        let plants = data.PlantCollection;
-        let assemblyPlantExp = 1;
-        let assemblyProduction = 1;
-        let assemblyPlantharvest = 1;
-
-
-        if (data?.AssemblerCollection[0].BonusList[1].StartingLevel <= data?.AssemblerCollection[0].Level) {
-            assemblyPlantExp *= farmingHelper.calcAssembly(data, 0, 1);
-        }
-        if (data?.AssemblerCollection[5].BonusList[2].StartingLevel <= data?.AssemblerCollection[5].Level) {
-            assemblyPlantExp *= farmingHelper.calcAssembly(data, 5, 2);
-        }
-
-        if (data?.AssemblerCollection[3].BonusList[2].StartingLevel <= data?.AssemblerCollection[3].Level) {
-            assemblyProduction *= farmingHelper.calcAssembly(data, 3, 2);
-        }
-        if (data?.AssemblerCollection[7].BonusList[1].StartingLevel <= data?.AssemblerCollection[7].Level) {
-            assemblyProduction *= farmingHelper.calcAssembly(data, 7, 1);
-        }
-
-        if (data?.AssemblerCollection[7].BonusList[0].StartingLevel <= data?.AssemblerCollection[7].Level) {
-            assemblyPlantharvest *= farmingHelper.calcAssembly(data, 7, 0);
-        }
-        if (data?.AssemblerCollection[9].BonusList[3].StartingLevel <= data?.AssemblerCollection[9].Level) {
-            assemblyPlantharvest *= farmingHelper.calcAssembly(data, 9, 3);
-        }
-
-        for (let i = 0; i < data.PetsSpecial.length; i++) {
-            let t = data.PetsSpecial[i];
-            if (t.BonusID === 5015 && t.Active === 1) {
-                petPlantCombo += t.BonusPower / 100;
-            }
-        }
-
-        let potionRankTime = data.SoulPotionHealthyRankTime;
-        let potionRank = potionRankTime > 0 ? data.SoulPotionHealthyRankBonus + 1 : 1;
-        if (forceRankPotion && potionRank === 1) {
-            potionRank = 1.5;
-        }
-        const modifiers = {
-            time: 0,
-            // numAuto: numAuto,
-            shopGrowingSpeed: shopGrowingSpeed,
-            originalPotionRank: data.SoulPotionHealthyRankTime,
-            originalShopGrowingLevel: data.FarmingShopPlantGrowingSpeed,
-            originalShopGrowingBonus: data.PlantGrowingSpeedBonus,
-            manualHarvestFormula: manualHarvestFormula,
-            shopRankEXP: shopRankEXP, picPlants: picPlants,
-            originalShopRankLevel: data.PlantRankExpBonus,
-            originalRankLevelBonus: data.FarmingShopPlantRankExpEarned,
-            originalShopProdLevel: data.FarmingShopPlantTotalProduction,
-            originalShopProdBonus: data.PlantTotalProductionBonus,
-            petPlantCombo: Number(petPlantCombo),
-            contagionPlantEXP: contagionPlantEXP,
-            contagionPlantGrowth: contagionPlantGrowth,
-            soulPlantEXP: soulPlantEXP,
-            assemblyPlantExp: assemblyPlantExp,
-            expBonus: shopRankEXP * soulPlantEXP * contagionPlantEXP * assemblyPlantExp,
-            manualHarvestBonus: mathHelper.createDecimal(data.PlantManualHarvestBonus).toNumber(),
-            potionRank: potionRank,
-            potionRankTime: potionRankTime,
-            forceRankPotion: forceRankPotion,
-            fryBonus: data.FrenchFriesBonus
-        }
-
-
-        let newArr = [];
-        let smallestGrowth = -1;
-        for (let i = 0; i < data.PlantCollection.length; i++) {
-            let plant = data.PlantCollection[i];
-            plant.growthTime = farmingHelper.calcGrowthTime(plant, modifiers);
-
-            if (smallestGrowth === -1)
-                smallestGrowth = plant.growthTime;
-            else if (plant.growthTime < smallestGrowth)
-                smallestGrowth = plant.growthTime;
-
-            newArr.push(plant);
-        }
-
-        for (let i = 0; i < newArr.length; i++) {
-            newArr[i] = newArr[i].growthTime / smallestGrowth;
-        }
-
-        setCustomMultipliers(newArr);
-
-    }, [data])
 
     useEffect(() => {
         ReactGA.send({ hitType: "pageview", page: "/farming", title: "Farming Calculator Page" });
@@ -271,11 +134,6 @@ const FarmingLanding = ({ data }) => {
         let level = helper.calcPOW(data.GrasshopperCollection[6].Level);
         contagionHarvest = Math.pow(1 + base * 0.01, level);
     }
-
-
-    let currHP = helper.calcPOW(data.HealthyPotatoCurrent);
-    let totalHP = helper.calcPOW(data.HealthyPotatoTotal);
-
 
     let soulPlantEXP = Math.pow(1.25, data.SoulLeafTreatment);
 
@@ -311,19 +169,12 @@ const FarmingLanding = ({ data }) => {
         assemblyPlantharvest *= farmingHelper.calcAssembly(data, 9, 3);
     }
 
-
-    let timeTillNextLevel = Number.MAX_SAFE_INTEGER;
-
-    let highestOverallMult = 0;
-    let highestOverallMultMine = 0;
-
     for (let i = 0; i < data.PetsSpecial.length; i++) {
         let t = data.PetsSpecial[i];
         if (t.BonusID === 5015 && t.Active === 1) {
             petPlantCombo += t.BonusPower / 100;
         }
     }
-
 
     let potionRankTime = data.SoulPotionHealthyRankTime;
     let potionRank = potionRankTime > 0 ? data.SoulPotionHealthyRankBonus + 1 : 1;
@@ -333,7 +184,6 @@ const FarmingLanding = ({ data }) => {
 
     const modifiers = useMemo(() => {
         console.log(`setin modif`);
-        let test = data.PlantTotalProductionBonus
         let tempy =
         {
             time: 0,
@@ -349,7 +199,7 @@ const FarmingLanding = ({ data }) => {
             originalShopRankLevel: data.FarmingShopPlantRankExpEarned,
             originalRankLevelBonus: data.PlantRankExpBonus,
             picPlants: picPlants,
-            petPlantCombo: Number(petPlantCombo),
+            petPlantCombo: petPlantCombo,
             contagionPlantEXP: contagionPlantEXP,
             contagionPlantGrowth: contagionPlantGrowth,
             soulPlantEXP: soulPlantEXP,
@@ -379,9 +229,9 @@ const FarmingLanding = ({ data }) => {
         return tempy
     },
         [
-            shopGrowingSpeed, manualHarvestFormula, contagionHarvest, shopRankEXP, shopRankLevel, picPlants, Number(petPlantCombo),
+            shopGrowingSpeed, manualHarvestFormula, contagionHarvest, shopRankEXP, shopRankLevel, picPlants, petPlantCombo,
             contagionPlantEXP, contagionPlantGrowth, soulPlantEXP, assemblyPlantExp, assemblyProduction, contagionPlantProd, assemblyPlantharvest,
-            data, currHP, totalHP, autoBuyPBC, futureTime, potionRank, potionRankTime, forceRankPotion
+            data, autoBuyPBC, futureTime, potionRank, potionRankTime, forceRankPotion
         ]
     )
 
@@ -396,25 +246,6 @@ const FarmingLanding = ({ data }) => {
 
 
             plant.prestige = picPlants[i];
-
-            if (plant.ID === 3) {
-                plant.prestige += 0;
-            }
-            //             if (plant.ID === 4) {
-            //                 plant.prestige += 0;
-            //             }
-            //             if (plant.ID === 5) {
-            //                 plant.prestige += 0;
-            //             }
-            //             if (plant.ID === 6) {
-            //                 plant.prestige += 40;
-            //             }
-            // //
-            // if (plant.ID === 7) {
-            //     let bigSad = -1;
-            //     plant.ManuallyCreated.mantissa = 1.63839;
-            //     plant.ManuallyCreated.exponent = 5;
-            // }
 
             plant.prestigeBonus = Math.pow(1.02, plant.prestige)
             plant.growthTime = farmingHelper.calcGrowthTime(plant, modifiers);
@@ -432,16 +263,12 @@ const FarmingLanding = ({ data }) => {
             plant.production = prod;
             plant.timeToLevel = farmingHelper.calcTimeTillLevel(plant, { ...modifiers, numAuto: plantAutos[i] });
 
-            if (plant.timeToLevel <= timeTillNextLevel) {
-                timeTillNextLevel = plant.timeToLevel;
-            }
-
             plant.elapsedTime = 0;
             plant.originalRank = plant.Rank;
             tempArr.push(plant);
         }
         return tempArr;
-    }, [modifiers, plantAutos, plantAutos, shopGrowingSpeed, petPlantCombo, contagionPlantGrowth])
+    }, [picPlants, plants, modifiers, plantAutos])
 
 
     const [calcDone, setCalcDone] = useState(true);
@@ -503,7 +330,7 @@ const FarmingLanding = ({ data }) => {
         let tempModif = { ...modifiers, time: secondsHour * futureTime, numAutos: plantAutos };
 
         let result = farmingHelper.calcHPProd(finalPlants, tempModif);
-        let bigsad = -1;
+
         for (let i = 0; i < result.dataPointsPotatoes.length; i++) {
             let cur = result.dataPointsPotatoes[i];
             cur.time = helper.roundInt(cur.time);
@@ -515,7 +342,7 @@ const FarmingLanding = ({ data }) => {
         console.log(`rough fry final (pre time bonus): ${finalFry.toExponential(3)}`)
         return result;
     },
-        [finalPlants, modifiers, futureTime, plantAutos, secondsHour]);
+        [numSimulatedAutos, finalPlants, modifiers, futureTime, plantAutos, secondsHour]);
 
     //Go through all datapoints, find highest exp, and reduce it for all equally if necessary so JS doesn't break
     const graphObjects = useMemo(() => {
@@ -632,7 +459,6 @@ const FarmingLanding = ({ data }) => {
                 }
             }
 
-
             diff_exp = currMaxExp > maxExp ? currMaxExp - maxExp : 0;
 
             for (let i = 0; i < runProd.result.result.dataPointsPotatoes.length; i++) {
@@ -641,10 +467,7 @@ const FarmingLanding = ({ data }) => {
                 cur_iner.production.exponent -= diff_exp;
                 cur_iner.production = cur_iner.production.toNumber();
             }
-
-
         }
-
 
         return {
             runningProd: runProd
@@ -653,88 +476,88 @@ const FarmingLanding = ({ data }) => {
             // bestPic: bestPlantCombo?.bestPic?.result?.result?.dataPointsPotatoes,
             // bestPicPerc: bestPlantCombo?.bestPicPerc?.result?.result?.dataPointsPotatoes,
         }
-            ;
-        if (bestPlantCombo.top10DataPointsPotatoes) {
-            // Go over all the top 1 results
-            for (let i = 0; i < bestPlantCombo.top10DataPointsPotatoes.length; i++) {
-                if (i > 0) break;
-                let cur = bestPlantCombo.top10DataPointsPotatoes[i];
-                for (let j = 0; j < cur.data.length; j++) {
-                    let cur_iner = cur.data[j];
-                    if (cur_iner.originalProduction.exponent > currMaxExp) {
-                        currMaxExp = cur_iner.originalProduction.exponent;
-                    }
-                }
-            }
 
-            // go over the best PIC
-            for (let i = 0; i < bestPlantCombo.bestPic.result.result.dataPointsPotatoes.length; i++) {
-                let cur = bestPlantCombo.bestPic.result.result.dataPointsPotatoes[i];
-                if (cur.originalProduction.exponent > currMaxExp) {
-                    currMaxExp = cur.originalProduction.exponent;
-                }
-            }
-            // go over the best PIC %
-            for (let i = 0; i < bestPlantCombo.bestPicPerc.result.result.dataPointsPotatoes.length; i++) {
-                let cur = bestPlantCombo.bestPicPerc.result.result.dataPointsPotatoes[i];
-                if (cur.originalProduction.exponent > currMaxExp) {
-                    currMaxExp = cur.originalProduction.exponent;
-                }
-            }
-        }
+        // if (bestPlantCombo.top10DataPointsPotatoes) {
+        //     // Go over all the top 1 results
+        //     for (let i = 0; i < bestPlantCombo.top10DataPointsPotatoes.length; i++) {
+        //         if (i > 0) break;
+        //         let cur = bestPlantCombo.top10DataPointsPotatoes[i];
+        //         for (let j = 0; j < cur.data.length; j++) {
+        //             let cur_iner = cur.data[j];
+        //             if (cur_iner.originalProduction.exponent > currMaxExp) {
+        //                 currMaxExp = cur_iner.originalProduction.exponent;
+        //             }
+        //         }
+        //     }
+
+        //     // go over the best PIC
+        //     for (let i = 0; i < bestPlantCombo.bestPic.result.result.dataPointsPotatoes.length; i++) {
+        //         let cur = bestPlantCombo.bestPic.result.result.dataPointsPotatoes[i];
+        //         if (cur.originalProduction.exponent > currMaxExp) {
+        //             currMaxExp = cur.originalProduction.exponent;
+        //         }
+        //     }
+        //     // go over the best PIC %
+        //     for (let i = 0; i < bestPlantCombo.bestPicPerc.result.result.dataPointsPotatoes.length; i++) {
+        //         let cur = bestPlantCombo.bestPicPerc.result.result.dataPointsPotatoes[i];
+        //         if (cur.originalProduction.exponent > currMaxExp) {
+        //             currMaxExp = cur.originalProduction.exponent;
+        //         }
+        //     }
+        // }
 
 
-        diff_exp = currMaxExp > maxExp ? currMaxExp - maxExp : 0;
+        // diff_exp = currMaxExp > maxExp ? currMaxExp - maxExp : 0;
 
-        // Reduce all the exponents for custom input first
-        for (let i = 0; i < tempFuture.dataPointsPotatoes.length; i++) {
-            let cur = tempFuture.dataPointsPotatoes[i];
-            cur.production = mathHelper.createDecimal(cur.originalProduction.toString());
-            cur.production.exponent -= diff_exp;
-            cur.production = cur.production.toNumber();
-        }
+        // // Reduce all the exponents for custom input first
+        // for (let i = 0; i < tempFuture.dataPointsPotatoes.length; i++) {
+        //     let cur = tempFuture.dataPointsPotatoes[i];
+        //     cur.production = mathHelper.createDecimal(cur.originalProduction.toString());
+        //     cur.production.exponent -= diff_exp;
+        //     cur.production = cur.production.toNumber();
+        // }
 
-        if (bestPlantCombo.top10DataPointsPotatoes) {
-            // Go over all the top 1 results
-            for (let i = 0; i < bestPlantCombo.top10DataPointsPotatoes.length; i++) {
-                if (i > 0) break;
-                let cur = bestPlantCombo.top10DataPointsPotatoes[i];
-                for (let j = 0; j < cur.data.length; j++) {
-                    let cur_iner = cur.data[j];
-                    cur_iner.production = mathHelper.createDecimal(cur_iner.originalProduction.toString());
-                    cur_iner.production.exponent -= diff_exp;
-                    cur_iner.production = cur_iner.production.toNumber();
-                }
-            }
+        // if (bestPlantCombo.top10DataPointsPotatoes) {
+        //     // Go over all the top 1 results
+        //     for (let i = 0; i < bestPlantCombo.top10DataPointsPotatoes.length; i++) {
+        //         if (i > 0) break;
+        //         let cur = bestPlantCombo.top10DataPointsPotatoes[i];
+        //         for (let j = 0; j < cur.data.length; j++) {
+        //             let cur_iner = cur.data[j];
+        //             cur_iner.production = mathHelper.createDecimal(cur_iner.originalProduction.toString());
+        //             cur_iner.production.exponent -= diff_exp;
+        //             cur_iner.production = cur_iner.production.toNumber();
+        //         }
+        //     }
 
-            // go over the best PIC
-            for (let i = 0; i < bestPlantCombo.bestPic.result.result.dataPointsPotatoes.length; i++) {
-                let cur = bestPlantCombo.bestPic.result.result.dataPointsPotatoes[i];
-                cur.production = mathHelper.createDecimal(cur.originalProduction.toString());
-                cur.production.exponent -= diff_exp;
-                cur.production = cur.production.toNumber();
-            }
-            // go over the best PIC %
-            for (let i = 0; i < bestPlantCombo.bestPicPerc.result.result.dataPointsPotatoes.length; i++) {
-                let cur = bestPlantCombo.bestPicPerc.result.result.dataPointsPotatoes[i];
-                cur.production = mathHelper.createDecimal(cur.originalProduction.toString());
-                cur.production.exponent -= diff_exp;
-                cur.production = cur.production.toNumber();
-            }
-        }
+        //     // go over the best PIC
+        //     for (let i = 0; i < bestPlantCombo.bestPic.result.result.dataPointsPotatoes.length; i++) {
+        //         let cur = bestPlantCombo.bestPic.result.result.dataPointsPotatoes[i];
+        //         cur.production = mathHelper.createDecimal(cur.originalProduction.toString());
+        //         cur.production.exponent -= diff_exp;
+        //         cur.production = cur.production.toNumber();
+        //     }
+        //     // go over the best PIC %
+        //     for (let i = 0; i < bestPlantCombo.bestPicPerc.result.result.dataPointsPotatoes.length; i++) {
+        //         let cur = bestPlantCombo.bestPicPerc.result.result.dataPointsPotatoes[i];
+        //         cur.production = mathHelper.createDecimal(cur.originalProduction.toString());
+        //         cur.production.exponent -= diff_exp;
+        //         cur.production = cur.production.toNumber();
+        //     }
+        // }
 
-        if (expDiff !== diff_exp) {
-            setExpDiff(diff_exp);
-        }
+        // if (expDiff !== diff_exp) {
+        //     setExpDiff(diff_exp);
+        // }
 
-        return {
-            customProduction: tempFuture,
-            top10Potatoes: bestPlantCombo.top10DataPointsPotatoes,
-            bestPic: bestPlantCombo?.bestPic?.result?.result?.dataPointsPotatoes,
-            bestPicPerc: bestPlantCombo?.bestPicPerc?.result?.result?.dataPointsPotatoes,
-        }
+        // return {
+        //     customProduction: tempFuture,
+        //     top10Potatoes: bestPlantCombo.top10DataPointsPotatoes,
+        //     bestPic: bestPlantCombo?.bestPic?.result?.result?.dataPointsPotatoes,
+        //     bestPicPerc: bestPlantCombo?.bestPicPerc?.result?.result?.dataPointsPotatoes,
+        // }
 
-    }, [expDiff, bestRunningCombo])
+    }, [bestRunningCombo])
 
 
 
@@ -968,216 +791,216 @@ const FarmingLanding = ({ data }) => {
         const updateRunningBest = ({ bestProduction }) => {
             //sounded like a good idea, leads to very jerky graphs
             return;
-            setBestRunningCombo((currBestCombo) => {
-                let bestProd = currBestCombo.prod ? currBestCombo : { prod: mathHelper.createDecimal(0) };
-                let runningProd = { prod: mathHelper.createDecimal(bestProduction.result.potatoeProduction), result: bestProduction };
+            // setBestRunningCombo((currBestCombo) => {
+            //     let bestProd = currBestCombo.prod ? currBestCombo : { prod: mathHelper.createDecimal(0) };
+            //     let runningProd = { prod: mathHelper.createDecimal(bestProduction.result.potatoeProduction), result: bestProduction };
 
 
-                if (runningProd.prod.greaterThan(bestProd.prod)) {
+            //     if (runningProd.prod.greaterThan(bestProd.prod)) {
 
-                    setForceGraphUpdate(true);
-                    runningProd.prod = mathHelper.createDecimal(runningProd.prod);
-                    runningProd.result.result.potatoeProduction = mathHelper.createDecimal(runningProd.result.result.potatoeProduction);
-                    runningProd.result.result.totalPotatoes = mathHelper.createDecimal(runningProd.result.result.totalPotatoes);
+            //         setForceGraphUpdate(true);
+            //         runningProd.prod = mathHelper.createDecimal(runningProd.prod);
+            //         runningProd.result.result.potatoeProduction = mathHelper.createDecimal(runningProd.result.result.potatoeProduction);
+            //         runningProd.result.result.totalPotatoes = mathHelper.createDecimal(runningProd.result.result.totalPotatoes);
 
-                    for (let i = 0; i < runningProd.result.result.dataPointsPotatoes.length; i++) {
-                        let cur = runningProd.result.result.dataPointsPotatoes[i];
-                        cur.originalProduction = mathHelper.createDecimal(cur.production);
-                        cur.production = mathHelper.createDecimal(cur.production);
-                        cur.time = helper.roundInt(cur.time);
-                    }
-
-
-                    return { ...currBestCombo, runningProd: runningProd };
-                }
-
-                return currBestCombo;
+            //         for (let i = 0; i < runningProd.result.result.dataPointsPotatoes.length; i++) {
+            //             let cur = runningProd.result.result.dataPointsPotatoes[i];
+            //             cur.originalProduction = mathHelper.createDecimal(cur.production);
+            //             cur.production = mathHelper.createDecimal(cur.production);
+            //             cur.time = helper.roundInt(cur.time);
+            //         }
 
 
-                let bestPot = { pot: mathHelper.createDecimal(0) };
-                let bestPic = { pic: 0, prod: mathHelper.createDecimal(0) }
-                let bestPicPerc = { pic: 0, prod: mathHelper.createDecimal(0) }
+            //         return { ...currBestCombo, runningProd: runningProd };
+            //     }
 
-                let top10DataPointsPotatoes = [];
-                let top10DataPointsFries = [];
-
-                for (let i = 0; i < farmTotals.current.length; i++) {
-                    let cur = farmTotals.current[i];
+            //     return currBestCombo;
 
 
-                    if (!cur.totalPotCombo.result) {
-                        continue;
-                    }
+            //     let bestPot = { pot: mathHelper.createDecimal(0) };
+            //     let bestPic = { pic: 0, prod: mathHelper.createDecimal(0) }
+            //     let bestPicPerc = { pic: 0, prod: mathHelper.createDecimal(0) }
+
+            //     let top10DataPointsPotatoes = [];
+            //     let top10DataPointsFries = [];
+
+            //     for (let i = 0; i < farmTotals.current.length; i++) {
+            //         let cur = farmTotals.current[i];
 
 
-                    //Have to reset potatoe values again
-                    cur.bestPicCombo.potatoeProduction = cur.bestPicCombo.potatoeProduction ? mathHelper.createDecimal(cur.bestPicCombo.potatoeProduction) : cur.bestPicCombo.potatoeProduction;
-                    cur.bestPicCombo.result.potatoeProduction = cur.bestPicCombo.result.potatoeProduction ? mathHelper.createDecimal(cur.bestPicCombo.result.potatoeProduction) : cur.bestPicCombo.result.potatoeProduction;
-                    cur.bestPicCombo.result.totalPotatoes = cur.bestPicCombo.result.totalPotatoes ? mathHelper.createDecimal(cur.bestPicCombo.result.totalPotatoes) : cur.bestPicCombo.result.totalPotatoes;
-                    cur.bestPICPercCombo.potatoeProduction = cur.bestPICPercCombo.potatoeProduction ? mathHelper.createDecimal(cur.bestPICPercCombo.potatoeProduction) : cur.bestPICPercCombo.potatoeProduction;
-                    cur.bestPICPercCombo.result.potatoeProduction = cur.bestPICPercCombo.result.potatoeProduction ? mathHelper.createDecimal(cur.bestPICPercCombo.result.potatoeProduction) : cur.bestPICPercCombo.result.potatoeProduction;
-                    cur.bestPICPercCombo.result.totalPotatoes = cur.bestPICPercCombo.result.totalPotatoes ? mathHelper.createDecimal(cur.bestPICPercCombo.result.totalPotatoes) : cur.bestPICPercCombo.result.totalPotatoes;
-                    cur.bestProdCombo.result.potatoeProduction = cur.bestProdCombo.result.potatoeProduction ? mathHelper.createDecimal(cur.bestProdCombo.result.potatoeProduction) : cur.bestProdCombo.result.potatoeProduction;
-                    cur.bestProdCombo.result.totalPotatoes = cur.bestProdCombo.result.totalPotatoes ? mathHelper.createDecimal(cur.bestProdCombo.result.totalPotatoes) : cur.bestProdCombo.result.totalPotatoes;
-                    cur.totalPotCombo.result.totalPotatoes = cur.totalPotCombo.result.totalPotatoes ? mathHelper.createDecimal(cur.totalPotCombo.result.totalPotatoes) : cur.totalPotCombo.result.totalPotatoes;
-                    cur.totalPotCombo.result.potatoeProduction = cur.totalPotCombo.result.potatoeProduction ? mathHelper.createDecimal(cur.totalPotCombo.result.potatoeProduction) : cur.totalPotCombo.result.potatoeProduction;
+            //         if (!cur.totalPotCombo.result) {
+            //             continue;
+            //         }
 
 
-
-                    for (let j = 0; j < cur.top10DataPointsPotatoes.length; j++) {
-
-                        let cur_top = cur.top10DataPointsPotatoes[j];
-                        cur_top.result = mathHelper.createDecimal(cur_top.result);
-
-                        for (let k = 0; k < cur_top.data.length; k++) {
-                            let cur_data = cur_top.data[k];
-                            cur_data.production = mathHelper.createDecimal(cur_data.production);
-                            cur_data.time = helper.roundInt(cur_data.time);
-                        }
-                    }
-
-                    for (let j = 0; j < cur.top10DataPointsFries.length; j++) {
-
-                        let cur_top = cur.top10DataPointsFries[j];
-                        cur_top.result = mathHelper.createDecimal(cur_top.result);
-
-                        for (let k = 0; k < cur_top.data.length; k++) {
-                            let cur_data = cur_top.data[k];
-                            cur_data.fries = mathHelper.createDecimal(cur_data.fries);
-                            cur_data.time = helper.roundInt(cur_data.time);
-                        }
-                    }
-
-
-                    for (let j = 0; j < cur.bestPicCombo.result.dataPointsPotatoes.length; j++) {
-                        let cur_data = cur.bestPicCombo.result.dataPointsPotatoes[j];
-                        cur_data.production = mathHelper.createDecimal(cur_data.production);
-                        cur_data.time = helper.roundInt(cur_data.time);
-                    }
-                    for (let j = 0; j < cur.bestPicCombo.result.dataPointsFries.length; j++) {
-                        let cur_data = cur.bestPicCombo.result.dataPointsFries[j];
-                        cur_data.fries = mathHelper.createDecimal(cur_data.fries);
-                        cur_data.time = helper.roundInt(cur_data.time);
-                    }
-                    for (let j = 0; j < cur.bestPICPercCombo.result.dataPointsPotatoes.length; j++) {
-                        let cur_data = cur.bestPICPercCombo.result.dataPointsPotatoes[j];
-                        cur_data.production = mathHelper.createDecimal(cur_data.production);
-                        cur_data.time = helper.roundInt(cur_data.time);
-                    }
-                    for (let j = 0; j < cur.bestPICPercCombo.result.dataPointsFries.length; j++) {
-                        let cur_data = cur.bestPICPercCombo.result.dataPointsFries[j];
-                        cur_data.fries = mathHelper.createDecimal(cur_data.fries);
-                        cur_data.time = helper.roundInt(cur_data.time);
-                    }
-
-
-                    top10DataPointsPotatoes.push(...cur.top10DataPointsPotatoes);
-                    top10DataPointsFries.push(...cur.top10DataPointsFries);
-                    if (cur.bestPicCombo.picGain > bestPic.pic) {
-                        bestPic = { pic: cur.bestPicCombo.picGain, result: cur.bestPicCombo, prod: cur.bestPicCombo.potatoeProduction }
-                    }
-                    else if (cur.bestPicCombo.picGain === bestPic.pic) {
-                        if (cur.bestPicCombo.potatoeProduction.greaterThan(bestPic.prod)) {
-                            bestPic = { pic: cur.bestPicCombo.picGain, result: cur.bestPicCombo, prod: cur.bestPicCombo.potatoeProduction }
-                        }
-                    }
-
-                    if (cur.bestPICPercCombo.picGain > bestPicPerc.pic) {
-                        bestPicPerc = { pic: cur.bestPICPercCombo.picGain, result: cur.bestPICPercCombo, prod: cur.bestPICPercCombo.potatoeProduction }
-                    }
-                    else if (cur.bestPICPercCombo.picGain === bestPicPerc.pic) {
-                        if (cur.bestPICPercCombo.potatoeProduction.greaterThan(bestPicPerc.prod)) {
-                            bestPicPerc = { pic: cur.bestPICPercCombo.picGain, result: cur.bestPICPercCombo, prod: cur.bestPICPercCombo.potatoeProduction }
-                        }
-                    }
-
-
-                    if (cur.bestProdCombo.result.potatoeProduction.greaterThan(bestProd.prod)) {
-                        bestProd = { prod: cur.bestProdCombo.result.potatoeProduction, result: cur.bestProdCombo }
-
-                    }
-                    if (cur.totalPotCombo.result.totalPotatoes.greaterThan(bestPot.pot)) {
-                        bestPot = { pot: cur.totalPotCombo.result.totalPotatoes, result: cur.totalPotCombo }
-                    }
-
-                    for (let j = 0; j < cur.top10DataPointsPotatoes.length; j++) {
-                        cur.top10DataPointsPotatoes[j].obj = cur.totalPotCombo;
-                    }
-
-                }
-
-                top10DataPointsPotatoes = top10DataPointsPotatoes.sort((a, b) => b.result.compare(a.result)).slice(0, 10);
-                top10DataPointsFries = top10DataPointsFries.sort((a, b) => b.result.compare(a.result)).slice(0, 10);
-                // top10DataPointsFries =[]
-
-
-                for (let i = 0; i < top10DataPointsPotatoes.length; i++) {
-
-                    let cur = top10DataPointsPotatoes[i];
-                    for (let j = 0; j < cur.data.length; j++) {
-                        cur.data[j].time = helper.roundInt(cur.data[j].time);
-                        cur.data[j].originalProduction = mathHelper.createDecimal(cur.data[j].production.toString());
-                    }
-                }
-
-                for (let i = 0; i < bestPic.result.result.dataPointsPotatoes.length; i++) {
-                    let cur = bestPic.result.result.dataPointsPotatoes[i];
-                    cur.time = helper.roundInt(cur.time);
-                    cur.originalProduction = mathHelper.createDecimal(cur.production.toString());
-                }
-                for (let i = 0; i < bestPicPerc.result.result.dataPointsPotatoes.length; i++) {
-                    let cur = bestPicPerc.result.result.dataPointsPotatoes[i];
-                    cur.time = helper.roundInt(cur.time);
-                    cur.originalProduction = mathHelper.createDecimal(cur.production.toString());
-                }
-
-                if (bestProd.result) {
-                    bestProd.finalFry = farmingHelper.calcFryOutput(bestProd.result.result.totalPotatoes);
-                    bestPot.finalFry = farmingHelper.calcFryOutput(bestPot.result.result.totalPotatoes);
-                    bestPic.finalFry = farmingHelper.calcFryOutput(bestPic.result.result.totalPotatoes);
-                    bestPicPerc.finalFry = farmingHelper.calcFryOutput(bestPicPerc.result.result.totalPotatoes);
-
-                    for (let i = 0; i < bestPic.result.plants.length; i++) {
-
-                        bestPic.result.plants[i].created = mathHelper.createDecimal(`${bestPic.result.plants[i].created.mantissa}e${bestPic.result.plants[i].created.exponent}`);
-                        bestPic.result.plants[i].totalMade = mathHelper.createDecimal(`${bestPic.result.plants[i].totalMade.mantissa}e${bestPic.result.plants[i].totalMade.exponent}`);
-                        bestPic.result.plants[i].production = mathHelper.createDecimal(`${bestPic.result.plants[i].production.mantissa}e${bestPic.result.plants[i].production.exponent}`);
-
-                        bestPicPerc.result.plants[i].created = mathHelper.createDecimal(`${bestPicPerc.result.plants[i].created.mantissa}e${bestPicPerc.result.plants[i].created.exponent}`);
-                        bestPicPerc.result.plants[i].totalMade = mathHelper.createDecimal(`${bestPicPerc.result.plants[i].totalMade.mantissa}e${bestPicPerc.result.plants[i].totalMade.exponent}`);
-                        bestPicPerc.result.plants[i].production = mathHelper.createDecimal(`${bestPicPerc.result.plants[i].production.mantissa}e${bestPicPerc.result.plants[i].production.exponent}`);
-
-                        bestProd.result.plants[i].created = mathHelper.createDecimal(`${bestProd.result.plants[i].created.mantissa}e${bestProd.result.plants[i].created.exponent}`);
-                        bestProd.result.plants[i].totalMade = mathHelper.createDecimal(`${bestProd.result.plants[i].totalMade.mantissa}e${bestProd.result.plants[i].totalMade.exponent}`);
-                        bestProd.result.plants[i].production = mathHelper.createDecimal(`${bestProd.result.plants[i].production.mantissa}e${bestProd.result.plants[i].production.exponent}`);
-
-                        bestPot.result.plants[i].created = mathHelper.createDecimal(`${bestPot.result.plants[i].created.mantissa}e${bestPot.result.plants[i].created.exponent}`);
-                        bestPot.result.plants[i].totalMade = mathHelper.createDecimal(`${bestPot.result.plants[i].totalMade.mantissa}e${bestPot.result.plants[i].totalMade.exponent}`);
-                        bestPot.result.plants[i].production = mathHelper.createDecimal(`${bestPot.result.plants[i].production.mantissa}e${bestPot.result.plants[i].production.exponent}`);
-                    }
-
-
-                    let finalBests = {
-                        bestProd: bestProd,
-                        prod: bestProd.result.combo,
-                        bestPot: bestPot,
-                        pot: bestPot.result.combo,
-                        bestPic: bestPic,
-                        pic: bestPic.result.combo,
-                        bestPicPerc: bestPicPerc,
-                        picPerc: bestPicPerc.result.combo,
-                        top10DataPointsPotatoes: top10DataPointsPotatoes,
-                        top10DataPointsFries: top10DataPointsFries
-                    }
-                    console.log(`Best:`);
-                    console.log(finalBests);
+            //         //Have to reset potatoe values again
+            //         cur.bestPicCombo.potatoeProduction = cur.bestPicCombo.potatoeProduction ? mathHelper.createDecimal(cur.bestPicCombo.potatoeProduction) : cur.bestPicCombo.potatoeProduction;
+            //         cur.bestPicCombo.result.potatoeProduction = cur.bestPicCombo.result.potatoeProduction ? mathHelper.createDecimal(cur.bestPicCombo.result.potatoeProduction) : cur.bestPicCombo.result.potatoeProduction;
+            //         cur.bestPicCombo.result.totalPotatoes = cur.bestPicCombo.result.totalPotatoes ? mathHelper.createDecimal(cur.bestPicCombo.result.totalPotatoes) : cur.bestPicCombo.result.totalPotatoes;
+            //         cur.bestPICPercCombo.potatoeProduction = cur.bestPICPercCombo.potatoeProduction ? mathHelper.createDecimal(cur.bestPICPercCombo.potatoeProduction) : cur.bestPICPercCombo.potatoeProduction;
+            //         cur.bestPICPercCombo.result.potatoeProduction = cur.bestPICPercCombo.result.potatoeProduction ? mathHelper.createDecimal(cur.bestPICPercCombo.result.potatoeProduction) : cur.bestPICPercCombo.result.potatoeProduction;
+            //         cur.bestPICPercCombo.result.totalPotatoes = cur.bestPICPercCombo.result.totalPotatoes ? mathHelper.createDecimal(cur.bestPICPercCombo.result.totalPotatoes) : cur.bestPICPercCombo.result.totalPotatoes;
+            //         cur.bestProdCombo.result.potatoeProduction = cur.bestProdCombo.result.potatoeProduction ? mathHelper.createDecimal(cur.bestProdCombo.result.potatoeProduction) : cur.bestProdCombo.result.potatoeProduction;
+            //         cur.bestProdCombo.result.totalPotatoes = cur.bestProdCombo.result.totalPotatoes ? mathHelper.createDecimal(cur.bestProdCombo.result.totalPotatoes) : cur.bestProdCombo.result.totalPotatoes;
+            //         cur.totalPotCombo.result.totalPotatoes = cur.totalPotCombo.result.totalPotatoes ? mathHelper.createDecimal(cur.totalPotCombo.result.totalPotatoes) : cur.totalPotCombo.result.totalPotatoes;
+            //         cur.totalPotCombo.result.potatoeProduction = cur.totalPotCombo.result.potatoeProduction ? mathHelper.createDecimal(cur.totalPotCombo.result.potatoeProduction) : cur.totalPotCombo.result.potatoeProduction;
 
 
 
-                    setCalcDone(true);
-                    return finalBests;
-                }
-            })
+            //         for (let j = 0; j < cur.top10DataPointsPotatoes.length; j++) {
+
+            //             let cur_top = cur.top10DataPointsPotatoes[j];
+            //             cur_top.result = mathHelper.createDecimal(cur_top.result);
+
+            //             for (let k = 0; k < cur_top.data.length; k++) {
+            //                 let cur_data = cur_top.data[k];
+            //                 cur_data.production = mathHelper.createDecimal(cur_data.production);
+            //                 cur_data.time = helper.roundInt(cur_data.time);
+            //             }
+            //         }
+
+            //         for (let j = 0; j < cur.top10DataPointsFries.length; j++) {
+
+            //             let cur_top = cur.top10DataPointsFries[j];
+            //             cur_top.result = mathHelper.createDecimal(cur_top.result);
+
+            //             for (let k = 0; k < cur_top.data.length; k++) {
+            //                 let cur_data = cur_top.data[k];
+            //                 cur_data.fries = mathHelper.createDecimal(cur_data.fries);
+            //                 cur_data.time = helper.roundInt(cur_data.time);
+            //             }
+            //         }
+
+
+            //         for (let j = 0; j < cur.bestPicCombo.result.dataPointsPotatoes.length; j++) {
+            //             let cur_data = cur.bestPicCombo.result.dataPointsPotatoes[j];
+            //             cur_data.production = mathHelper.createDecimal(cur_data.production);
+            //             cur_data.time = helper.roundInt(cur_data.time);
+            //         }
+            //         for (let j = 0; j < cur.bestPicCombo.result.dataPointsFries.length; j++) {
+            //             let cur_data = cur.bestPicCombo.result.dataPointsFries[j];
+            //             cur_data.fries = mathHelper.createDecimal(cur_data.fries);
+            //             cur_data.time = helper.roundInt(cur_data.time);
+            //         }
+            //         for (let j = 0; j < cur.bestPICPercCombo.result.dataPointsPotatoes.length; j++) {
+            //             let cur_data = cur.bestPICPercCombo.result.dataPointsPotatoes[j];
+            //             cur_data.production = mathHelper.createDecimal(cur_data.production);
+            //             cur_data.time = helper.roundInt(cur_data.time);
+            //         }
+            //         for (let j = 0; j < cur.bestPICPercCombo.result.dataPointsFries.length; j++) {
+            //             let cur_data = cur.bestPICPercCombo.result.dataPointsFries[j];
+            //             cur_data.fries = mathHelper.createDecimal(cur_data.fries);
+            //             cur_data.time = helper.roundInt(cur_data.time);
+            //         }
+
+
+            //         top10DataPointsPotatoes.push(...cur.top10DataPointsPotatoes);
+            //         top10DataPointsFries.push(...cur.top10DataPointsFries);
+            //         if (cur.bestPicCombo.picGain > bestPic.pic) {
+            //             bestPic = { pic: cur.bestPicCombo.picGain, result: cur.bestPicCombo, prod: cur.bestPicCombo.potatoeProduction }
+            //         }
+            //         else if (cur.bestPicCombo.picGain === bestPic.pic) {
+            //             if (cur.bestPicCombo.potatoeProduction.greaterThan(bestPic.prod)) {
+            //                 bestPic = { pic: cur.bestPicCombo.picGain, result: cur.bestPicCombo, prod: cur.bestPicCombo.potatoeProduction }
+            //             }
+            //         }
+
+            //         if (cur.bestPICPercCombo.picGain > bestPicPerc.pic) {
+            //             bestPicPerc = { pic: cur.bestPICPercCombo.picGain, result: cur.bestPICPercCombo, prod: cur.bestPICPercCombo.potatoeProduction }
+            //         }
+            //         else if (cur.bestPICPercCombo.picGain === bestPicPerc.pic) {
+            //             if (cur.bestPICPercCombo.potatoeProduction.greaterThan(bestPicPerc.prod)) {
+            //                 bestPicPerc = { pic: cur.bestPICPercCombo.picGain, result: cur.bestPICPercCombo, prod: cur.bestPICPercCombo.potatoeProduction }
+            //             }
+            //         }
+
+
+            //         if (cur.bestProdCombo.result.potatoeProduction.greaterThan(bestProd.prod)) {
+            //             bestProd = { prod: cur.bestProdCombo.result.potatoeProduction, result: cur.bestProdCombo }
+
+            //         }
+            //         if (cur.totalPotCombo.result.totalPotatoes.greaterThan(bestPot.pot)) {
+            //             bestPot = { pot: cur.totalPotCombo.result.totalPotatoes, result: cur.totalPotCombo }
+            //         }
+
+            //         for (let j = 0; j < cur.top10DataPointsPotatoes.length; j++) {
+            //             cur.top10DataPointsPotatoes[j].obj = cur.totalPotCombo;
+            //         }
+
+            //     }
+
+            //     top10DataPointsPotatoes = top10DataPointsPotatoes.sort((a, b) => b.result.compare(a.result)).slice(0, 10);
+            //     top10DataPointsFries = top10DataPointsFries.sort((a, b) => b.result.compare(a.result)).slice(0, 10);
+            //     // top10DataPointsFries =[]
+
+
+            //     for (let i = 0; i < top10DataPointsPotatoes.length; i++) {
+
+            //         let cur = top10DataPointsPotatoes[i];
+            //         for (let j = 0; j < cur.data.length; j++) {
+            //             cur.data[j].time = helper.roundInt(cur.data[j].time);
+            //             cur.data[j].originalProduction = mathHelper.createDecimal(cur.data[j].production.toString());
+            //         }
+            //     }
+
+            //     for (let i = 0; i < bestPic.result.result.dataPointsPotatoes.length; i++) {
+            //         let cur = bestPic.result.result.dataPointsPotatoes[i];
+            //         cur.time = helper.roundInt(cur.time);
+            //         cur.originalProduction = mathHelper.createDecimal(cur.production.toString());
+            //     }
+            //     for (let i = 0; i < bestPicPerc.result.result.dataPointsPotatoes.length; i++) {
+            //         let cur = bestPicPerc.result.result.dataPointsPotatoes[i];
+            //         cur.time = helper.roundInt(cur.time);
+            //         cur.originalProduction = mathHelper.createDecimal(cur.production.toString());
+            //     }
+
+            //     if (bestProd.result) {
+            //         bestProd.finalFry = farmingHelper.calcFryOutput(bestProd.result.result.totalPotatoes);
+            //         bestPot.finalFry = farmingHelper.calcFryOutput(bestPot.result.result.totalPotatoes);
+            //         bestPic.finalFry = farmingHelper.calcFryOutput(bestPic.result.result.totalPotatoes);
+            //         bestPicPerc.finalFry = farmingHelper.calcFryOutput(bestPicPerc.result.result.totalPotatoes);
+
+            //         for (let i = 0; i < bestPic.result.plants.length; i++) {
+
+            //             bestPic.result.plants[i].created = mathHelper.createDecimal(`${bestPic.result.plants[i].created.mantissa}e${bestPic.result.plants[i].created.exponent}`);
+            //             bestPic.result.plants[i].totalMade = mathHelper.createDecimal(`${bestPic.result.plants[i].totalMade.mantissa}e${bestPic.result.plants[i].totalMade.exponent}`);
+            //             bestPic.result.plants[i].production = mathHelper.createDecimal(`${bestPic.result.plants[i].production.mantissa}e${bestPic.result.plants[i].production.exponent}`);
+
+            //             bestPicPerc.result.plants[i].created = mathHelper.createDecimal(`${bestPicPerc.result.plants[i].created.mantissa}e${bestPicPerc.result.plants[i].created.exponent}`);
+            //             bestPicPerc.result.plants[i].totalMade = mathHelper.createDecimal(`${bestPicPerc.result.plants[i].totalMade.mantissa}e${bestPicPerc.result.plants[i].totalMade.exponent}`);
+            //             bestPicPerc.result.plants[i].production = mathHelper.createDecimal(`${bestPicPerc.result.plants[i].production.mantissa}e${bestPicPerc.result.plants[i].production.exponent}`);
+
+            //             bestProd.result.plants[i].created = mathHelper.createDecimal(`${bestProd.result.plants[i].created.mantissa}e${bestProd.result.plants[i].created.exponent}`);
+            //             bestProd.result.plants[i].totalMade = mathHelper.createDecimal(`${bestProd.result.plants[i].totalMade.mantissa}e${bestProd.result.plants[i].totalMade.exponent}`);
+            //             bestProd.result.plants[i].production = mathHelper.createDecimal(`${bestProd.result.plants[i].production.mantissa}e${bestProd.result.plants[i].production.exponent}`);
+
+            //             bestPot.result.plants[i].created = mathHelper.createDecimal(`${bestPot.result.plants[i].created.mantissa}e${bestPot.result.plants[i].created.exponent}`);
+            //             bestPot.result.plants[i].totalMade = mathHelper.createDecimal(`${bestPot.result.plants[i].totalMade.mantissa}e${bestPot.result.plants[i].totalMade.exponent}`);
+            //             bestPot.result.plants[i].production = mathHelper.createDecimal(`${bestPot.result.plants[i].production.mantissa}e${bestPot.result.plants[i].production.exponent}`);
+            //         }
+
+
+            //         let finalBests = {
+            //             bestProd: bestProd,
+            //             prod: bestProd.result.combo,
+            //             bestPot: bestPot,
+            //             pot: bestPot.result.combo,
+            //             bestPic: bestPic,
+            //             pic: bestPic.result.combo,
+            //             bestPicPerc: bestPicPerc,
+            //             picPerc: bestPicPerc.result.combo,
+            //             top10DataPointsPotatoes: top10DataPointsPotatoes,
+            //             top10DataPointsFries: top10DataPointsFries
+            //         }
+            //         console.log(`Best:`);
+            //         console.log(finalBests);
+
+
+
+            //         setCalcDone(true);
+            //         return finalBests;
+            //     }
+            // })
 
         }
 
@@ -1441,7 +1264,7 @@ const FarmingLanding = ({ data }) => {
         }
     }
 
-    let displayPicPerc = bestPlantCombo.pic != bestPlantCombo.picPerc;
+    let displayPicPerc = bestPlantCombo.pic !== bestPlantCombo.picPerc;
 
     return (
         <div style={{ height: '100%', display: 'flex', flex: 1, flexDirection: 'column', paddingLeft: '6px' }}>
@@ -2234,7 +2057,7 @@ const FarmingLanding = ({ data }) => {
                                                                                     - bestPlantCombo.bestPot.result.plants[index].prestige
                                                                                 }
                                                                             </div>
-                                                                            <img style={{ height: '24px', marginTop: '-4px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
+                                                                            <img alt='prestige star, yellow star in a red/orange circle' style={{ height: '24px', marginTop: '-4px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
                                                                         </div>
                                                                     )}
                                                                 </div>
@@ -2331,7 +2154,7 @@ const FarmingLanding = ({ data }) => {
                                                                                     - bestPlantCombo.bestPic.result.plants[index].prestige
                                                                                 }
                                                                             </div>
-                                                                            <img style={{ height: '24px', marginTop: '-4px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
+                                                                            <img alt='prestige star, yellow star in a red/orange circle' style={{ height: '24px', marginTop: '-4px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
                                                                             {/* <div> {bestPlantCombo.bestPic.result.plants[index].prestige + bestPlantCombo.bestPic.result.plants[index].picIncrease}</div> */}
                                                                         </div>
                                                                         // <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -2538,7 +2361,7 @@ const FarmingLanding = ({ data }) => {
                                                                                     - bestPlantCombo.bestPot.result.plants[bestPlantCombo.bestPot.result.result.steps.length - index - 1].prestige
                                                                                 }
                                                                             </div>
-                                                                            <img style={{ height: '24px', marginTop: '-4px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
+                                                                            <img alt='prestige star, yellow star in a red/orange circle' style={{ height: '24px', marginTop: '-4px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
                                                                         </div>
                                                                     )}
                                                                 </div>
@@ -2631,7 +2454,7 @@ const FarmingLanding = ({ data }) => {
                                                                                         - bestPlantCombo.bestPic.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].prestige
                                                                                     }
                                                                                 </div>
-                                                                                <img style={{ height: '24px', marginTop: '-4px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
+                                                                                <img alt='prestige star, yellow star in a red/orange circle' style={{ height: '24px', marginTop: '-4px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
                                                                                 {/* <img style={{ height: '24px' }} src={`/fapi_fork_personal/farming/prestige_star.png`} />
                                                                                 <div> {bestPlantCombo.bestPic.result.plants[bestPlantCombo.bestPic.result.plants.length - 1 - index].prestige}</div>
                                                                                 <img style={{ height: '24px' }} src={`/fapi_fork_personal/right_arrow.svg`} />

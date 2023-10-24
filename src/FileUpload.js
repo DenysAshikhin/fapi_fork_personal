@@ -53,13 +53,13 @@ const FileUpload = ({ onData }) => {
                 justifyContent: 'center'
             }}
         >
-            <img src={backgroundImage} style={{
+            <img alt='fullscreen picture of a Farmer Against Potatoes Idle game' src={backgroundImage} style={{
                 position: 'absolute', top: '0', left: '0', width: '100%', height: '100%', zIndex: '1',
                 opacity: '0.3'
             }} />
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginTop: 'calc(0px - 50vh)', zIndex: '2' }}
 
-         
+
 
             >
 
@@ -69,8 +69,8 @@ const FileUpload = ({ onData }) => {
                     setForceOpen={setForceOpen}
                     tooltip={
                         <div
-                        onMouseEnter={(e) => { if (!forceOpen) setForceOpen(true) }}
-                        onMouseLeave={(e) => { if (forceOpen) setForceOpen(false) }}
+                            onMouseEnter={(e) => { if (!forceOpen) setForceOpen(true) }}
+                            onMouseLeave={(e) => { if (forceOpen) setForceOpen(false) }}
                         >
                             <h3 style={{ marginTop: '6px', marginBottom: '12px' }}>Your save file can be found at:</h3>
                             <div style={{ display: 'flex' }}>
@@ -94,11 +94,11 @@ const FileUpload = ({ onData }) => {
                         </div>
                     }>
                     <div
-                           onMouseEnter={(e) => { if (!forceOpen) setForceOpen(true) }}
-                           onMouseLeave={(e) => { if (forceOpen) setForceOpen(false) }}
+                        onMouseEnter={(e) => { if (!forceOpen) setForceOpen(true) }}
+                        onMouseLeave={(e) => { if (forceOpen) setForceOpen(false) }}
                         style={{ display: 'flex', alignItems: 'center' }}>
                         <div className="mediumImportantText blackTextStroke" style={{ margin: '0 0 0 0', fontSize: '60px', fontWeight: 'bold' }}>Upload save file to view calculator</div>
-                        <img src={infoIcon} style={{ height: '36px', marginLeft: '6px', marginTop: '6px' }} />
+                        <img alt='on hover I in a cirlce icon, shows more information on hover' src={infoIcon} style={{ height: '36px', marginLeft: '6px', marginTop: '6px' }} />
                     </div>
                 </MouseOverPopover>
                 <div className="mediumImportantText blackTextStroke" style={{ margin: '0 0 0 0', fontSize: '35px', fontWeight: 'bold', textStroke: '' }}>Warning: contains spoilers!</div>

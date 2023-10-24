@@ -69,7 +69,7 @@ const PageCard = ({ page, setTab }) => {
                     borderRight: '2px solid rgba(255,255,255,0.8)',
                 }}
             >
-                <img style={{ maxHeight: '100%' }} src={imgSrc ? imgSrc : `/fapi_fork_personal/${imgString}.svg`} />
+                <img alt={`navigation item, picture of ${imgString}`} style={{ maxHeight: '100%' }} src={imgSrc ? imgSrc : `/fapi_fork_personal/${imgString}.svg`} />
             </div>
 
 

@@ -185,7 +185,7 @@ const PetItem = ({ petData, isSelected, onClick, data, weightMap, petScoreFn, de
                                 </div>)
                             })}
                             {/* <div className="item-image"> */}
-                            <img src={img} alt={name}
+                            <img alt={`in game image of ${name}`} src={img}
                                 className={circleBorder ? '' : 'item-image'}
                                 style={{
                                     zIndex: '2',
@@ -287,7 +287,7 @@ const StaticPetItem = ({ petData, highlight, showNameOnly }) => {
                 </div>
             }>
             {!showNameOnly && (
-                <img src={img} alt={name} className='item-image' />
+                <img alt={`in game image of ${name}`} src={img} className='item-image' />
             )}
 
             {showNameOnly && (

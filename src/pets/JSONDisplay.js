@@ -412,7 +412,7 @@ const JSONDisplay = ({
                                                 style={{ display: 'flex', alignItems: 'center', margin: '0 12px', }}
                                             >
                                                 {groupLabel}
-                                                <img style={{ height: '16px', margin: '0 0 0 6px' }} src={infoIcon} />
+                                                <img alt={`letter "I" in a circle, shows more information on hover`} style={{ height: '16px', margin: '0 0 0 6px' }} src={infoIcon} />
                                             </div>
                                         </MouseOverPopover>
                                     </div>
@@ -543,7 +543,7 @@ const JSONDisplay = ({
                                                     }}
                                                 >
 
-                                                    <img
+                                                    <img alt='push pin'
                                                         style={{ width: '20px' }}
                                                         src={pinIcon} />
                                                 </div>
@@ -578,7 +578,7 @@ const JSONDisplay = ({
                                                     }}
                                                 >
 
-                                                    <img
+                                                    <img alt='trash can'
                                                         style={{ width: '20px' }}
                                                         src={trashIcon} />
                                                 </div>
@@ -1527,7 +1527,7 @@ const JSONDisplay = ({
                                             <div>
                                                 Placement
                                             </div>
-                                            <img style={{ height: '16px', marginLeft: '6px' }} src={infoIcon} />
+                                            <img alt='on hover I in a cirlce icon, shows more information on hover' style={{ height: '16px', marginLeft: '6px' }} src={infoIcon} />
                                         </div>
                                     </MouseOverPopover>
 
@@ -1560,7 +1560,7 @@ const JSONDisplay = ({
                                             <div>
                                                 Parameters
                                             </div>
-                                            <img style={{ height: '16px', marginLeft: '6px' }} src={infoIcon} />
+                                            <img alt='on hover I in a cirlce icon, shows more information on hover' style={{ height: '16px', marginLeft: '6px' }} src={infoIcon} />
                                         </div>
                                     </MouseOverPopover>
                                 </div>
@@ -1731,7 +1731,7 @@ const JSONDisplay = ({
                                                         {petGroup}
                                                     </div>
                                                 </div>
-                                                <img
+                                                <img alt='X (cross to remove)'
                                                     style={{
                                                         maxHeight: '12px',
                                                         margin: '0 12px 0 auto',
@@ -1852,7 +1852,7 @@ const JSONDisplay = ({
                                                 {(showGreen || showRed) && (
                                                     <div style={{ position: 'absolute', right: '34px' }}>
                                                         <MouseOverPopover muiHeight={'18px'} tooltip={<div>{hoverMsg}</div>} style={{ display: 'flex', alignItems: 'center', height: '18px' }}>
-                                                            <img style={{ height: '18px', marginLeft: '6px', marginTop: '2px' }} src={showGreen ? infoIconGreen : infoIconRed} />
+                                                            <img alt='on hover I in a cirlce icon, shows more information on hover' style={{ height: '18px', marginLeft: '6px', marginTop: '2px' }} src={showGreen ? infoIconGreen : infoIconRed} />
                                                         </MouseOverPopover>
                                                     </div>
                                                 )}
@@ -2057,10 +2057,9 @@ const JSONDisplay = ({
                                                                     justifyContent: 'center'
                                                                 }}
                                                             >
-                                                                <img
+                                                                <img alt='push pin'
                                                                     style={{
                                                                         maxHeight: '12px',
-
                                                                     }}
                                                                     onClick={(e) => {
                                                                         setPetWhiteList((curr) => {

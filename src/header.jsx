@@ -16,7 +16,7 @@ const Header = ({ }) => {
                 margin: '0 0 0 0'
             }}
         >
-            <img src={FARMER_PNG} style={{ height: '31px' }} />
+            <img alt='in game font spelling "Farmer"' src={FARMER_PNG} style={{ height: '31px' }} />
 
             <div
                 className='dobra importantText'
@@ -27,7 +27,7 @@ const Header = ({ }) => {
                 Against
             </div>
 
-            <img src={POTATOES_PNG} style={{ height: '31px' }} />
+            <img alt='in game font spelling "Potatoes"' src={POTATOES_PNG} style={{ height: '31px' }} />
             <div
                 className='dobra importantText'
                 style={{

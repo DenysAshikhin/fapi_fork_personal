@@ -31,7 +31,7 @@ const AssemblyInnerBonus = ({ line, al_level }) => {
             onMouseLeave={(e) => { setShowLocked(false) }}
         >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                <img src={!locked || showLocked ? data.img : lockedAssembly} style={{ width: '95%' }} />
+                <img alt={`in game ${data.label} assembly line image`} src={!locked || showLocked ? data.img : lockedAssembly} style={{ width: '95%' }} />
                 {(!locked || showLocked) && (
                     <div
                         className='textMedium blackTextStroke1'
@@ -59,7 +59,7 @@ const AssemblyInnerBonus = ({ line, al_level }) => {
                         <div style={{ fontSize: '24px', marginLeft: 'auto', marginRight: '6px', marginTop: '0px' }}>
                             {`x` + bonusAmount.toExponential(2)}
                         </div>
-                        <img src={rightArrow} style={{ width: '32px', margin:'0 -3px' }} />
+                        <img alt='arrow point to the left' src={rightArrow} style={{ width: '32px', margin:'0 -3px' }} />
                         <div style={{ fontSize: '24px', marginLeft: '6px', marginTop: '0px' }}>
                             {`x` + futureBonusAmount.toExponential(2)}
                         </div>
