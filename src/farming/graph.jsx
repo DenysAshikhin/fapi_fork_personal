@@ -8,11 +8,14 @@ function Graph({
     runningGraphObjects,
     yScale,
     expDiff,
+    expDiffFry,
     showCalc,
     bestPic,
     displayPicPerc,
     calcDone,
-    calcAFK
+    calcAFK,
+    showHP,
+    showFries
 }) {
     let showRunning = false;
     if (!!runningGraphObjects?.runningProd?.prod && !calcDone && !calcAFK) {
@@ -30,40 +33,63 @@ function Graph({
                 }}
             >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                    dataKey="time"
-                    xAxisId="mainTime"
-                    name="time in seconds"
-                    tickFormatter={(e, index) => {
-                        return (helper.secondsToString(e));
-                    }}
-                    minTickGap={7}
-                />
-
-                <YAxis
-                    yAxisId="potatoes"
-                    scale={yScale}
-                    domain={['auto', 'auto']}
-                    tickFormatter={(e, index, payload) => {
-                        let temp = mathHelper.createDecimal(e);
-                        temp.exponent += expDiff;
-                        return temp.toPrecision(3).toString();
-                    }}
-                    width={95}
-                >
-
-                    <Label
-                        value="Total HP Made"
-                        position="insideLeft"
-                        angle={-90}
-                        style={{ textAnchor: 'middle' }}
+                {showHP && (
+                    <XAxis
+                        dataKey="time"
+                        xAxisId="mainTime"
+                        name="time in seconds"
+                        tickFormatter={(e, index) => {
+                            return (helper.secondsToString(e));
+                        }}
+                        minTickGap={7}
                     />
+                )}
+                {showHP && (
+                    <YAxis
+                        yAxisId="potatoes"
+                        scale={yScale}
+                        domain={['auto', 'auto']}
+                        tickFormatter={(e, index, payload) => {
+                            let temp = mathHelper.createDecimal(e);
+                            temp.exponent += expDiff;
+                            return temp.toPrecision(3).toString();
+                        }}
+                        width={95}
+                    >
 
-                </YAxis >
-                {/*<YAxis yAxisId="fries" orientation="right" />*/}
+                        <Label
+                            value="Total HP Made"
+                            position="insideLeft"
+                            angle={-90}
+                            style={{ textAnchor: 'middle' }}
+                        />
+
+                    </YAxis >
+                )}
+                {showFries && (
+
+                    <YAxis yAxisId="fries" orientation={showHP ? "right" : "left"}
+                        // scale={yScale}
+                        scale={'linear'}
+                        domain={['auto', 'auto']}
+                        tickFormatter={(e, index, payload) => {
+                            let temp = mathHelper.createDecimal(e);
+                            temp.exponent += expDiffFry;
+                            return temp.toPrecision(3).toString();
+                        }}
+                    // width={95} 
+                    >
+                        <Label
+                            value="Total Fries Made"
+                            position="insideLeft"
+                            angle={-90}
+                            style={{ textAnchor: 'middle' }}
+                        />
+                    </YAxis>
+                )}
                 <Tooltip
                     formatter={(value, name, props) => {
-                        return [props.payload.originalProduction.toPrecision(3).toString(), name];
+                        return [props.payload.originalProduction ? props.payload.originalProduction.toPrecision(3).toString() : props.payload.fries.toPrecision(3).toString(), name];
                     }}
                     labelFormatter={(label, payload) => {
                         return helper.secondsToString(label);
@@ -97,7 +123,7 @@ function Graph({
 
                         {/* {calcStep && ( */}
                         <>
-                            {bestPic > 0 && (
+                            {bestPic > 0 && showHP && (
                                 <>
                                     <XAxis dataKey="time" hide={true} xAxisId={"bestPIC"} name="time in seconds" />
                                     <Line
@@ -108,7 +134,7 @@ function Graph({
                                         data={graphObjects.bestPic}
                                         dataKey="production"
                                         // dataKey="value2"
-                                        name={`Most PIC`}
+                                        name={`Most PIC HP`}
                                         stroke="orange"
                                         activeDot={{ r: 8 }}
                                     />
@@ -135,32 +161,66 @@ function Graph({
 
                         </>
 
+                        {showHP && (
+                            <>
+                                {graphObjects.top10Potatoes.map((val, index) => {
+                                    if (index > 0) return;
+                                    return (<XAxis key={`xAxis${index}`} dataKey="time" hide={true} xAxisId={"potatoXAxis" + index} name="time in seconds" />)
+                                })
+                                }
 
-                        {graphObjects.top10Potatoes.map((val, index) => {
-                            if (index > 0) return;
-                            return (<XAxis key={`xAxis${index}`} dataKey="time" hide={true} xAxisId={"potatoXAxis" + index} name="time in seconds" />)
-                        })
-                        }
+                                {graphObjects.top10Potatoes.map((val, index) => {
+                                    if (index > 0) return;
+                                    return (
+                                        <Line
+                                            key={`line${index}`}
+                                            type="monotone"
+                                            xAxisId={"potatoXAxis" + index}
+                                            // xAxisId={"mainTime"}
+                                            yAxisId="potatoes"
+                                            data={val.data}
+                                            dataKey="production"
+                                            // dataKey="value2"
+                                            name={`Best Production HP`}
+                                            stroke="#8884d8"
+                                            activeDot={{ r: 8 }}
+                                        />
+                                    )
+                                })
+                                }
+                            </>
+                        )}
 
-                        {graphObjects.top10Potatoes.map((val, index) => {
-                            if (index > 0) return;
-                            return (
-                                <Line
-                                    key={`line${index}`}
-                                    type="monotone"
-                                    xAxisId={"potatoXAxis" + index}
-                                    // xAxisId={"mainTime"}
-                                    yAxisId="potatoes"
-                                    data={val.data}
-                                    dataKey="production"
-                                    // dataKey="value2"
-                                    name={`Top ${index + 1} production`}
-                                    stroke="#8884d8"
-                                    activeDot={{ r: 8 }}
-                                />
-                            )
-                        })
-                        }
+                        {showFries && (
+                            <>
+                                {graphObjects.top10Fries.map((val, index) => {
+                                    if (index > 0) return;
+                                    return (<XAxis key={`xAxis${index}_fries`} dataKey="time" hide={true} xAxisId={"fryXAxis" + index} name="time in seconds" />)
+                                })
+                                }
+
+                                {graphObjects.top10Fries.map((val, index) => {
+                                    if (index > 0) return;
+                                    return (
+                                        <Line
+                                            key={`line${index}`}
+                                            type="monotone"
+                                            xAxisId={"fryXAxis" + index}
+                                            // xAxisId={"mainTime"}
+                                            yAxisId="fries"
+                                            data={val.data}
+                                            dataKey="fries"
+                                            // dataKey="value2"
+                                            name={`Best Production Fries`}
+                                            stroke="#524f82"
+                                            activeDot={{ r: 8 }}
+                                        />
+                                    )
+                                })
+                                }
+                            </>
+                        )}
+
                     </>
                 )}
 
@@ -183,19 +243,51 @@ function Graph({
                     </>
                 )}
 
+                {showHP && (
 
-                <Line
-                    type="monotone"
-                    xAxisId="mainTime"
-                    yAxisId="potatoes"
-                    data={graphObjects.customProduction.dataPointsPotatoes}
-                    dataKey="production"
-                    // dataKey="custom"
-                    name="Currently selected production"
-                    stroke="#82ca9d"
-                    strokeWidth={2}
-                    activeDot={{ r: 8 }}
-                />
+                    <Line
+                        type="monotone"
+                        xAxisId="mainTime"
+                        yAxisId="potatoes"
+                        data={graphObjects.customProduction.dataPointsPotatoes}
+                        dataKey="production"
+                        // dataKey="custom"
+                        name="Currently selected production HP"
+                        stroke="#82ca9d"
+                        strokeWidth={2}
+                        activeDot={{ r: 8 }}
+                    />
+                )}
+
+
+                {showFries && (
+                    <>
+
+                        <XAxis
+                            dataKey="time"
+                            xAxisId="fry_axis_current"
+                            name="time in seconds"
+                            hide={showHP ? true : false}
+                            minTickGap={7}
+                            tickFormatter={(e, index) => {
+                                return (helper.secondsToString(e));
+                            }}
+                        />
+
+                        <Line
+                            type="monotone"
+                            xAxisId="fry_axis_current"
+                            yAxisId="fries"
+                            data={graphObjects.customProduction.dataPointsFries}
+                            dataKey="fries"
+                            // dataKey="custom"
+                            name="Currently selected production Fries"
+                            stroke="#4e795e"
+                            strokeWidth={2}
+                            activeDot={{ r: 8 }}
+                        />
+                    </>
+                )}
                 {/* {customLines.length > 0 && (
                 customLines.map((e, index) => {
                     return (
@@ -241,6 +333,9 @@ export default memo(Graph, function (prev, current) {
     //to avoid checking every single datapoint, we can be a bit smarter
     //if the graph was recalulcated, or calculating, update graph
     if (prev.showCalc !== current.showCalc) return false
+
+    else if (prev.showFries !== current.showFries) return false
+    else if (prev.showHP !== current.showHP) return false
 
     //Otherwise, if the user's total potatoes changed (meaning they updated something else) update graph
     else if (prev.graphObjects.customProduction.totalPotatoes.notEquals(current.graphObjects.customProduction.totalPotatoes)) {

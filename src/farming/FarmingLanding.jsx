@@ -84,6 +84,8 @@ const FarmingLanding = ({ data }) => {
     const [numThreads, setNumThreads] = useLocalStorage("numThreads", 8);
     // const [yScale, setYScale] = useState('log');
     const [yScale, setYScale] = useLocalStorage("yScale", 'log');
+    const [showFries, setShowFries] = useLocalStorage("showFries", true);
+    const [showHP, setShowHP] = useLocalStorage("showHP", true);
     const [calcedFutureTime, setCalcedFutureTime] = useState(futureTime);//Used to lock in for pic displaying what future time what used when calculating
 
     const [numSimulatedAutos, setNumSimulatedAutos] = useLocalStorage("numSimulatedAutos", data.FarmingShopAutoPlotBought);
@@ -223,7 +225,8 @@ const FarmingLanding = ({ data }) => {
             potionRankTime: potionRankTime,
             potionRank: potionRank,
             forceRankPotion: forceRankPotion,
-            fryBonus: data.FrenchFriesBonus
+            fryBonus: data.FrenchFriesBonus,
+            timePassed: data.TimePassedFarming
         }
         tempy.originalShopProdBonus = data.PlantTotalProductionBonus;
         return tempy
@@ -273,6 +276,7 @@ const FarmingLanding = ({ data }) => {
 
     const [calcDone, setCalcDone] = useState(true);
     const [expDiff, setExpDiff] = useState(0);
+    const [expDiffFry, setExpDiffFry] = useState(0);
 
     let tempFuture = useMemo(() => {
         console.log(`calcing`);
@@ -336,6 +340,12 @@ const FarmingLanding = ({ data }) => {
             cur.time = helper.roundInt(cur.time);
             cur.originalProduction = mathHelper.createDecimal(cur.production.toString());
         }
+        for (let i = 0; i < result.dataPointsFries.length; i++) {
+            let cur = result.dataPointsFries[i];
+            cur.time = helper.roundInt(cur.time);
+            cur.originalFry = mathHelper.createDecimal(cur.fries.toString());
+        }
+
         console.log(`future plants:`);
         console.log(result);
         let finalFry = farmingHelper.calcFryOutput(result.totalPotatoes, result.finalModifiers);
@@ -352,11 +362,21 @@ const FarmingLanding = ({ data }) => {
         let currMaxExp = 0;
         let diff_exp = 0;
 
+        let currMaxExpFry = 0;
+        let diff_expFry = 0;
+
         // Go over all the custom input data points first
         for (let i = 0; i < tempFuture.dataPointsPotatoes.length; i++) {
             let cur = tempFuture.dataPointsPotatoes[i];
             if (cur.originalProduction.exponent > currMaxExp) {
                 currMaxExp = cur.originalProduction.exponent;
+            }
+        }
+
+        for (let i = 0; i < tempFuture.dataPointsFries.length; i++) {
+            let cur = tempFuture.dataPointsFries[i];
+            if (cur.originalFry.exponent > currMaxExpFry) {
+                currMaxExpFry = cur.originalFry.exponent;
             }
         }
 
@@ -372,6 +392,16 @@ const FarmingLanding = ({ data }) => {
                     }
                 }
             }
+            for (let i = 0; i < bestPlantCombo.top10DataPointsFries.length; i++) {
+                if (i > 0) break;
+                let cur = bestPlantCombo.top10DataPointsFries[i];
+                for (let j = 0; j < cur.data.length; j++) {
+                    let cur_iner = cur.data[j];
+                    if (cur_iner.originalFry.exponent > currMaxExpFry) {
+                        currMaxExpFry = cur_iner.originalFry.exponent;
+                    }
+                }
+            }
 
             // go over the best PIC
             for (let i = 0; i < bestPlantCombo.bestPic.result.result.dataPointsPotatoes.length; i++) {
@@ -380,6 +410,7 @@ const FarmingLanding = ({ data }) => {
                     currMaxExp = cur.originalProduction.exponent;
                 }
             }
+
             // go over the best PIC %
             for (let i = 0; i < bestPlantCombo.bestPicPerc.result.result.dataPointsPotatoes.length; i++) {
                 let cur = bestPlantCombo.bestPicPerc.result.result.dataPointsPotatoes[i];
@@ -391,6 +422,7 @@ const FarmingLanding = ({ data }) => {
 
 
         diff_exp = currMaxExp > maxExp ? currMaxExp - maxExp : 0;
+        diff_expFry = currMaxExpFry > maxExp ? currMaxExpFry - maxExp : 0;
 
         // Reduce all the exponents for custom input first
         for (let i = 0; i < tempFuture.dataPointsPotatoes.length; i++) {
@@ -398,6 +430,12 @@ const FarmingLanding = ({ data }) => {
             cur.production = mathHelper.createDecimal(cur.originalProduction.toString());
             cur.production.exponent -= diff_exp;
             cur.production = cur.production.toNumber();
+        }
+        for (let i = 0; i < tempFuture.dataPointsFries.length; i++) {
+            let cur = tempFuture.dataPointsFries[i];
+            cur.fries = mathHelper.createDecimal(cur.originalFry.toString());
+            cur.fries.exponent -= diff_exp;
+            cur.fries = cur.fries.toNumber();
         }
 
         if (bestPlantCombo.top10DataPointsPotatoes) {
@@ -410,6 +448,16 @@ const FarmingLanding = ({ data }) => {
                     cur_iner.production = mathHelper.createDecimal(cur_iner.originalProduction.toString());
                     cur_iner.production.exponent -= diff_exp;
                     cur_iner.production = cur_iner.production.toNumber();
+                }
+            }
+            for (let i = 0; i < bestPlantCombo.top10DataPointsFries.length; i++) {
+                if (i > 0) break;
+                let cur = bestPlantCombo.top10DataPointsFries[i];
+                for (let j = 0; j < cur.data.length; j++) {
+                    let cur_iner = cur.data[j];
+                    cur_iner.fries = mathHelper.createDecimal(cur_iner.originalFry.toString());
+                    cur_iner.fries.exponent -= diff_expFry;
+                    cur_iner.fries = cur_iner.fries.toNumber();
                 }
             }
 
@@ -432,10 +480,14 @@ const FarmingLanding = ({ data }) => {
         if (expDiff !== diff_exp) {
             setExpDiff(diff_exp);
         }
+        if (expDiffFry !== diff_expFry) {
+            setExpDiffFry(expDiffFry);
+        }
 
         return {
             customProduction: tempFuture,
             top10Potatoes: bestPlantCombo.top10DataPointsPotatoes,
+            top10Fries: bestPlantCombo.top10DataPointsFries,
             bestPic: bestPlantCombo?.bestPic?.result?.result?.dataPointsPotatoes,
             bestPicPerc: bestPlantCombo?.bestPicPerc?.result?.result?.dataPointsPotatoes,
         }
@@ -647,7 +699,7 @@ const FarmingLanding = ({ data }) => {
 
                             for (let k = 0; k < cur_top.data.length; k++) {
                                 let cur_data = cur_top.data[k];
-                                cur_data.fries = mathHelper.createDecimal(cur_data.fries);
+                                cur_data.fries = cur_data.originalFry ? mathHelper.createDecimal(cur_data.originalFry) : mathHelper.createDecimal(cur_data.fries);
                                 cur_data.time = helper.roundInt(cur_data.time);
                             }
                         }
@@ -660,7 +712,9 @@ const FarmingLanding = ({ data }) => {
                         }
                         for (let j = 0; j < cur.bestPicCombo.result.dataPointsFries.length; j++) {
                             let cur_data = cur.bestPicCombo.result.dataPointsFries[j];
-                            cur_data.fries = mathHelper.createDecimal(cur_data.fries);
+
+                            cur_data.fries = cur_data.originalFry ? mathHelper.createDecimal(cur_data.originalFry) : mathHelper.createDecimal(cur_data.fries);
+
                             cur_data.time = helper.roundInt(cur_data.time);
                         }
                         for (let j = 0; j < cur.bestPICPercCombo.result.dataPointsPotatoes.length; j++) {
@@ -670,7 +724,7 @@ const FarmingLanding = ({ data }) => {
                         }
                         for (let j = 0; j < cur.bestPICPercCombo.result.dataPointsFries.length; j++) {
                             let cur_data = cur.bestPICPercCombo.result.dataPointsFries[j];
-                            cur_data.fries = mathHelper.createDecimal(cur_data.fries);
+                            cur_data.fries = cur_data.originalFry ? mathHelper.createDecimal(cur_data.originalFry) : mathHelper.createDecimal(cur_data.fries);
                             cur_data.time = helper.roundInt(cur_data.time);
                         }
 
@@ -724,15 +778,33 @@ const FarmingLanding = ({ data }) => {
                         }
                     }
 
+                    for (let i = 0; i < top10DataPointsFries.length; i++) {
+                        let cur = top10DataPointsFries[i];
+                        for (let j = 0; j < cur.data.length; j++) {
+                            cur.data[j].time = helper.roundInt(cur.data[j].time);
+                            cur.data[j].originalFry = mathHelper.createDecimal(cur.data[j].fries.toString());
+                        }
+                    }
+
                     for (let i = 0; i < bestPic.result.result.dataPointsPotatoes.length; i++) {
                         let cur = bestPic.result.result.dataPointsPotatoes[i];
                         cur.time = helper.roundInt(cur.time);
                         cur.originalProduction = mathHelper.createDecimal(cur.production.toString());
                     }
+                    for (let i = 0; i < bestPic.result.result.dataPointsFries.length; i++) {
+                        let cur = bestPic.result.result.dataPointsFries[i];
+                        cur.time = helper.roundInt(cur.time);
+                        cur.originalFry = mathHelper.createDecimal(cur.fries.toString());
+                    }
                     for (let i = 0; i < bestPicPerc.result.result.dataPointsPotatoes.length; i++) {
                         let cur = bestPicPerc.result.result.dataPointsPotatoes[i];
                         cur.time = helper.roundInt(cur.time);
                         cur.originalProduction = mathHelper.createDecimal(cur.production.toString());
+                    }
+                    for (let i = 0; i < bestPicPerc.result.result.dataPointsFries.length; i++) {
+                        let cur = bestPicPerc.result.result.dataPointsFries[i];
+                        cur.time = helper.roundInt(cur.time);
+                        cur.originalFry = mathHelper.createDecimal(cur.fries.toString());
                     }
 
                     if (bestProd.result) {
@@ -1264,7 +1336,8 @@ const FarmingLanding = ({ data }) => {
         }
     }
 
-    let displayPicPerc = bestPlantCombo.pic !== bestPlantCombo.picPerc;
+    // let displayPicPerc = bestPlantCombo.pic !== bestPlantCombo.picPerc;
+    let displayPicPerc = false;
 
     return (
         <div style={{ height: '100%', display: 'flex', flex: 1, flexDirection: 'column', paddingLeft: '6px' }}>
@@ -1448,7 +1521,7 @@ const FarmingLanding = ({ data }) => {
 
 
                                 <div
-                                    style={{ display: 'flex', marginTop: '6px', }}
+                                    style={{ display: 'flex', marginTop: '4px', }}
                                 >
                                     {/* Max all autos */}
                                     <div style={{
@@ -1477,6 +1550,35 @@ const FarmingLanding = ({ data }) => {
                                                 label: `clear_auto`,
                                             })
                                         }}>Clear Autos</button>
+                                    </div>
+                                </div>
+                                {/* Show HP + Fry */}
+                                <div style={{ display: 'flex', flexDirection: 'column', marginTop: '4px' }}>
+                                    <div style={{ display: 'flex' }}>
+                                        <div style={{ width: '160px' }}>Show Fries On Graph</div>
+                                        <input type="checkbox" checked={showFries}
+                                            onChange={(e) => {
+                                                setShowFries(e.target.checked ? 1 : 0);
+                                                ReactGA.event({
+                                                    category: "farming_interaction",
+                                                    action: `changed_show_fry`,
+                                                    label: `${e.target.checked}`,
+                                                })
+                                            }}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex' }}>
+                                        <div style={{ width: '160px' }}>Show HP On Graph</div>
+                                        <input type="checkbox" checked={showHP}
+                                            onChange={(e) => {
+                                                setShowHP(e.target.checked ? 1 : 0);
+                                                ReactGA.event({
+                                                    category: "farming_interaction",
+                                                    action: `changed_show_HP`,
+                                                    label: `${e.target.checked}`,
+                                                })
+                                            }}
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -2618,9 +2720,12 @@ const FarmingLanding = ({ data }) => {
                                     yScale={yScale}
                                     bestPic={!!bestPlantCombo?.bestPic?.pic}
                                     expDiff={expDiff}
+                                    expDiffFry={expDiffFry}
                                     displayPicPerc={displayPicPerc}
                                     calcDone={calcDone}
                                     calcAFK={calcAFK}
+                                    showFries={showFries}
+                                    showHP={showHP}
                                 />
                             </div>
                         </div>

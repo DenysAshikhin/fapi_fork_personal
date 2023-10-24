@@ -78,22 +78,53 @@ var farmingHelper = {
 
         return output;
     },
-    calcFryOutput: function (potatoes) {
+    calcFryOutput: function (potatoes, modifiers) {
 
-        // BigDouble.Round((BigDouble.Log(GM.PD.HealthyPotatoTotal, 10.0) - 15.75) * (20 - BigDouble.Min(BigDouble.Log(GM.PD.HealthyPotatoTotal, 10.0), 31) + 16) * BigDouble.Pow(1.15, BigDouble.Log(GM.PD.HealthyPotatoTotal, 10.0) - 16.0) * GM.PD.FrenchFriesBonus * GM.PD.TimerFriesPrestigeBonuses);
+
+        if (potatoes.lessThan(10000000000000000)) return 0;
+
+
+        let timerBonus = 0;
+        let timePassed = modifiers.timePassed ? modifiers.timePassed : 0;
+        if (timePassed > 1800) {
+            if (timePassed < 86400) {
+                timerBonus = timePassed / 86400;
+            }
+            else {
+                // 1.0 + (timePassed - 86400.0) / (172800.0 + (timePassed - 86400.0) * 0.5);
+                //1 + (step1) / (172800 + (step2) * 0.5)
+                let step1 = timePassed - 86400;
+                let step2 = timePassed - 86400;
+                let step3 = (172800 + step2 * 0.5);
+                let step4 = step1 / step3;
+                timerBonus = 1 + step4;
+            }
+        }
+
+        // BigDouble.Round(
+        // (Log10(HealthyPotatoTotal) - 15.75)
+        //  * (36 - Min(Log10(HealthyPotatoTotal), 31))
+        //  * Pow(1.15, Log10(HealthyPotatoTotal) - 16.0)
+        //  * FrenchFriesBonus 
+        //  * TimerFriesPrestigeBonuses);
         // BigDouble.Round(step1 * step2 * step3  * GM.PD.FrenchFriesBonus * GM.PD.TimerFriesPrestigeBonuses);
         let log10 = mathHelper.logDecimal(potatoes, 10);
-        let step1 = mathHelper.subtractDecimal(mathHelper.logDecimal(potatoes, 10), 15.75);
-        let inter1 = log10;
-        inter1 = inter1.lessThan(31) ? inter1 : 31;
-        let step2 = mathHelper.subtractDecimal(mathHelper.createDecimal(36), inter1);
-        let step3 = mathHelper.pow(
-            mathHelper.createDecimal(1.15),
-            mathHelper.subtractDecimal(
-                log10, 16.0
-            )
-        );
-        return mathHelper.multiplyDecimal(step1, mathHelper.multiplyDecimal(step2, step3));
+        let step1 = mathHelper.subtractDecimal(log10, 15.75);
+
+        let log2 = log10;
+        log2 = log2.lessThan(31) ? log2 : 31;
+        let step2 = mathHelper.subtractDecimal(36, log2);
+
+        let log3 = mathHelper.subtractDecimal(log10, 16);
+        let step3 = mathHelper.pow(1.15, log3);
+
+        let inter1 = mathHelper.multiplyDecimal(step1, step2);
+        let inter2 = mathHelper.multiplyDecimal(inter1, step3);
+        let frenchBonus = mathHelper.createDecimal(modifiers.fryBonus);
+        let step4 = mathHelper.multiplyDecimal(inter2, frenchBonus);
+        let step5 = mathHelper.multiplyDecimal(step4, timerBonus);
+        return step5;
+
     },
     calcCarryOverEXP_OLD: function ({ plant, numAutos, expTick }) {
 
@@ -457,6 +488,8 @@ var farmingHelper = {
 
             }
 
+            modifiers.passedTime += tickRate;
+
 
             //Reduce plant rank potion timer, or set it the bonus to 0 if necessary
             if (modifiers.potionRank > 1 && !modifiers.forceRankPotion) {
@@ -513,7 +546,7 @@ var farmingHelper = {
 
             if (i % dataPointThreshold === 0 && curTime >= tickStart && curTime <= (simulationTime + runningTime)) {
                 dataPointsPotatoes.push({ "time": curTime, "production": totalPotatoes })
-                dataPointsFries.push({ "time": curTime, "fries": farmingHelper.calcFryOutput(totalPotatoes) })
+                dataPointsFries.push({ "time": curTime, "fries": farmingHelper.calcFryOutput(totalPotatoes, modifiers) })
             }
 
             if (!modifiers.skipFinal) {
@@ -530,10 +563,11 @@ var farmingHelper = {
         if (i > 0 && !modifiers.skipFinal) {
 
             let curTime = helper.roundInt(i * tickRate + startTime);
+            modifiers.passedTime = i * tickRate + startTime;
             //Handling rare case when you have to add, but only once due to intervals duration, but only at the end, and didn't fit in the for loop above
             if (dataPointsPotatoes.length === 0) {
                 dataPointsPotatoes.push({ "time": curTime, "production": totalPotatoes })
-                dataPointsFries.push({ "time": curTime, "fries": farmingHelper.calcFryOutput(totalPotatoes) })
+                dataPointsFries.push({ "time": curTime, "fries": farmingHelper.calcFryOutput(totalPotatoes, modifiers) })
             }
             else if (dataPointsPotatoes[dataPointsPotatoes.length - 1].production !== totalPotatoes) {
                 if (curTime > (simulationTime + runningTime)) {
@@ -562,7 +596,7 @@ var farmingHelper = {
                     let newObj = { time: dataPointsPotatoes[dataPointsPotatoes.length - 1].time + trueTimeIncrease, production: finalPotatoes };
                     dataPointsPotatoes.push(newObj);
 
-                    dataPointsFries.push({ "time": dataPointsPotatoes[dataPointsPotatoes.length - 1].time + trueTimeIncrease, "fries": farmingHelper.calcFryOutput(finalPotatoes) })
+                    dataPointsFries.push({ "time": dataPointsPotatoes[dataPointsPotatoes.length - 1].time + trueTimeIncrease, "fries": farmingHelper.calcFryOutput(finalPotatoes, modifiers) })
 
                     //This means the `current` potatoes aren't updated to reflect the backwards fill/fix but it shouldn't be a big deal, and not used for anything atm
                     totalPotatoes = finalPotatoes;
@@ -590,6 +624,7 @@ var farmingHelper = {
         let steps = modifiers.steps;
         let res = -1;
         let potatoeSteps = [];
+        let frySteps = [];
         let runningTime = 0;
 
 
@@ -614,12 +649,14 @@ var farmingHelper = {
             modifiers.totalPotatoes = res.totalPotatoes;
             plants = res.plants;
             potatoeSteps = potatoeSteps.concat(res.dataPointsPotatoes);
+            frySteps = frySteps.concat(res.dataPointsFries)
             steps[i].obj = { text: `P${steps.length - i} for ${steps[i].time}`, numAutos: steps[i].autos, time: steps[i].time }
 
             runningTime += steps[i].time;
 
         }
         res.dataPointsPotatoes = potatoeSteps;
+        res.dataPointsFries = frySteps;
         res.steps = steps;
 
         return res;

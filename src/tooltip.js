@@ -36,7 +36,7 @@ function MouseOverPopover({ tooltip, children, style, extraClasses, opacity, for
 
     return (
         <div
-            class={extraClasses ? extraClasses + 'popoverContainer' : 'popoverContainer'}
+            className={extraClasses ? extraClasses + 'popoverContainer' : 'popoverContainer'}
             style={style ? style : {}}
         >
             <Typography
