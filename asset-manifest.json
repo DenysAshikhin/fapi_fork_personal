@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/fapi_fork_personal/static/css/main.8b6e8628.css",
-    "main.js": "/fapi_fork_personal/static/js/main.cd4e1925.js",
+    "main.js": "/fapi_fork_personal/static/js/main.28572141.js",
     "static/js/21.f8741d5f.chunk.js": "/fapi_fork_personal/static/js/21.f8741d5f.chunk.js",
     "static/js/520.6bf51ab2.chunk.js": "/fapi_fork_personal/static/js/520.6bf51ab2.chunk.js",
     "static/js/942.730982d8.chunk.js": "/fapi_fork_personal/static/js/942.730982d8.chunk.js",
@@ -54,6 +54,7 @@
     "static/media/Skulls_Earned.png": "/fapi_fork_personal/static/media/Skulls_Earned.57f8d9b7c2e8e0245790.png",
     "static/media/Class_Exp.png": "/fapi_fork_personal/static/media/Class_Exp.b7273816c23d92614996.png",
     "static/media/Not_Unlocked.png": "/fapi_fork_personal/static/media/Not_Unlocked.ae31ba424daf00d276b6.png",
+    "static/media/info_amber.svg": "/fapi_fork_personal/static/media/info_amber.8dbb138a47bccc25f2514d9aa2c41b4b.svg",
     "static/media/info_lightgray.svg": "/fapi_fork_personal/static/media/info_lightgray.c2806147a87b5dd144ee745b2fac895f.svg",
     "static/media/info_white.svg": "/fapi_fork_personal/static/media/info_white.b21ba30ae43a2e3dff3a7c02a1adc15e.svg",
     "static/media/info_green.svg": "/fapi_fork_personal/static/media/info_green.ed71cceb338866f9736d06c315153a4d.svg",
@@ -66,7 +67,7 @@
     "static/media/x_icon.svg": "/fapi_fork_personal/static/media/x_icon.e6091a530d75adde1df68129a099b94d.svg",
     "static/media/right_arrow_white.svg": "/fapi_fork_personal/static/media/right_arrow_white.49846f3360740d92de5d78e3fe8e6773.svg",
     "main.8b6e8628.css.map": "/fapi_fork_personal/static/css/main.8b6e8628.css.map",
-    "main.cd4e1925.js.map": "/fapi_fork_personal/static/js/main.cd4e1925.js.map",
+    "main.28572141.js.map": "/fapi_fork_personal/static/js/main.28572141.js.map",
     "21.f8741d5f.chunk.js.map": "/fapi_fork_personal/static/js/21.f8741d5f.chunk.js.map",
     "520.6bf51ab2.chunk.js.map": "/fapi_fork_personal/static/js/520.6bf51ab2.chunk.js.map",
     "942.730982d8.chunk.js.map": "/fapi_fork_personal/static/js/942.730982d8.chunk.js.map",
@@ -85,6 +86,6 @@
   },
   "entrypoints": [
     "static/css/main.8b6e8628.css",
-    "static/js/main.cd4e1925.js"
+    "static/js/main.28572141.js"
   ]
 }
