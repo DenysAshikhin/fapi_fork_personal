@@ -1,4 +1,3 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
 Sitemap: https://denysashikhin.github.io/fapi_fork_personal/sitemap.xml
-Disallow:
