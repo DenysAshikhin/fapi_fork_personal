@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/fapi_fork_personal/static/css/main.8b6e8628.css",
-    "main.js": "/fapi_fork_personal/static/js/main.8a68ab55.js",
+    "main.js": "/fapi_fork_personal/static/js/main.cd4e1925.js",
     "static/js/21.f8741d5f.chunk.js": "/fapi_fork_personal/static/js/21.f8741d5f.chunk.js",
     "static/js/520.6bf51ab2.chunk.js": "/fapi_fork_personal/static/js/520.6bf51ab2.chunk.js",
     "static/js/942.730982d8.chunk.js": "/fapi_fork_personal/static/js/942.730982d8.chunk.js",
@@ -18,6 +18,7 @@
     "static/js/73.1bac8e58.chunk.js": "/fapi_fork_personal/static/js/73.1bac8e58.chunk.js",
     "static/js/359.149e0cec.chunk.js": "/fapi_fork_personal/static/js/359.149e0cec.chunk.js",
     "static/media/coming_soon.png": "/fapi_fork_personal/static/media/coming_soon.02148a2c5983fa8d3d3d.png",
+    "static/media/rank_explain.png": "/fapi_fork_personal/static/media/rank_explain.243a450ee1d02c868a88.png",
     "static/media/Dobra-Black.ttf": "/fapi_fork_personal/static/media/Dobra-Black.b0acda3d3f950249db2b.ttf",
     "static/media/Dobra-Black.woff": "/fapi_fork_personal/static/media/Dobra-Black.0bfb45a15a7e425fa551.woff",
     "static/media/Dobra-Black.woff2": "/fapi_fork_personal/static/media/Dobra-Black.b2d74bbb9a58910f5b92.woff2",
@@ -65,7 +66,7 @@
     "static/media/x_icon.svg": "/fapi_fork_personal/static/media/x_icon.e6091a530d75adde1df68129a099b94d.svg",
     "static/media/right_arrow_white.svg": "/fapi_fork_personal/static/media/right_arrow_white.49846f3360740d92de5d78e3fe8e6773.svg",
     "main.8b6e8628.css.map": "/fapi_fork_personal/static/css/main.8b6e8628.css.map",
-    "main.8a68ab55.js.map": "/fapi_fork_personal/static/js/main.8a68ab55.js.map",
+    "main.cd4e1925.js.map": "/fapi_fork_personal/static/js/main.cd4e1925.js.map",
     "21.f8741d5f.chunk.js.map": "/fapi_fork_personal/static/js/21.f8741d5f.chunk.js.map",
     "520.6bf51ab2.chunk.js.map": "/fapi_fork_personal/static/js/520.6bf51ab2.chunk.js.map",
     "942.730982d8.chunk.js.map": "/fapi_fork_personal/static/js/942.730982d8.chunk.js.map",
@@ -84,6 +85,6 @@
   },
   "entrypoints": [
     "static/css/main.8b6e8628.css",
-    "static/js/main.8a68ab55.js"
+    "static/js/main.cd4e1925.js"
   ]
 }
